@@ -1,5 +1,6 @@
 import requests
 import asyncio
+import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import owner_id, jio_saavn_api, sudo_chat_id
@@ -93,7 +94,7 @@ async def youtube_search(_, message: Message):
         text += f"https://youtube.com{results[i]['url_suffix']}\n\n"
         i += 1
     await m.edit(text, disable_web_page_preview=True)
-    await asyncio.sleep(5)
+    await asyncio.sleep(40)
     await m.delete()
 
 # Youtube Playing
@@ -125,7 +126,10 @@ async def stop(_, message: Message):
         await message.delete()
     except:
         pass
-
+    try:
+        os.system("killall -9 mpv")
+    except:
+        pass
     s.terminate()
     try:
         await m.delete()
