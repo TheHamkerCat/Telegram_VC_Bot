@@ -3,14 +3,14 @@ import asyncio
 import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from config import owner_id, jio_saavn_api, sudo_chat_id
+from config import jio_saavn_api, sudo_chat_id
 from youtube_search import YoutubeSearch
 
 
 
 # Ping
 
-@Client.on_message(filters.command(["ping"]))
+@Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_id)))
 async def ping(_, message: Message):
     j = await message.reply_text("Wait, Pinging all Datacenters`")
     result = ""
@@ -22,19 +22,19 @@ async def ping(_, message: Message):
 
 # Start
 
-@Client.on_message(filters.command(["start"]))
+@Client.on_message(filters.command(["start"]) & (filters.chat(sudo_chat_id)))
 async def start(_, message: Message):
     await message.reply_text("Hi I'm Telegram Voice Chat Bot, Pressing /help wen?")
 
 # Help
 
-@Client.on_message(filters.command(["help"]))
+@Client.on_message(filters.command(["help"]) & (filters.chat(sudo_chat_id)))
 async def help(_, message: Message):
     await message.reply_text('''Currently These Commands Are Supported.
 /start To Start The bot.
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
-/stop To Stop Any Playing Music.
+/end To Stop Any Playing Music.
 "/jiosaavn <song_name>" To Play A Song From Jiosaavn.
 "/ytsearch <song_name>" To Search For A Song On Youtube.
 "/youtube <song_link>" To Play A Song From Youtube.
@@ -45,7 +45,7 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 #Global vars
 s = None
 m = None
-@Client.on_message(filters.command(["jiosaavn"]))
+@Client.on_message(filters.command(["jiosaavn"]) & (filters.chat(sudo_chat_id)))
 async def jiosaavn(_, message: Message):
     global s
     global m
@@ -70,7 +70,7 @@ async def jiosaavn(_, message: Message):
 
 # Youtube Searching
 
-@Client.on_message(filters.command(["ytsearch"]))
+@Client.on_message(filters.command(["ytsearch"]) & (filters.chat(sudo_chat_id)))
 async def youtube_search(_, message: Message):
     try:
         await message.delete()
@@ -99,7 +99,7 @@ async def youtube_search(_, message: Message):
 
 # Youtube Playing
 
-@Client.on_message(filters.command(["youtube"]))
+@Client.on_message(filters.command(["youtube"]) & (filters.chat(sudo_chat_id)))
 async def youtube(_, message: Message):
     global m
     global s
@@ -120,7 +120,7 @@ async def youtube(_, message: Message):
 
 # Stop
 
-@Client.on_message(filters.command(["stop"]))
+@Client.on_message(filters.command(["end"]) & (filters.chat(sudo_chat_id)))
 async def stop(_, message: Message):
     try:
         await message.delete()
