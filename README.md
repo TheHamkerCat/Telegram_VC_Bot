@@ -2,7 +2,8 @@
 
 Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
-![Logo](tg_vc_bot.png)
+<img src="tg_vc_bot.png" width="300" height="300">
+
 ## Requirements
 
 - Python 3.6 or higher
