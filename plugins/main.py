@@ -2,7 +2,7 @@ import requests
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from config import owner_id, sudo_chat_id, jio_saavn_api
+from config import owner_id, jio_saavn_api, sudo_chat_id
 from youtube_search import YoutubeSearch
 
 #Global vars
@@ -11,7 +11,7 @@ m = None # For message
 
 # Ping
 
-@Client.on_message(filters.command(["ping"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["ping"]))
 async def ping(_, message: Message):
     j = await message.reply_text("Wait, Pinging all Datacenters`")
     result = ""
@@ -23,13 +23,13 @@ async def ping(_, message: Message):
 
 # Start
 
-@Client.on_message(filters.command(["start"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["start"]))
 async def start(_, message: Message):
     await message.reply_text("Hi I'm Telegram Voice Chat Bot, Pressing /help wen?")
 
 # Help
 
-@Client.on_message(filters.command(["help"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["help"]))
 async def help(_, message: Message):
     await message.reply_text('''Currently These Commands Are Supported.
 /start To Start The bot.
@@ -44,12 +44,12 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 
 # Jiosaavn
 
-@Client.on_message(filters.command(["jiosaavn"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["jiosaavn"]))
 async def jiosaavn(_, message: Message):
     global s
     global m
-    if len(message.command) != 2:
-        await message.reply_text("/jiosaavn requires one argument")
+    if len(message.command) < 2:
+        await message.reply_text("/jiosaavn requires an argument")
         return
 
     query = message.command[1]
@@ -68,11 +68,11 @@ async def jiosaavn(_, message: Message):
 
 # Youtube Searching
 
-@Client.on_message(filters.command(["ytsearch"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["ytsearch"]))
 async def youtube_search(_, message: Message):
 
     if len(message.command) != 2:
-        await message.reply_text("/youtube requires one argument")
+        await message.reply_text("/ytsearch requires one argument")
         return
 
     query = message.command[1]
@@ -92,7 +92,7 @@ async def youtube_search(_, message: Message):
 
 # Youtube Playing
 
-@Client.on_message(filters.command(["youtube"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["youtube"]))
 async def youtube(_, message: Message):
     global m
     global s
@@ -109,7 +109,7 @@ async def youtube(_, message: Message):
 
 # Stop
 
-@Client.on_message(filters.command(["stop"]) & (filters.chat(int(sudo_chat_id))) & (filters.user(owner_id)))
+@Client.on_message(filters.command(["stop"]))
 async def stop(_, message: Message):
     s.terminate()
     try:
@@ -120,7 +120,3 @@ async def stop(_, message: Message):
     i = await message.reply_text("Stopped!")
     await asyncio.sleep(5)
     await i.delete()
-
-
-
-
