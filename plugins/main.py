@@ -1,9 +1,14 @@
+import requests
+import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import owner_id, sudo_chat_username, jio_saavn_api
-import requests
-import os
-import asyncio
+from youtube_search import YoutubeSearch
+
+#Global vars
+s = None # For subprocess
+m = None # For message
+
 # Ping
 
 @Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_username)) & (filters.user(owner_id)))
@@ -35,14 +40,13 @@ async def help(_, message: Message):
 NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 
 # Jiosaavn
-s = None
-m = None
+
 @Client.on_message(filters.command(["jiosaavn"]) & (filters.chat(sudo_chat_username)) & (filters.user(owner_id)))
 async def jiosaavn(_, message: Message):
     global s
     global m
     if len(message.command) != 2:
-        await message.reply_text("/upload requires one argument")
+        await message.reply_text("/jiosaavn requires one argument")
         return
 
     query = message.command[1]
@@ -54,10 +58,51 @@ async def jiosaavn(_, message: Message):
     slink = r.json()[0]['media_url']
     ssingers = r.json()[0]['singers']
     await m.edit(f"Playing {sname}-{ssingers}")
-#    os.system(f"mpv {slink} --no-video")
     s = await asyncio.create_subprocess_shell(f"mpv {slink} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     await s.communicate()
     await m.delete()
+
+
+# Youtube Searching
+
+@Client.on_message(filters.command(["ytsearch"]) & (filters.chat(sudo_chat_username)) & (filters.user(owner_id)))
+async def youtube_search(_, message: Message):
+
+    if len(message.command) != 2:
+        await message.reply_text("/youtube requires one argument")
+        return
+
+    query = message.command[1]
+    m = await message.reply_text("Searching....")
+    results = YoutubeSearch(query, max_results=4).to_dict()
+    i = 0
+    text = ""
+    while i < 4:
+        text += f"Title - {results[i]['title']}\n"
+        text += f"Duration - {results[i]['duration']}\n"
+        text += f"Views - {results[i]['views']}\n"
+        text += f"Channel - {results[i]['channel']}\n"
+        text += f"https://youtube.com{results[i]['url_suffix']}\n\n"
+        i += 1
+    await m.edit(text, disable_web_page_preview=True)
+
+
+# Youtube Playing
+
+@Client.on_message(filters.command(["youtube"]) & (filters.chat(sudo_chat_username)) & (filters.user(owner_id)))
+async def youtube(_, message: Message):
+    global m
+    global s
+    if len(message.command) != 2:
+        await message.reply_text("/youtube requires one argument")
+        return
+
+    query = message.command[1]
+    m = await message.reply_text("Playing")
+    s = await asyncio.create_subprocess_shell(f"mpv {query} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    await s.communicate()
+    await m.delete()
+
 
 # Stop
 

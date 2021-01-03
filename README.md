@@ -18,7 +18,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 4. `cp sample_config.ini config.ini`
 5. `cp sample_config.py config.py`
 5. Edit `config.ini` and `config.py` with your own values.
-6. Follow [This](https://www.kirsle.net/redirect-audio-out-to-mic-in-linux) tutorial to route your PC or Server's audio output to audio input.
+6. Follow [This](https://unix.stackexchange.com/questions/82259/how-to-pipe-audio-output-to-mic-input) to route your PC or Server's audio output to audio input.
 7. Run with `python3 tgvcbot.py`
 8. Open Telegram and start voice chat.
 9. Send commands to bot to play music.
