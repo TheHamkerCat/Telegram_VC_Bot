@@ -56,7 +56,7 @@ async def jiosaavn(_, message: Message):
         await message.reply_text("/jiosaavn requires an argument")
         return
 
-    query = message.command[1:]
+    query = message.text.replace("/jiosaavn ", "")
     m = await message.reply_text("Searching...")
     r = requests.get(f"{jio_saavn_api}{query}")
 
@@ -80,7 +80,7 @@ async def youtube_search(_, message: Message):
         await message.reply_text("/ytsearch requires one argument")
         return
 
-    query = message.command[1:]
+    query = message.text.replace("/ytsearch ", "")
     m = await message.reply_text("Searching....")
     results = YoutubeSearch(query, max_results=4).to_dict()
     i = 0
@@ -111,7 +111,7 @@ async def youtube(_, message: Message):
         await message.reply_text("/youtube requires one argument")
         return
 
-    query = message.command[1:]
+    query = message.text.replace("/youtube ", "")
     m = await message.reply_text("Playing")
     s = await asyncio.create_subprocess_shell(f"mpv {query} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
