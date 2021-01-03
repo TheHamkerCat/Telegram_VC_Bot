@@ -2,7 +2,7 @@
 
 Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
-owner_id and sudo chat_id is broken for now will fix till tomorrow
+## owner_id and sudo chat_id is broken for now will fix till tomorrow
 
 <img src="tg_vc_bot.png" width="300" height="300">
 
