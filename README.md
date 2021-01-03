@@ -2,7 +2,6 @@
 
 Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
-## owner_id and sudo chat_id is broken for now will fix till tomorrow
 
 <img src="tg_vc_bot.png" width="300" height="300">
 
@@ -31,7 +30,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 ## Commands
 
 1. `/help` To show help screen.
-2. `/stop` To stop any playing music. 
+2. `/end` To stop any playing music. 
 3. `/jiosaavn <song_name>` To play music from JioSaavn.
 4. `/ytsearch <song_name>` To search for a song on Youtube.
 5. `/youtube <song_link>` To play a song from YouTube.
