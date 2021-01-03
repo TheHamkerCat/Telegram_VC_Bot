@@ -5,3 +5,7 @@ TgCrypto
 youtube-dl
 requests
 youtube_search
+Flask
+gunicorn
+pyDes
+flask-cors
