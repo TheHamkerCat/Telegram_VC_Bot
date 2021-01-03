@@ -62,9 +62,6 @@ async def jiosaavn(_, message: Message):
     ssingers = r.json()[0]['singers']
     await m.edit(f"Playing {sname}-{ssingers}")
     s = await asyncio.create_subprocess_shell(f"mpv {slink} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    await s.communicate()
-    await m.delete()
-
 
 # Youtube Searching
 
@@ -103,8 +100,7 @@ async def youtube(_, message: Message):
     query = message.command[1]
     m = await message.reply_text("Playing")
     s = await asyncio.create_subprocess_shell(f"mpv {query} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    await s.communicate()
-    await m.delete()
+
 
 
 # Stop
