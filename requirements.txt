@@ -1,0 +1,5 @@
+OpenCC
+Pillow
+Pyrogram==1.0.7
+TgCrypto
+youtube-dl

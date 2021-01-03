@@ -1,0 +1,10 @@
+# vim
+[._]*.sw[a-p]
+
+# python
+/venv/
+__pycache__/
+# tgbot
+/config.ini
+/config.py
+/tgbot.session
