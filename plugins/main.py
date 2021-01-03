@@ -71,7 +71,7 @@ async def jiosaavn(_, message: Message):
 @Client.on_message(filters.command(["ytsearch"]))
 async def youtube_search(_, message: Message):
 
-    if len(message.command) != 2:
+    if len(message.command) < 2:
         await message.reply_text("/ytsearch requires one argument")
         return
 
@@ -96,7 +96,7 @@ async def youtube_search(_, message: Message):
 async def youtube(_, message: Message):
     global m
     global s
-    if len(message.command) != 2:
+    if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
 
