@@ -5,9 +5,7 @@ from pyrogram.types import Message
 from config import owner_id, jio_saavn_api, sudo_chat_id
 from youtube_search import YoutubeSearch
 
-#Global vars
-s = None # For subprocess
-m = None # For message
+
 
 # Ping
 
@@ -43,11 +41,17 @@ async def help(_, message: Message):
 NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 
 # Jiosaavn
-
+#Global vars
+s = None
+m = None
 @Client.on_message(filters.command(["jiosaavn"]))
 async def jiosaavn(_, message: Message):
     global s
     global m
+    try:
+        await message.delete()
+    except:
+        pass
     if len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
@@ -67,7 +71,11 @@ async def jiosaavn(_, message: Message):
 
 @Client.on_message(filters.command(["ytsearch"]))
 async def youtube_search(_, message: Message):
-
+    try:
+        await message.delete()
+    except:
+        pass
+    
     if len(message.command) < 2:
         await message.reply_text("/ytsearch requires one argument")
         return
@@ -85,7 +93,8 @@ async def youtube_search(_, message: Message):
         text += f"https://youtube.com{results[i]['url_suffix']}\n\n"
         i += 1
     await m.edit(text, disable_web_page_preview=True)
-
+    await asyncio.sleep(5)
+    await m.delete()
 
 # Youtube Playing
 
@@ -93,6 +102,11 @@ async def youtube_search(_, message: Message):
 async def youtube(_, message: Message):
     global m
     global s
+    try:
+        await message.delete()
+    except:
+        pass
+
     if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
@@ -107,6 +121,11 @@ async def youtube(_, message: Message):
 
 @Client.on_message(filters.command(["stop"]))
 async def stop(_, message: Message):
+    try:
+        await message.delete()
+    except:
+        pass
+
     s.terminate()
     try:
         await m.delete()
