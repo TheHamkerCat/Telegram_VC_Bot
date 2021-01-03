@@ -32,10 +32,13 @@ async def start(_, message: Message):
 @Client.on_message(filters.command(["help"]) & (filters.chat(sudo_chat_username)) & (filters.user(owner_id)))
 async def help(_, message: Message):
     await message.reply_text('''Currently These Commands Are Supported.
-/start To Start The bot
-/help To Show This Message
-/ping To Ping All Datacenters Of Telegram
-"/jiosaavn <song_name>" To Play A Song From Jiosaavn
+/start To Start The bot.
+/help To Show This Message.
+/ping To Ping All Datacenters Of Telegram.
+/stop To Stop Any Playing Music.
+"/jiosaavn <song_name>" To Play A Song From Jiosaavn.
+"/ytsearch <song_name>" To Search For A Song On Youtube.
+"/youtube <song_link>" To Play A Song From Youtube.
 
 NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 
