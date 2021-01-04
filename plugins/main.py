@@ -164,7 +164,7 @@ async def radio(_, message: Message):
     except:
         pass
     m = await message.reply_text("Playing Radio....")
-    s = await asyncio.create_subprocess_shell(f"mpv http://103.16.47.70:7222/;stream.mp3 --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    s = await asyncio.create_subprocess_shell(f"mpv http://peridot.streamguys.com:7150/Mirchi --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 
 
