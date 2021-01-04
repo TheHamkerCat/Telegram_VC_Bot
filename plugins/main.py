@@ -137,8 +137,7 @@ async def youtube(_, message: Message):
         info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
-        if info_dict['ext'] == 'webm':
-            os.rename(audio_file, "audio.webm")
+        os.rename(audio_file, "audio.webm")
     await m.edit("Playing")
     s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
