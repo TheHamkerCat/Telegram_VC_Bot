@@ -8,7 +8,7 @@ from config import jio_saavn_api, sudo_chat_id
 from youtube_search import YoutubeSearch
 import youtube_dl
 
-
+print("Bot Started!")
 # Ping
 
 @Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_id)))
