@@ -9,7 +9,6 @@ from youtube_search import YoutubeSearch
 import youtube_dl
 
 
-
 # Ping
 
 @Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_id)))
@@ -109,6 +108,7 @@ async def youtube_search(_, message: Message):
 async def youtube(_, message: Message):
     global m
     global s
+
     try:
         os.system("killall -9 mpv")
     except:
@@ -118,15 +118,16 @@ async def youtube(_, message: Message):
         await message.delete()
     except:
         pass
+
     try:
         os.remove("audio.mp3")
     except:
         pass
+
     if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
 
-    query = message.text.replace("/youtube ", "")
     ydl_opts = {
         'format': 'bestaudio',
     }
@@ -136,13 +137,9 @@ async def youtube(_, message: Message):
         info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
-        basename = audio_file.rsplit(".", 1)[-2]
         if info_dict['ext'] == 'webm':
             os.rename(audio_file, "audio.webm")
-        
-
     await m.edit("Playing")
-
     s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 # Stop
