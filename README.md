@@ -10,7 +10,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 - Python 3.6 or higher
 - A [Telegram API key](//docs.pyrogram.org/intro/setup#api-keys)
 - A [Telegram bot token](//t.me/botfather)
-- `mpv media player` Install it From Your Linux Repository.
+- `mpv` and `ffmpeg` Install it From Your Linux Repository.
 
 ## Run
 
@@ -39,6 +39,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 ## Note
 
 1. More services will be added soon.
+2. If /youtube is not working for youyou need mpv version 0.33.0
 
 ## Credits
 1. `https://github.com/cyberboysumanjay/JioSaavnAPI` [For JioSaavnAPI]
