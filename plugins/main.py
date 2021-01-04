@@ -39,6 +39,7 @@ async def help(_, message: Message):
 "/jiosaavn <song_name>" To Play A Song From Jiosaavn.
 "/ytsearch <song_name>" To Search For A Song On Youtube.
 "/youtube <song_link>" To Play A Song From Youtube.
+/radio To Play Radio Continuosly
 
 NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 
@@ -129,7 +130,7 @@ async def youtube(_, message: Message):
         return
 
     ydl_opts = {
-        'format': 'bestaudio',
+        'format': 'bestaudio'
     }
     link = message.command[1]
     m = await message.reply_text("Downloading....")
@@ -138,8 +139,34 @@ async def youtube(_, message: Message):
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
         os.rename(audio_file, "audio.webm")
-    await m.edit("Playing")
+    await m.edit(f"Playing {audio_file}")
     s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+# Radio
+
+@Client.on_message(filters.command(["radio"]) & (filters.chat(sudo_chat_id)))
+async def radio(_, message: Message):
+    global m
+    global s
+
+    try:
+        os.system("killall -9 mpv")
+    except:
+        pass
+
+    try:
+        await message.delete()
+    except:
+        pass
+
+    try:
+        os.remove("audio.mp3")
+    except:
+        pass
+    m = await message.reply_text("Playing Radio....")
+    s = await asyncio.create_subprocess_shell(f"mpv http://103.16.47.70:7222/;stream.mp3 --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+
 
 # Stop
 
