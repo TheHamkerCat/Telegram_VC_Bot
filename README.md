@@ -10,7 +10,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 - Python 3.6 or higher
 - A [Telegram API key](//docs.pyrogram.org/intro/setup#api-keys)
 - A [Telegram bot token](//t.me/botfather)
-- `mpv` and `ffmpeg` Install it From Your Linux Repository.
+- `mpv` Install it From Your Linux Repository. [`sudo apt-get install mpv`] -for ubuntu, [`sudo pacman -S mpv `] -for ArchLinux, I use arch btw
 
 ## Run
 
@@ -20,11 +20,12 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 4. `cp sample_config.ini config.ini`
 5. `cp sample_config.py config.py`
 5. Edit `config.ini` and `config.py` with your own values.
-6. Follow [This](https://unix.stackexchange.com/questions/82259/how-to-pipe-audio-output-to-mic-input) to route your PC or Server's audio output to audio input.
-7. Run JioSaavn Server `python3 plugins/app.py` Only do this if you want to play songs from JioSaavn too 
-8. Run the bot `python3 tgvcbot.py`
-9. Open Telegram and start voice chat.
-10. Send commands to bot to play music.
+6. Follow [This](https://unix.stackexchange.com/questions/82259/how-to-pipe-audio-output-to-mic-input) to route your PC or Server's audio output to audio input. [For Linux]
+7. If you're on windows, Follow [This](https://superuser.com/questions/1133750/set-output-audio-of-windows-as-input-audio-of-microphone) instead.
+8. Run JioSaavn Server `python3 plugins/app.py` Only do this if you want to play songs from JioSaavn too 
+9. Run the bot `python3 tgvcbot.py`
+10. Open Telegram and start voice chat.
+11. Send commands to bot to play music.
 
 
 ## Commands
@@ -39,6 +40,8 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 ## Note
 
 1. More services will be added soon.
+2. If you want any help you can ask [here](https://t.me/wbbsupport)
+
 
 ## Credits
 1. `https://github.com/cyberboysumanjay/JioSaavnAPI` [For JioSaavnAPI]
