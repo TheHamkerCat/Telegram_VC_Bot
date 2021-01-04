@@ -22,7 +22,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 5. Edit `config.ini` and `config.py` with your own values.
 6. Follow [This](https://unix.stackexchange.com/questions/82259/how-to-pipe-audio-output-to-mic-input) to route your PC or Server's audio output to audio input. [For Linux]
 7. If you're on windows, Follow [This](https://superuser.com/questions/1133750/set-output-audio-of-windows-as-input-audio-of-microphone) instead.
-8. Run JioSaavn Server `python3 plugins/app.py` Only do this if you want to play songs from JioSaavn too 
+8. Run JioSaavn Server `python3 jiosaavn/app.py` Only do this if you want to play songs from JioSaavn too 
 9. Run the bot `python3 tgvcbot.py`
 10. Open Telegram and start voice chat.
 11. Send commands to bot to play music.
