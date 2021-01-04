@@ -9,4 +9,3 @@ Flask
 gunicorn
 pyDes
 flask-cors
-__future__
