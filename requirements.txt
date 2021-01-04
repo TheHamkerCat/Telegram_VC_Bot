@@ -2,10 +2,11 @@ OpenCC
 Pillow
 Pyrogram==1.1.8
 TgCrypto
-youtube-dl
+youtube_dl
 requests
 youtube_search
 Flask
 gunicorn
 pyDes
 flask-cors
+__future__

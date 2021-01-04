@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import requests
 import asyncio
 import os
@@ -5,6 +6,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import jio_saavn_api, sudo_chat_id
 from youtube_search import YoutubeSearch
+import youtube_dl
 
 
 
@@ -116,19 +118,42 @@ async def youtube(_, message: Message):
         await message.delete()
     except:
         pass
-
+    try:
+        os.remove("audio.mp3")
+    except:
+        pass
     if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
 
     query = message.text.replace("/youtube ", "")
-    m = await message.reply_text("Playing")
-    s = await asyncio.create_subprocess_shell(f"mpv '{query}' --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    ydl_opts = {
+        'format': 'bestaudio',
+    }
+    link = message.command[1]
+    m = await message.reply_text("Downloading....")
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(link, download=False)
+        audio_file = ydl.prepare_filename(info_dict)
+        ydl.process_info(info_dict)
+        basename = audio_file.rsplit(".", 1)[-2]
+        if info_dict['ext'] == 'webm':
+            os.rename(audio_file, "audio.webm")
+        
+
+    await m.edit("Playing")
+
+    s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 # Stop
 
 @Client.on_message(filters.command(["end"]) & (filters.chat(sudo_chat_id)))
 async def stop(_, message: Message):
+    try:
+        os.remove("audio.mp3")
+    except:
+        pass
+
     try:
         await message.delete()
     except:
