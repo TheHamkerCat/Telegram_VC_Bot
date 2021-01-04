@@ -1,6 +1,10 @@
 # vim
 [._]*.sw[a-p]
-
+*.webm
+*.mp3
+*.mp4
+*.webp
+*.weba
 # python
 /venv/
 __pycache__/
