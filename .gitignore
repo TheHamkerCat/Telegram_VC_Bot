@@ -5,6 +5,7 @@
 *.mp4
 *.webp
 *.weba
+*.part
 # python
 /venv/
 __pycache__/
