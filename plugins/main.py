@@ -50,6 +50,10 @@ async def jiosaavn(_, message: Message):
     global s
     global m
     try:
+        os.system("killall -9 mpv")
+    except:
+        pass
+    try:
         await message.delete()
     except:
         pass
@@ -104,6 +108,11 @@ async def youtube(_, message: Message):
     global m
     global s
     try:
+        os.system("killall -9 mpv")
+    except:
+        pass
+
+    try:
         await message.delete()
     except:
         pass
@@ -114,9 +123,7 @@ async def youtube(_, message: Message):
 
     query = message.text.replace("/youtube ", "")
     m = await message.reply_text("Playing")
-    s = await asyncio.create_subprocess_shell(f"mpv {query} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-
-
+    s = await asyncio.create_subprocess_shell(f"mpv '{query}' --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 # Stop
 
