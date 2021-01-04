@@ -39,6 +39,7 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 ## Note
 
 1. More services will be added soon.
+2. If /youtube is not working for youyou need mpv version 0.33.0
 
 ## Credits
 1. `https://github.com/cyberboysumanjay/JioSaavnAPI` [For JioSaavnAPI]
