@@ -51,6 +51,10 @@ m = None
 async def jiosaavn(_, message: Message):
     global s
     global m
+
+    if len(message.command) < 2:
+        await message.reply_text("/jiosaavn requires an argument")
+        return
     try:
         os.system("killall -9 mpv")
     except:
@@ -59,10 +63,6 @@ async def jiosaavn(_, message: Message):
         await message.delete()
     except:
         pass
-    if len(message.command) < 2:
-        await message.reply_text("/jiosaavn requires an argument")
-        return
-
     query = message.text.replace("/jiosaavn ", "")
     m = await message.reply_text("Searching...")
     r = requests.get(f"{jio_saavn_api}{query}")
@@ -109,7 +109,12 @@ async def youtube_search(_, message: Message):
 async def youtube(_, message: Message):
     global m
     global s
-    try:
+
+
+    if len(message.command) < 2:
+        await message.reply_text("/youtube requires one argument")
+        return
+   try:
         await message.delete()
     except:
         pass
@@ -124,12 +129,7 @@ async def youtube(_, message: Message):
     try:
         os.remove("audio.mp3")
     except:
-        pass
-
-    if len(message.command) < 2:
-        await message.reply_text("/youtube requires one argument")
-        return
-    
+        pass 
     ydl_opts = {
         'format': 'bestaudio'
     }
