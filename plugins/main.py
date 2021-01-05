@@ -76,7 +76,8 @@ async def jiosaavn(_, message: Message):
     sname = r.json()[0]['song']
     slink = r.json()[0]['media_url']
     ssingers = r.json()[0]['singers']
-    await m.edit(f"Playing {sname}-{ssingers}")
+
+    await m.edit(f"Playing {sname}-{ssingers}\nRequested by - {message.from_user.mention}")
     s = await asyncio.create_subprocess_shell(f"mpv {slink} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     await s.wait()
     await m.delete()
@@ -153,7 +154,7 @@ async def youtube(_, message: Message):
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
         os.rename(audio_file, "audio.webm")
-    await m.edit(f"Playing {audio_file}")
+    await m.edit(f"Playing {audio_file}\nRequested by - {message.from_user.mention}")
     s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     await s.wait()
     await m.delete()
@@ -207,7 +208,7 @@ async def playlist(_, message: Message):
                     audio_file = ydl.prepare_filename(info_dict)
                     ydl.process_info(info_dict)
                     os.rename(audio_file, "audio.webm")
-                await m.edit(f"Playing {result['entries'][i]['title']}, Song Number {ii} In Playlist, {len(result['entries']) - ii} In Queue.")
+                await m.edit(f"Playing {result['entries'][i]['title']}, Song Number {ii} In Playlist, {len(result['entries']) - ii} In Queue. \nRequested by - {message.from_user.mention}")
                 s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                 await s.wait()
                 ii += 1
@@ -240,7 +241,7 @@ async def radio(_, message: Message):
         os.remove("audio.mp3")
     except:
         pass
-    m = await message.reply_text("Playing Radio....")
+    m = await message.reply_text("Playing Radio\nRequested by - {message.from_user.mention}")
     s = await asyncio.create_subprocess_shell(f"mpv http://peridot.streamguys.com:7150/Mirchi --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 
@@ -271,6 +272,4 @@ async def stop(_, message: Message):
     except:
         pass
 
-    i = await message.reply_text("Stopped!")
-    await asyncio.sleep(5)
-    await i.delete()
+    i = await message.reply_text(f"{message.from_user.mention} Stopped The Music.")
