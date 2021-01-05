@@ -13,3 +13,4 @@ __pycache__/
 /config.ini
 /config.py
 /tgbot.session
+/tgbot.session-journal
