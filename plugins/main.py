@@ -114,7 +114,7 @@ async def youtube(_, message: Message):
     if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
-   try:
+    try:
         await message.delete()
     except:
         pass
