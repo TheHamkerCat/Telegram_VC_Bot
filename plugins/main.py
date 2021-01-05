@@ -142,7 +142,7 @@ async def youtube(_, message: Message):
         await message.reply_text("Link not found, or your internet is ded af")
         return
     m = await message.reply_text("Downloading....")
-    with youtube_dl.youtubedl(ydl_opts) as ydl:
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=false)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
