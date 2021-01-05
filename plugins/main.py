@@ -39,6 +39,7 @@ async def help(_, message: Message):
 "/jiosaavn <song_name>" To Play A Song From Jiosaavn.
 "/ytsearch <song_name>" To Search For A Song On Youtube.
 "/youtube <song_link>" To Play A Song From Youtube.
+"/playlist <youtube_playlist_url> To Play A Playlist From Youtube"
 /radio To Play Radio Continuosly
 
 NOTE: Do Not Assign These Commands To Bot Via BotFather''')
@@ -141,15 +142,72 @@ async def youtube(_, message: Message):
         await message.reply_text("Link not found, or your internet is ded af")
         return
     m = await message.reply_text("Downloading....")
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(link, download=False)
+    with youtube_dl.youtubedl(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(link, download=false)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
         os.rename(audio_file, "audio.webm")
-    await m.edit(f"Playing {audio_file}")
-    s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    await m.edit(f"playing {audio_file}")
+    s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.pipe, stderr=asyncio.subprocess.pipe)
     await s.wait()
     await m.delete()
+
+# youtube playlist
+
+
+@Client.on_message(filters.command(["playlist"]) & (filters.chat(sudo_chat_id)))
+async def playlist(_, message: Message):    
+    global m
+    global s
+
+
+    if len(message.command) != 2:
+        await message.reply_text("/playlist requires one youtube playlist link")
+        return
+    try:
+        await message.delete()
+    except:
+        pass
+    try:
+        await m.delete()
+    except:
+        pass
+    try:
+        os.system("killall -9 mpv")
+    except:
+        pass
+    try:
+        os.remove("audio.mp3")
+    except:
+        pass 
+
+    link = message.command[1]
+    ydl_opts = {
+        'format': 'bestaudio'
+    }
+
+    await message.reply_text("Processing...")
+    with youtube_dl.YoutubeDL():
+        result = youtube_dl.YoutubeDL().extract_info(link, download=False)
+    
+        if 'entries' in result:
+            video = result['entries']
+            await m.edit(f"Found {len(result['entries'])} Videos In Playlist, Playing Them All.")
+            ii = 1
+            for i, item in enumerate(video):
+                video = result['entries'][i]['webpage_url']
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(video, download=False)
+                    audio_file = ydl.prepare_filename(info_dict)
+                    ydl.process_info(info_dict)
+                    os.rename(audio_file, "audio.webm")
+                await m.edit(f"Playing {result['entries'][i]['title']}, Song Number {ii} In Playlist, {result['entries'] - ii} In Queue.")
+                s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                await s.wait()
+                os.system("rm audio.mp3")
+   
+
+
 
 # Radio
 
