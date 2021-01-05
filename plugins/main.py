@@ -109,17 +109,18 @@ async def youtube_search(_, message: Message):
 async def youtube(_, message: Message):
     global m
     global s
-
-    try:
-        os.system("killall -9 mpv")
-    except:
-        pass
-
     try:
         await message.delete()
     except:
         pass
-
+    try:
+        await m.delete()
+    except:
+        pass
+    try:
+        os.system("killall -9 mpv")
+    except:
+        pass
     try:
         os.remove("audio.mp3")
     except:
@@ -137,7 +138,7 @@ async def youtube(_, message: Message):
     try:
         response = requests.get(link)
     except:
-        await message.reply_text("/youtube needs a link")
+        await message.reply_text("Link not found, or your internet is ded af")
         return
     m = await message.reply_text("Downloading....")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -147,6 +148,8 @@ async def youtube(_, message: Message):
         os.rename(audio_file, "audio.webm")
     await m.edit(f"Playing {audio_file}")
     s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    await s.wait()
+    await m.delete()
 
 # Radio
 
