@@ -185,7 +185,10 @@ async def stop(_, message: Message):
         os.system("killall -9 mpv")
     except:
         pass
-    s.terminate()
+    try:
+        s.terminate()
+    except:
+        pass
     try:
         await m.delete()
     except:
