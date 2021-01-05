@@ -143,12 +143,12 @@ async def youtube(_, message: Message):
         return
     m = await message.reply_text("Downloading....")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(link, download=false)
+        info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
         os.rename(audio_file, "audio.webm")
-    await m.edit(f"playing {audio_file}")
-    s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.pipe, stderr=asyncio.subprocess.pipe)
+    await m.edit(f"Playing {audio_file}")
+    s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     await s.wait()
     await m.delete()
 
