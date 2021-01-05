@@ -128,11 +128,17 @@ async def youtube(_, message: Message):
     if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
-
+    
     ydl_opts = {
         'format': 'bestaudio'
     }
+
     link = message.command[1]
+    try:
+        response = requests.get(link)
+    except:
+        await message.reply_text("/youtube needs a link")
+        return
     m = await message.reply_text("Downloading....")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)
