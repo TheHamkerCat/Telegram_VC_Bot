@@ -221,7 +221,10 @@ async def radio(_, message: Message):
         os.system("killall -9 mpv")
     except:
         pass
-
+    try:
+        await m.delete()
+    except:
+        pass
     try:
         await message.delete()
     except:
