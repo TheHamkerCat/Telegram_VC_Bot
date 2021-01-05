@@ -61,6 +61,10 @@ async def jiosaavn(_, message: Message):
     except:
         pass
     try:
+        await m.delete()
+    except:
+        pass
+    try:
         await message.delete()
     except:
         pass
