@@ -201,7 +201,7 @@ async def playlist(_, message: Message):
                     audio_file = ydl.prepare_filename(info_dict)
                     ydl.process_info(info_dict)
                     os.rename(audio_file, "audio.webm")
-                await m.edit(f"Playing {result['entries'][i]['title']}, Song Number {ii} In Playlist, {result['entries'] - ii} In Queue.")
+                await message.reply_text(f"Playing {result['entries'][i]['title']}, Song Number {ii} In Playlist, {len(result['entries']) - ii} In Queue.")
                 s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                 await s.wait()
                 os.system("rm audio.mp3")
