@@ -186,7 +186,7 @@ async def playlist(_, message: Message):
         'format': 'bestaudio'
     }
 
-    await message.reply_text("Processing...")
+    m = await message.reply_text("Processing...")
     with youtube_dl.YoutubeDL():
         result = youtube_dl.YoutubeDL().extract_info(link, download=False)
     
