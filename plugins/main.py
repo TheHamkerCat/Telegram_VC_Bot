@@ -9,6 +9,16 @@ from youtube_search import YoutubeSearch
 import youtube_dl
 
 print("Bot Started!")
+
+
+def kwairi(message):
+    query = ""
+    for i in message.command[1:]:
+        query += f"{i} "
+    return query
+
+
+
 # Ping
 
 @Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_id)))
@@ -68,8 +78,9 @@ async def jiosaavn(_, message: Message):
         await message.delete()
     except:
         pass
-    query = message.text.replace("/jiosaavn ", "")
-    m = await message.reply_text("Searching...")
+    query = kwairi(message)
+
+    m = await message.reply_text(f"Searching for `{query}` on JioSaavn")
     r = requests.get(f"{jio_saavn_api}{query}")
 
 
@@ -77,7 +88,7 @@ async def jiosaavn(_, message: Message):
     slink = r.json()[0]['media_url']
     ssingers = r.json()[0]['singers']
 
-    await m.edit(f"Playing {sname}-{ssingers}\nRequested by - {message.from_user.mention}")
+    await m.edit(f"Playing `{sname}-{ssingers}`\nRequested by - {message.from_user.mention}")
     s = await asyncio.create_subprocess_shell(f"mpv {slink} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     await s.wait()
     await m.delete()
@@ -95,8 +106,8 @@ async def youtube_search(_, message: Message):
         await message.reply_text("/ytsearch requires one argument")
         return
 
-    query = message.text.replace("/ytsearch ", "")
-    m = await message.reply_text("Searching....")
+    query = kwairi(message)
+    m = await message.reply_text(f"Searching for `{query}` on YouTube")
     results = YoutubeSearch(query, max_results=4).to_dict()
     i = 0
     text = ""
@@ -119,7 +130,7 @@ async def youtube(_, message: Message):
     global s
 
 
-    if len(message.command) < 2:
+    if len(message.command) != 2:
         await message.reply_text("/youtube requires one argument")
         return
     try:
@@ -143,18 +154,19 @@ async def youtube(_, message: Message):
     }
 
     link = message.command[1]
+    m = await message.reply_text("Parsing link...")
     try:
         response = requests.get(link)
     except:
-        await message.reply_text("Link not found, or your internet is ded af")
+        await m.edit("Link not found, or your internet is ded af")
         return
-    m = await message.reply_text("Downloading....")
+    await m.edit("Downloading....")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
         os.rename(audio_file, "audio.webm")
-    await m.edit(f"Playing {audio_file}\nRequested by - {message.from_user.mention}")
+    await m.edit(f"Playing `{audio_file}`\nRequested by - {message.from_user.mention}")
     s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     await s.wait()
     await m.delete()
@@ -193,7 +205,7 @@ async def playlist(_, message: Message):
         'format': 'bestaudio'
     }
 
-    m = await message.reply_text("Processing...")
+    m = await message.reply_text("Processing Playlist...")
     with youtube_dl.YoutubeDL():
         result = youtube_dl.YoutubeDL().extract_info(link, download=False)
     
@@ -208,7 +220,7 @@ async def playlist(_, message: Message):
                     audio_file = ydl.prepare_filename(info_dict)
                     ydl.process_info(info_dict)
                     os.rename(audio_file, "audio.webm")
-                await m.edit(f"Playing {result['entries'][i]['title']}, Song Number {ii} In Playlist, {len(result['entries']) - ii} In Queue. \nRequested by - {message.from_user.mention}")
+                await m.edit(f"Playing `{result['entries'][i]['title']}`, Song Number `{ii}` In Playlist, `{len(result['entries']) - ii}` In Queue. \nRequested by - {message.from_user.mention}")
                 s = await asyncio.create_subprocess_shell(f"mpv audio.webm --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                 await s.wait()
                 ii += 1
