@@ -6,6 +6,8 @@
 *.webp
 *.weba
 *.part
+*.ytdl
+blacklisted.txt
 # python
 /venv/
 __pycache__/
