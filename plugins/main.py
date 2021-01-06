@@ -32,6 +32,9 @@ def blacks():
 
 @Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_id)))
 async def ping(_, message: Message):
+    if message.from_user.id in blacks():
+        await message.reply_text("You're Blacklisted, So Stop Spamming.")
+        return
     j = await message.reply_text("Wait, Pinging all Datacenters`")
     result = ""
     for i in range(1, 6):
@@ -336,8 +339,14 @@ async def blacklist(_, message: Message):
     if not message.reply_to_message:
         await message.reply_text("Reply to a message to blacklist a user.")
         return
-    with open('blacklist.txt') as text:
-        lines = text.read().splitlines()
+    try:
+        with open('blacklist.txt') as text:
+            lines = text.read().splitlines()
+    except FileNotFoundError:
+        os.system("touch blacklist.txt")
+        with open('blacklist.txt') as text:
+            lines = text.read().splitlines()
+
     blacklisted_users = []
     for user in lines:
         blacklisted_users.append(int(user))
@@ -359,8 +368,13 @@ async def whitelist(_, message: Message):
     if not message.reply_to_message:
         await message.reply_text("Reply to a message to whitelist a user.")
         return
-    with open('blacklist.txt') as text:
-        lines = text.read().splitlines()
+    try:
+        with open('blacklist.txt') as text:
+            lines = text.read().splitlines()
+    except FileNotFoundError:
+        os.system("touch blacklist.txt")
+        with open('blacklist.txt') as text:
+            lines = text.read().splitlines()
     blacklisted_users = []
     for user in lines:
         blacklisted_users.append(int(user))
@@ -377,6 +391,9 @@ async def whitelist(_, message: Message):
 
 @Client.on_message(filters.command(["users"]) & (filters.chat(sudo_chat_id)))
 async def users(client, message: Message):
+    if message.from_user.id in blacks():
+        await message.reply_text("You're Blacklisted, So Stop Spamming.")
+        return
     with open('blacklist.txt', "r") as text:
         lines = text.read().splitlines()
     blacklisted_users = []
