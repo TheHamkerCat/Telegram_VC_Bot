@@ -288,7 +288,7 @@ async def radio(_, message: Message):
     except:
         pass
     m = await message.reply_text(f"Playing Radio\nRequested by - {message.from_user.mention}")
-    s = await asyncio.create_subprocess_shell(f"mpv {radio_link} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    s = await asyncio.create_subprocess_shell(f"while true; do mpv {radio_link} --no-video;done", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 
 
