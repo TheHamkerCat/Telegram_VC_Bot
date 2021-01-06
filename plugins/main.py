@@ -4,7 +4,7 @@ import asyncio
 import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from config import jio_saavn_api, sudo_chat_id, owner_id
+from config import jio_saavn_api, sudo_chat_id, owner_id, radio_link
 from youtube_search import YoutubeSearch
 import youtube_dl
 
@@ -288,7 +288,7 @@ async def radio(_, message: Message):
     except:
         pass
     m = await message.reply_text(f"Playing Radio\nRequested by - {message.from_user.mention}")
-    s = await asyncio.create_subprocess_shell(f"mpv http://peridot.streamguys.com:7150/Mirchi --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    s = await asyncio.create_subprocess_shell(f"mpv {radio_link} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 
 
