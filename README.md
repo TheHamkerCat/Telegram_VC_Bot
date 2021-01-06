@@ -5,12 +5,18 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 
 <img src="tg_vc_bot.png" width="300" height="300">
 
+# Support
+
+1. All linux based os, including android [Yes android is also supported through Termux]
+2. Windows
+
+
 ## Requirements
 
 - Python 3.6 or higher
 - A [Telegram API key](//docs.pyrogram.org/intro/setup#api-keys)
 - A [Telegram bot token](//t.me/botfather)
-- `mpv` Install it From Your Linux Repository. [`sudo apt-get install mpv`] -for ubuntu, [`sudo pacman -S mpv `] -for ArchLinux, I use arch btw
+- `mpv` Install it From Your Linux Repository. [`pkg install mpv`] -for Android,  [`sudo apt-get install mpv`] - for ubuntu, [`sudo pacman -S mpv `] - for ArchLinux, I use arch btw
 
 ## Run
 
@@ -37,6 +43,9 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 5. `/youtube <song_link>` To play a song from YouTube.
 6. `/playlist <youtube_playlist_link>` To play a all videos in a youtube playlist.
 7. `/radio` To Play Radio Continuosly.
+8. `/black` To Blacklist A User.
+9. `/white` To Whitelist A User.
+10. `/users` To Get A List Of Blacklisted Users.
 
 ## Note
 
