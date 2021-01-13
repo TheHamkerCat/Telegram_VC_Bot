@@ -16,7 +16,10 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 - Python 3.6 or higher
 - A [Telegram API key](//docs.pyrogram.org/intro/setup#api-keys)
 - A [Telegram bot token](//t.me/botfather)
-- `mpv` Install it From Your Linux Repository. [`pkg install mpv`] - for Android,  [`sudo apt-get install mpv`] - for ubuntu, [`sudo pacman -S mpv `] - for ArchLinux, I use arch btw
+- Bot needs to be admin in the chat, atleast give message delete permissions.
+- Install `mpv` with
+
+`pkg install mpv` - for Android,  `sudo apt-get install mpv` - for ubuntu, `sudo pacman -S mpv `  - for ArchLinux, I use arch btw
 
 ## Run
 
@@ -35,17 +38,18 @@ Just Another [Obviously better!] Telegram Voice-Chat Bot To Play Music From Vari
 
 
 ## Commands
-
-1. `/help` To show help screen.
-2. `/end` To stop any playing music. 
-3. `/jiosaavn <song_name>` To play music from JioSaavn.
-4. `/ytsearch <song_name>` To search for a song on Youtube.
-5. `/youtube <song_link>` To play a song from YouTube.
-6. `/playlist <youtube_playlist_link>` To play a all videos in a youtube playlist.
-7. `/radio` To Play Radio Continuosly.
-8. `/black` To Blacklist A User.
-9. `/white` To Whitelist A User.
-10. `/users` To Get A List Of Blacklisted Users.
+Command | Description
+:--- | :---
+/help | Show help screen.
+/end | Stop any playing music. 
+/jiosaavn <song_name> | Play music from JioSaavn.
+/ytsearch <song_name>|  Search for a song on Youtube.
+/youtube <song_link> | Play a song from YouTube.
+/playlist <youtube_playlist_link> | Play a all videos in a youtube playlist.
+/radio | Play radio continuosly.
+/black | Blacklist a user.
+/white | Whitelist a user.
+/users | Get a list of blacklisted users.
 
 ## Note
 
