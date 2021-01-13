@@ -8,6 +8,8 @@ from config import jio_saavn_api, sudo_chat_id, owner_id, radio_link
 from youtube_search import YoutubeSearch
 import youtube_dl
 
+
+
 print("Bot Started!")
 
 # Get User Input
@@ -30,7 +32,7 @@ def blacks():
 
 # Ping
 
-@Client.on_message(filters.command(["ping"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["ping"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def ping(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -45,7 +47,7 @@ async def ping(_, message: Message):
 
 # Start
 
-@Client.on_message(filters.command(["start"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["start"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def start(_, message: Message):
 
     if message.from_user.id in blacks():
@@ -55,7 +57,7 @@ async def start(_, message: Message):
 
 # Help
 
-@Client.on_message(filters.command(["help"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["help"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def help(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -80,7 +82,7 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 #Global vars
 s = None
 m = None
-@Client.on_message(filters.command(["jiosaavn"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["jiosaavn"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def jiosaavn(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -120,7 +122,7 @@ async def jiosaavn(_, message: Message):
 
 # Youtube Searching
 
-@Client.on_message(filters.command(["ytsearch"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["ytsearch"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def youtube_search(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -152,7 +154,7 @@ async def youtube_search(_, message: Message):
 
 # Youtube Playing
 
-@Client.on_message(filters.command(["youtube"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["youtube"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def youtube(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -205,7 +207,7 @@ async def youtube(_, message: Message):
 # youtube playlist
 
 
-@Client.on_message(filters.command(["playlist"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["playlist"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def playlist(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -265,7 +267,7 @@ async def playlist(_, message: Message):
 
 # Radio
 
-@Client.on_message(filters.command(["radio"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["radio"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def radio(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -292,12 +294,14 @@ async def radio(_, message: Message):
         pass
     m = await message.reply_text(f"Playing Radio\nRequested by - {message.from_user.mention}")
     s = await asyncio.create_subprocess_shell(f"mpv {radio_link} --no-video", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    await s.wait()
+    await m.delete()
 
 
 
 # End Music
 
-@Client.on_message(filters.command(["end"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["end"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def end(_, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -331,7 +335,7 @@ async def end(_, message: Message):
 # Ban
 
 
-@Client.on_message(filters.command(["black"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["black"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def blacklist(_, message: Message):
     if message.from_user.id != owner_id:
         await message.reply_text("Only owner can blacklist users.")
@@ -360,7 +364,7 @@ async def blacklist(_, message: Message):
 
 # Unban
 
-@Client.on_message(filters.command(["white"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["white"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def whitelist(_, message: Message):
     if message.from_user.id != owner_id:
         await message.reply_text("Only owner can whitelist users.")
@@ -389,7 +393,7 @@ async def whitelist(_, message: Message):
 # Blacklisted users
 
 
-@Client.on_message(filters.command(["users"]) & (filters.chat(sudo_chat_id)))
+@Client.on_message(filters.command(["users"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def users(client, message: Message):
     if message.from_user.id in blacks():
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
