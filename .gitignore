@@ -7,12 +7,10 @@
 *.weba
 *.part
 *.ytdl
-blacklisted.txt
 # python
 /venv/
 __pycache__/
 # tgbot
-/config.ini
 /config.py
-/tgbot.session
-/tgbot.session-journal
+/*.session
+/*.session-journal

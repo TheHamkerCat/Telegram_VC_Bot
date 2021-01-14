@@ -1,16 +1,16 @@
 from __future__ import unicode_literals
 import requests
+import youtube_dl
 import asyncio
+import time
 import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from config import jio_saavn_api, sudo_chat_id, owner_id, radio_link
 from youtube_search import YoutubeSearch
-import youtube_dl
+from config import owner_id, bot_token, radio_link, sudo_chat_id
 
+app = Client(":memory:", bot_token=bot_token, api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
 
-
-print("Bot Started!")
 
 # Get User Input
 def kwairi(message):
@@ -18,48 +18,40 @@ def kwairi(message):
     for i in message.command[1:]:
         query += f"{i} "
     return query
-
 # For Blacklist filter
-
-def blacks():
-    with open('blacklist.txt') as text:
-        lines = text.read().splitlines()
-    blacklisted_members = []
-    for user in lines:
-        blacklisted_members.append(int(user))
-    return blacklisted_members
+blacks = []
 
 
 # Ping
 
-@Client.on_message(filters.command(["ping"]) & filters.chat(sudo_chat_id) & ~filters.edited)
-async def ping(_, message: Message):
-    if message.from_user.id in blacks():
+@app.on_message(filters.command(["ping"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+async def ping(_, message):
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    j = await message.reply_text("Wait, Pinging all Datacenters`")
-    result = ""
-    for i in range(1, 6):
-        datacenter = (f"https://cdn{i}.telesco.pe")
-        ping1 = round(requests.head(datacenter).elapsed.total_seconds() * 1000)
-        result += f'`DC{i} - {ping1}ms`\n'
-    await j.edit(result)
+    start_time = int(round(time.time() * 1000))
+    m = await message.reply_text(".")
+    end_time = int(round(time.time() * 1000))
+    await m.edit(f"{end_time - start_time} ms")
+
 
 # Start
 
-@Client.on_message(filters.command(["start"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["start"]) & ~filters.edited)
 async def start(_, message: Message):
-
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    await message.reply_text("Hi I'm Telegram Voice Chat Bot, Join @TheHamkerChat For Support.")
+    await message.reply_text("Hi I'm Telegram Voice Chat Bot, I Won't Work Here, You Need To Add Me To A Group, Join @TheHamkerChat For Support.")
 
 # Help
 
-@Client.on_message(filters.command(["help"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["help"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def help(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     await message.reply_text('''Currently These Commands Are Supported.
@@ -82,9 +74,10 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather''')
 #Global vars
 s = None
 m = None
-@Client.on_message(filters.command(["jiosaavn"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["jiosaavn"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def jiosaavn(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     global s
@@ -108,7 +101,7 @@ async def jiosaavn(_, message: Message):
     query = kwairi(message)
 
     m = await message.reply_text(f"Searching for `{query}` on JioSaavn")
-    r = requests.get(f"{jio_saavn_api}{query}")
+    r = requests.get(f"https://jiosaavnapi.bhadoo.uk/result/?query={query}")
 
 
     sname = r.json()[0]['song']
@@ -122,9 +115,10 @@ async def jiosaavn(_, message: Message):
 
 # Youtube Searching
 
-@Client.on_message(filters.command(["ytsearch"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["ytsearch"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def youtube_search(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     try:
@@ -154,9 +148,10 @@ async def youtube_search(_, message: Message):
 
 # Youtube Playing
 
-@Client.on_message(filters.command(["youtube"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["youtube"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def youtube(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     global m
@@ -207,9 +202,10 @@ async def youtube(_, message: Message):
 # youtube playlist
 
 
-@Client.on_message(filters.command(["playlist"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["playlist"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def playlist(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return   
     global m
@@ -267,9 +263,10 @@ async def playlist(_, message: Message):
 
 # Radio
 
-@Client.on_message(filters.command(["radio"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["radio"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def radio(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     global m
@@ -301,9 +298,10 @@ async def radio(_, message: Message):
 
 # End Music
 
-@Client.on_message(filters.command(["end"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["end"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def end(_, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     try:
@@ -335,86 +333,57 @@ async def end(_, message: Message):
 # Ban
 
 
-@Client.on_message(filters.command(["black"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["black"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def blacklist(_, message: Message):
+    global blacks
     if message.from_user.id != owner_id:
         await message.reply_text("Only owner can blacklist users.")
         return
     if not message.reply_to_message:
-        await message.reply_text("Reply to a message to blacklist a user.")
+        await message.reply_text("Reply to a message with /black to blacklist a user.")
         return
-    try:
-        with open('blacklist.txt') as text:
-            lines = text.read().splitlines()
-    except FileNotFoundError:
-        os.system("touch blacklist.txt")
-        with open('blacklist.txt') as text:
-            lines = text.read().splitlines()
-
-    blacklisted_users = []
-    for user in lines:
-        blacklisted_users.append(int(user))
-
-    if message.reply_to_message.from_user.id in blacklisted_users:
+    if message.reply_to_message.from_user.id in blacks:
         await message.reply_text("This user is already blacklisted.")
         return
-    with open("blacklist.txt", "a+") as f:
-        f.write(str(f"{message.reply_to_message.from_user.id}\n"))
+    blacks.append(message.reply_to_message.from_user.id)
     await message.reply_text(f"Blacklisted {message.reply_to_message.from_user.mention}")
 
 # Unban
 
-@Client.on_message(filters.command(["white"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["white"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def whitelist(_, message: Message):
+    global blacks
     if message.from_user.id != owner_id:
         await message.reply_text("Only owner can whitelist users.")
         return
     if not message.reply_to_message:
         await message.reply_text("Reply to a message to whitelist a user.")
         return
-    try:
-        with open('blacklist.txt') as text:
-            lines = text.read().splitlines()
-    except FileNotFoundError:
-        os.system("touch blacklist.txt")
-        with open('blacklist.txt') as text:
-            lines = text.read().splitlines()
-    blacklisted_users = []
-    for user in lines:
-        blacklisted_users.append(int(user))
-    if message.reply_to_message.from_user.id in blacklisted_users:
-        os.system("rm blacklist.txt")
-        with open("blacklist.txt", "a+") as f:
-            for member in lines:
-                if int(member) != message.reply_to_message.from_user.id:
-                    f.write(str(f"{member}\n"))
+    if message.reply_to_message.from_user.id in blacks:
+        blacks.remove(message.reply_to_message.from_user.id)
         await message.reply_text(f"Whitelisted {message.reply_to_message.from_user.mention}")
+    else:
+        await message.reply_text("This user is already whitelisted.")
 
 # Blacklisted users
 
 
-@Client.on_message(filters.command(["users"]) & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command(["users"]) & filters.chat(sudo_chat_id) & ~filters.edited)
 async def users(client, message: Message):
-    if message.from_user.id in blacks():
+    global blacks
+    if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    with open('blacklist.txt', "r") as text:
-        lines = text.read().splitlines()
-    blacklisted_users = []
-    for user in lines:
-        blacklisted_users.append(int(user))
     output = "Blacklisted Users:\n"
     n = 1
-    for i in blacklisted_users:
+    for i in blacks:
         usern = (await client.get_users(i)).mention
         output += f"{n}. {usern}\n"
         n += 1
-    if len(blacklisted_users) == 0:
+    if len(blacks) == 0:
         await message.reply_text("No Users Are Blacklisted")
         return
     await message.reply_text(output)
 
-
-        
-    
-
+print("Bot Started!")
+app.run()
