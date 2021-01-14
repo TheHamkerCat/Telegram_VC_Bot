@@ -143,7 +143,7 @@ async def youtube_search(_, message: Message):
         text += f"https://youtube.com{results[i]['url_suffix']}\n\n"
         i += 1
     await m.edit(text, disable_web_page_preview=True)
-    await asyncio.sleep(40)
+    await asyncio.sleep(15)
     await m.delete()
 
 # Youtube Playing
