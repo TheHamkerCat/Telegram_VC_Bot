@@ -8,7 +8,7 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
 # Support
 
-1. All linux based os, including android [Yes android is also supported through Termux]
+1. All linux based oses
 2. Windows
 
 
@@ -53,8 +53,8 @@ Command | Description
 ## Note
 
 1. More services will be added soon.
-2. If you want any help you can ask [here](https://t.me/TheHamkerChat)
-
+2. Termux is not completely supported yet, might take a week or two.
+3. If you want any help you can ask [here](https://t.me/TheHamkerChat)
 
 ## Credits
 1. `https://github.com/cyberboysumanjay/JioSaavnAPI` [For JioSaavnAPI]
