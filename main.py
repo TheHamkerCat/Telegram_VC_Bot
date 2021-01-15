@@ -29,6 +29,20 @@ def kwairi(message):
         query += f"{i} "
     return query
 
+async def list_admins(group_id):
+    list_of_admins = []
+    async for member in app.iter_chat_members(
+            group_id, filter="administrators"):
+        list_of_admins.append(member.user.id)
+    return list_of_admins
+
+def convert_seconds(seconds): 
+    seconds = seconds % (24 * 3600)
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return "%02d:%02d" % (minutes, seconds)
+
 
 # For Blacklist filter
 blacks = []
@@ -99,13 +113,6 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
 # Global vars
 s = None
 m = None
-
-def convert_seconds(seconds): 
-    seconds = seconds % (24 * 3600)
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60
-    return "%02d:%02d" % (minutes, seconds)
 
 
 @app.on_message(
@@ -312,7 +319,7 @@ async def ytplay(_, message: Message):
         os.rename(audio_file, "audio.webm")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing `{title}` Via YouTube #music",
+        caption=f"Playing [{title}]({link}) Via YouTube #music",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -543,6 +550,7 @@ async def end_callback(_, CallbackQuery):
     global blacks
     global m
     global s
+    chat_id = int(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id in blacks:
         return
     try:
@@ -562,7 +570,7 @@ async def end_callback(_, CallbackQuery):
     except:
         pass
     await app.send_message(
-        CallbackQuery.message.chat.id,
+        chat_id,
         f"{CallbackQuery.from_user.mention} - {CallbackQuery.from_user.id} Stopped The Music.",
     )
 
