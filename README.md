@@ -41,11 +41,9 @@ Command | Description
 /help | Show help screen.
 /end | Stop any playing music. 
 /jiosaavn <song_name> | Play music from JioSaavn.
-/ytplay <song_name> | Search for a song and play the top-most one.
-/ytsearch <song_name>|  Search for a song on Youtube.
-/youtube <song_link> | Play a song from YouTube.
+/youtube <song_name> or <song_link>| Search for a song and play the top-most one or play with a link.
 /playlist <youtube_playlist_link> | Play a all videos in a youtube playlist.
-/tgplay | Play a song from telegram file.
+/telegram | Play a song from telegram file.
 /radio | Play radio continuosly.
 /black | Blacklist a user.
 /white | Whitelist a user.
