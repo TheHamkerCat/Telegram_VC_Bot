@@ -173,23 +173,26 @@ async def jiosaavn(_, message: Message):
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 20)
     draw.text(
-        (190, 560), f"Title - {sname}-{ssingers}", (255, 255, 255), font=font
+        (190, 560), f"Title: {sname}", (255, 255, 255), font=font
+    )
+    draw.text(
+        (190, 590), f"Artist: {ssingers}", (255, 255, 255), font=font
     )
     draw.text(
         (190, 620),
-        f"Duration - {sduration} Seconds",
+        f"Duration: {sduration} Seconds",
         (255, 255, 255),
         font=font,
     )
     draw.text(
         (190, 650),
-        f"Group - {message.chat.username}-{message.chat.id}",
+        f"Group: {message.chat.username} - {message.chat.id}",
         (255, 255, 255),
         font=font,
     )
     draw.text(
         (190, 680),
-        f"Played By - {message.from_user.username}-{message.from_user.id}",
+        f"Played By: {message.from_user.username} - {message.from_user.id}",
         (255, 255, 255),
         font=font,
     )
@@ -198,7 +201,7 @@ async def jiosaavn(_, message: Message):
     os.system("rm background.png")
     await m.delete()
     m = await message.reply_photo(
-        caption="Playing",
+        caption=f"Playing {sname} Via Jiosaavn",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -324,20 +327,20 @@ async def ytplay(_, message: Message):
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 20)
-    draw.text((190, 560), f"Title - {title}", (255, 255, 255), font=font)
+    draw.text((190, 560), f"Title: {title}", (255, 255, 255), font=font)
     draw.text(
-        (190, 620), f"Duration - {duration}", (255, 255, 255), font=font
+        (190, 620), f"Duration: {duration}", (255, 255, 255), font=font
     )
-    draw.text((190, 590), f"Views - {views}", (255, 255, 255), font=font)
+    draw.text((190, 590), f"Views: {views}", (255, 255, 255), font=font)
     draw.text(
         (190, 650),
-        f"Group - {message.chat.username}-{message.chat.id}",
+        f"Group: {message.chat.username} - {message.chat.id}",
         (255, 255, 255),
         font=font,
     )
     draw.text(
         (190, 680),
-        f"Played By - {message.from_user.username}-{message.from_user.id}",
+        f"Played By: {message.from_user.username} - {message.from_user.id}",
         (255, 255, 255),
         font=font,
     )
@@ -352,7 +355,7 @@ async def ytplay(_, message: Message):
         os.rename(audio_file, "audio.webm")
     await m.delete()
     m = await message.reply_photo(
-        caption="Playing",
+        caption=f"Playing {title} Via YouTube ",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -665,7 +668,7 @@ async def end_callback(_, CallbackQuery):
         pass
     await app.send_message(
         CallbackQuery.message.chat.id,
-        f"{CallbackQuery.from_user.mention}{CallbackQuery.from_user.id} Stopped The Music.",
+        f"{CallbackQuery.from_user.mention} - {CallbackQuery.from_user.id} Stopped The Music.",
     )
 
 
