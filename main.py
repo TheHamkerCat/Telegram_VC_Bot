@@ -85,7 +85,7 @@ async def help(_, message: Message):
 "/jiosaavn <song_name>" To Play A Song From Jiosaavn.
 "/youtube <song_name> or <song_link>" To Search For A Song And Play The Top-Most Song Or Play With A Link.
 "/playlist <youtube_playlist_url> To Play A Playlist From Youtube".
-/tgplay To Play A Song Directly From Telegram File.
+/telegram To Play A Song Directly From Telegram File.
 /radio To Play Radio Continuosly.
 /black To Blacklist A User.
 /white To Whitelist A User.
