@@ -3,7 +3,7 @@
 Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
 
-<img src="tg_vc_bot.png" width="300" height="300">
+<img src="etc/tg_vc_bot.png" width="300" height="300">
 
 # Support
 
@@ -41,9 +41,11 @@ Command | Description
 /help | Show help screen.
 /end | Stop any playing music. 
 /jiosaavn <song_name> | Play music from JioSaavn.
+/ytplay <song_name> | Search for a song and play the top-most one.
 /ytsearch <song_name>|  Search for a song on Youtube.
 /youtube <song_link> | Play a song from YouTube.
 /playlist <youtube_playlist_link> | Play a all videos in a youtube playlist.
+/tgplay | Play a song from telegram file.
 /radio | Play radio continuosly.
 /black | Blacklist a user.
 /white | Whitelist a user.
