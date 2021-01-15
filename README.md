@@ -11,7 +11,7 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 1. All linux based oses
 2. Windows
 
-# Scheme
+# Diagram
 
 <img src="etc/scheme.png" width="919" height="448">
 
