@@ -32,7 +32,11 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 3. `pip3 install -r requirements.txt`, to install the requirements.
 4. `cp sample_config.py config.py`
 5. Edit `config.py` with your own values.
-6. Download Telegram desktop from desktop.telegram.org , Log in using your second account, and connect to the 
+6. If you are on linux follow [this](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/vnc.md) 
+instruction to set up vnc. If you are using windows you can skip this step.
+6. Download Telegram desktop from https://desktop.telegram.org , Log in using your second account, and connect 
+to 
+the 
 voice chat in your group.
 7. Follow [This](https://unix.stackexchange.com/questions/82259/how-to-pipe-audio-output-to-mic-input) to route 
 your PC or Server's audio output to audio input. [For Linux]
