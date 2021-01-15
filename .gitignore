@@ -7,6 +7,9 @@
 *.weba
 *.part
 *.ytdl
+final.png
+background.png
+temp.png
 # python
 /venv/
 __pycache__/
