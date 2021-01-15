@@ -2,8 +2,9 @@
 
 Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
-<img src="https://i.imgur.com/dHg5n2a.png" width="500" height="400">
+
 <img src="etc/tg_vc_bot.png" width="300" height="300">
+
 
 # Support
 
