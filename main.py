@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import requests
 import youtube_dl
 import asyncio
 import aiohttp
@@ -10,7 +9,7 @@ import os
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
-from pyrogram import Client, filters, emoji
+from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from youtube_search import YoutubeSearch
 from config import owner_id, bot_token, radio_link, sudo_chat_id
@@ -101,6 +100,13 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
 s = None
 m = None
 
+def convert_seconds(seconds): 
+    seconds = seconds % (24 * 3600)
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    return "%02d:%02d" % (minutes, seconds)
+
 
 @app.on_message(
     filters.command(["jiosaavn"])
@@ -144,6 +150,7 @@ async def jiosaavn(_, message: Message):
     ssingers = r[0]["singers"]
     sthumb = r[0]["image"]
     sduration = r[0]["duration"]
+    sduration_converted = convert_seconds(int(sduration)) 
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
         async with session.get(sthumb) as resp:
@@ -169,27 +176,21 @@ async def jiosaavn(_, message: Message):
     Image.alpha_composite(image5, image6).save("temp.png")
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 20)
+    font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 32)
     draw.text(
-        (190, 560), f"Title: {sname}", (255, 255, 255), font=font
+        (190, 550), f"Title: {sname}", (255, 255, 255), font=font
     )
     draw.text(
         (190, 590), f"Artist: {ssingers}", (255, 255, 255), font=font
     )
     draw.text(
-        (190, 620),
-        f"Duration: {sduration} Seconds",
+        (190, 630),
+        f"Duration: {sduration_converted} Seconds",
         (255, 255, 255),
         font=font,
     )
     draw.text(
-        (190, 650),
-        f"Group: {message.chat.title}",
-        (255, 255, 255),
-        font=font,
-    )
-    draw.text(
-        (190, 680),
+        (190, 670),
         f"Played By: {message.from_user.first_name}",
         (255, 255, 255),
         font=font,
@@ -199,19 +200,20 @@ async def jiosaavn(_, message: Message):
     os.system("rm background.png")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing `{sname}` Via Jiosaavn",
+        caption=f"Playing `{sname}` Via Jiosaavn #music",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        f"STOP {emoji.CROSS_MARK}", callback_data="end"
+                        f"STOP", callback_data="end"
                     )
                 ]
             ]
         ),
         parse_mode="markdown",
     )
+
     s = await asyncio.create_subprocess_shell(
         f"mpv {slink} --no-video",
         stdout=asyncio.subprocess.PIPE,
@@ -287,20 +289,14 @@ async def ytplay(_, message: Message):
     Image.alpha_composite(image5, image6).save("temp.png")
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 20)
-    draw.text((190, 560), f"Title: {title}", (255, 255, 255), font=font)
+    font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 32)
+    draw.text((190, 550), f"Title: {title}", (255, 255, 255), font=font)
     draw.text(
-        (190, 620), f"Duration: {duration}", (255, 255, 255), font=font
+        (190, 590), f"Duration: {duration}", (255, 255, 255), font=font
     )
-    draw.text((190, 590), f"Views: {views}", (255, 255, 255), font=font)
+    draw.text((190, 630), f"Views: {views}", (255, 255, 255), font=font)
     draw.text(
-        (190, 650),
-        f"Group: {message.chat.title}",
-        (255, 255, 255),
-        font=font,
-    )
-    draw.text(
-        (190, 680),
+        (190, 670),
         f"Played By: {message.from_user.first_name}",
         (255, 255, 255),
         font=font,
@@ -316,13 +312,13 @@ async def ytplay(_, message: Message):
         os.rename(audio_file, "audio.webm")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing `{title}` Via YouTube ",
+        caption=f"Playing `{title}` Via YouTube #music",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
                     InlineKeyboardButton(
-                        f"STOP {emoji.CROSS_MARK}", callback_data="end"
+                        f"STOP", callback_data="end"
                     )
                 ]
             ]
