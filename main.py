@@ -29,14 +29,8 @@ def kwairi(message):
         query += f"{i} "
     return query
 
-async def list_admins(group_id):
-    list_of_admins = []
-    async for member in app.iter_chat_members(
-            group_id, filter="administrators"):
-        list_of_admins.append(member.user.id)
-    return list_of_admins
 
-def convert_seconds(seconds): 
+def convert_seconds(seconds):
     seconds = seconds % (24 * 3600)
     seconds %= 3600
     minutes = seconds // 60
@@ -213,7 +207,7 @@ async def jiosaavn(_, message: Message):
             [
                 [
                     InlineKeyboardButton(
-                        f"STOP", callback_data="end"
+                        "STOP", callback_data="end"
                     )
                 ]
             ]
@@ -325,7 +319,7 @@ async def ytplay(_, message: Message):
             [
                 [
                     InlineKeyboardButton(
-                        f"STOP", callback_data="end"
+                        "STOP", callback_data="end"
                     )
                 ]
             ]
@@ -450,7 +444,7 @@ async def tgplay(_, message: Message):
     except:
         pass
     m = await message.reply_text("Downloading")
-    j = await app.download_media(message.reply_to_message, file_name="audio.mp3")
+    await app.download_media(message.reply_to_message, file_name="audio.mp3")
     await m.edit(f"Playing `{message.reply_to_message.link}` via Telegram.")
     s = await asyncio.create_subprocess_shell(
         "mpv downloads/audio.mp3 --no-video",
@@ -508,6 +502,12 @@ async def radio(_, message: Message):
 # End Music
 
 
+async def getadmins(chat_id):
+    admins = []
+    async for i in app.iter_chat_members(chat_id, filter="administrators"):
+        admins.append(i.user.id)
+    return admins
+
 @app.on_message(
     filters.command(["end"]) & filters.chat(sudo_chat_id) & ~filters.edited
 )
@@ -517,6 +517,11 @@ async def end(_, message: Message):
     global s
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
+        return
+    list_of_admins = await getadmins(message.chat.id)
+    if message.from_user.id not in list_of_admins:
+        await message.reply_text("Well, you're not admin, SO YOU CAN'T STOP"
+                                 + " ME, HAH!, how about i ban you?")
         return
     try:
         os.remove("audio.mp3")
@@ -547,6 +552,12 @@ async def end(_, message: Message):
 
 @app.on_callback_query(filters.regex("end"))
 async def end_callback(_, CallbackQuery):
+    list_of_admins = await getadmins(CallbackQuery.message.chat.id)
+    if CallbackQuery.from_user.id not in list_of_admins:
+        await app.answer_callback_query(
+            CallbackQuery.id, "Well, you're not admin, SO YOU CAN'T STOP"
+            + " ME, HAH!, how about i ban you?", show_alert=True)
+        return
     global blacks
     global m
     global s
