@@ -42,8 +42,13 @@ def convert_seconds(seconds):
 blacks = []
 
 
-# Ping
+# Ping and repo
 
+@app.on_message(filters.command("repo") & ~filters.edited)
+async def repo(_, message: Message):
+    await message.reply_text(
+        "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
+        + " | [Group](t.me/TheHamkerChat)", disable_web_page_preview=True)
 
 @app.on_message(
     filters.command(["ping"]) & filters.chat(sudo_chat_id) & ~filters.edited
