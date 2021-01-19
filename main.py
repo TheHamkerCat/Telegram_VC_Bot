@@ -264,7 +264,11 @@ async def ytplay(_, message: Message):
     ydl_opts = {"format": "bestaudio"}
     query = kwairi(message)
     m = await message.reply_text(f"Searching for `{query}` on YouTube")
-    results = YoutubeSearch(query, max_results=1).to_dict()
+    try:
+        results = YoutubeSearch(query, max_results=1).to_dict()
+    except Exception as e:
+        await m.edit(str(e))
+        return
     link = f"https://youtube.com{results[0]['url_suffix']}"
     title = results[0]["title"]
     thumbnail = results[0]["thumbnails"][0]
