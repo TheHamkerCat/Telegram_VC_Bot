@@ -144,7 +144,7 @@ async def jiosaavn(_, message: Message):
 
     query = kwairi(message)
 
-    m = await message.reply_text(f"Searching for `{query}` on JioSaavn")
+    m = await message.reply_text(f"Searching for `{query}`on JioSaavn")
     async with aiohttp.ClientSession() as session:
         async with session.get(
             f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
@@ -263,7 +263,7 @@ async def ytplay(_, message: Message):
         pass
     ydl_opts = {"format": "bestaudio"}
     query = kwairi(message)
-    m = await message.reply_text(f"Searching for `{query}` on YouTube")
+    m = await message.reply_text(f"Searching for `{query}`on YouTube")
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
     except Exception as e:
