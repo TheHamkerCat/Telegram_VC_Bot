@@ -7,8 +7,9 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 
 # Support
 
-1. All linux based oses
+1. All linux based os.
 2. Windows
+3. Mac
 
 # Diagram
 
