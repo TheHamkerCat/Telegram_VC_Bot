@@ -182,7 +182,7 @@ async def jiosaavn(_, message: Message):
     Image.alpha_composite(image5, image6).save("temp.png")
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/JetBrainsMonoNL-Regular.ttf", 32)
+    font = ImageFont.truetype("etc/font.otf", 32)
     draw.text(
         (190, 550), f"Title: {sname}", (255, 255, 255), font=font
     )
