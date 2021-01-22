@@ -17,8 +17,8 @@ from config import owner_id, bot_token, radio_link, sudo_chat_id
 app = Client(
     ":memory:",
     bot_token=bot_token,
-    api_id= 275658,
-    api_hash="88ggdysgud855b2cf6e55539a55cff",
+    api_id=6,
+    api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e",
 )
 
 
