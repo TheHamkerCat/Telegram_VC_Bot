@@ -18,7 +18,6 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 ## Requirements
 
 - Python 3.6 or higher
-- A [Telegram API key](//docs.pyrogram.org/intro/setup#api-keys)
 - A [Telegram bot token](//t.me/botfather)
 - Bot needs to be admin in the chat, atleast give message delete permissions.
 - Install `mpv` with
