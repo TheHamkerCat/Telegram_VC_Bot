@@ -37,6 +37,11 @@ def convert_seconds(seconds):
     seconds %= 60
     return "%02d:%02d" % (minutes, seconds)
 
+#Os Determination
+if os.name == 'nt':
+    kill = "tskill"
+else:
+    kill = "killall -9"
 
 # For Blacklist filter
 blacks = []
@@ -74,7 +79,7 @@ async def start(_, message: Message):
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     await message.reply_text(
-        "Hi I'm Telegram Voice Chat Bot. Join @TheHamkerChat For Support."
+        "Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support."
     )
 
 
@@ -94,15 +99,17 @@ async def help(_, message: Message):
 /start To Start The bot.
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
-/end To Stop Any Playing Music.
+/end To Stop Any Playing Music (only works for current user playing and to Admins).
 "/jiosaavn <song_name>" To Play A Song From Jiosaavn.
 "/youtube <song_name> or <song_link>" To Search For A Song And Play The Top-Most Song Or Play With A Link.
 "/playlist <youtube_playlist_url> To Play A Playlist From Youtube".
 /telegram To Play A Song Directly From Telegram File.
 /radio To Play Radio Continuosly.
+/users To Get A List Of Blacklisted Users.
+
+Admin Commands:
 /black To Blacklist A User.
 /white To Whitelist A User.
-/users To Get A List Of Blacklisted Users.
 
 NOTE: Do Not Assign These Commands To Bot Via BotFather"""
     )
@@ -112,6 +119,7 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
 # Global vars
 s = None
 m = None
+current_player = None
 
 
 @app.on_message(
@@ -126,11 +134,13 @@ async def jiosaavn(_, message: Message):
         return
     global s
     global m
+    global current_player
+    
     if len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
@@ -143,6 +153,7 @@ async def jiosaavn(_, message: Message):
         pass
 
     query = kwairi(message)
+    current_player = message.from_user.id
 
     m = await message.reply_text(f"Searching for `{query}`on JioSaavn")
     try:
@@ -205,11 +216,11 @@ async def jiosaavn(_, message: Message):
         font=font,
     )
     img.save("final.png")
-    os.system("rm temp.png")
-    os.system("rm background.png")
+    os.remove("temp.png")
+    os.remove("background.png")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing `{sname}` Via Jiosaavn #music",
+        caption=f"Playing `{sname}` Via Jiosaavn #music\n>>>Requested by {message.from_user.first_name}<<<",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -244,6 +255,7 @@ async def ytplay(_, message: Message):
         return
     global m
     global s
+    global current_player
 
     if len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
@@ -257,15 +269,16 @@ async def ytplay(_, message: Message):
     except:
         pass
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
-        os.remove("audio.mp3")
+        os.remove("audio.webm")
     except:
         pass
     ydl_opts = {"format": "bestaudio"}
     query = kwairi(message)
+    current_player = message.from_user.id
     m = await message.reply_text(f"Searching for `{query}`on YouTube")
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -315,8 +328,8 @@ async def ytplay(_, message: Message):
         font=font,
     )
     img.save("final.png")
-    os.system("rm temp.png")
-    os.system("rm background.png")
+    os.remove("temp.png")
+    os.remove("background.png")
     await m.edit("Downloading Music.")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)
@@ -325,7 +338,7 @@ async def ytplay(_, message: Message):
         os.rename(audio_file, "audio.webm")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing [{title}]({link}) Via YouTube #music",
+        caption=f"Playing [{title}]({link}) Via YouTube #music\n>>>Requested by {message.from_user.first_name}<<<",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -338,7 +351,7 @@ async def ytplay(_, message: Message):
         ),
         parse_mode="markdown",
     )
-    os.system("rm final.png")
+    os.remove("final.png")
     s = await asyncio.create_subprocess_shell(
         "mpv audio.webm --no-video",
         stdout=asyncio.subprocess.PIPE,
@@ -363,6 +376,7 @@ async def playlist(_, message: Message):
         return
     global m
     global s
+    global current_player
 
     if len(message.command) != 2:
         await message.reply_text(
@@ -378,16 +392,17 @@ async def playlist(_, message: Message):
     except:
         pass
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
-        os.remove("audio.mp3")
+        os.remove("audio.webm")
     except:
         pass
 
     link = message.command[1]
     ydl_opts = {"format": "bestaudio"}
+    current_player = message.from_user.id
 
     m = await message.reply_text("Processing Playlist...")
     with youtube_dl.YoutubeDL():
@@ -396,7 +411,7 @@ async def playlist(_, message: Message):
         if "entries" in result:
             video = result["entries"]
             await m.edit(
-                f"Found {len(result['entries'])} Videos In Playlist, Playing Them All."
+                f"Found {len(result['entries'])} Videos In Playlist, Playing Them All.\n>>>Requested by {message.from_user.first_name}<<<"
             )
             ii = 1
             for i, item in enumerate(video):
@@ -416,7 +431,7 @@ async def playlist(_, message: Message):
                 )
                 await s.wait()
                 ii += 1
-                os.system("rm audio.webm")
+                os.remove("audio.webm")
 
 
 # Telegram Audio
@@ -432,6 +447,8 @@ async def tgplay(_, message: Message):
         return
     global m
     global s
+    global current_player
+    
     if not message.reply_to_message:
         await message.reply_text("Reply To A Telegram Audio To Play It.")
         return
@@ -444,28 +461,29 @@ async def tgplay(_, message: Message):
     except:
         pass
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
-        os.remove("audio.mp3")
+        os.remove("audio.webm")
     except:
         pass
     try:
-        os.remove("downloads/audio.mp3")
+        os.remove("downloads/audio.webm")
     except:
         pass
+    current_player = message.from_user.id
     m = await message.reply_text("Downloading")
-    await app.download_media(message.reply_to_message, file_name="audio.mp3")
-    await m.edit(f"Playing `{message.reply_to_message.link}` via Telegram.")
+    await app.download_media(message.reply_to_message, file_name="audio.webm")
+    await m.edit(f"Playing `{message.reply_to_message.link}` via Telegram.\n>>>Requested by {message.from_user.first_name}<<<")
     s = await asyncio.create_subprocess_shell(
-        "mpv downloads/audio.mp3 --no-video",
+        "mpv downloads/audio.webm --no-video",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
     await s.wait()
     await m.delete()
-    os.system("rm downloads/audio.mp3")
+    os.remove("downloads/audio.webm")
 
 
 # Radio
@@ -481,9 +499,10 @@ async def radio(_, message: Message):
         return
     global m
     global s
+    global current_player
 
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
@@ -496,9 +515,10 @@ async def radio(_, message: Message):
         pass
 
     try:
-        os.remove("audio.mp3")
+        os.remove("audio.webm")
     except:
         pass
+    current_player = message.from_user.id
     m = await message.reply_text(
         f"Playing Radio\nRequested by - {message.from_user.mention}"
     )
@@ -518,6 +538,8 @@ async def getadmins(chat_id):
     admins = []
     async for i in app.iter_chat_members(chat_id, filter="administrators"):
         admins.append(i.user.id)
+    admins.append(current_player) #Includes Current Player ID
+    #print(admins)
     return admins
 
 @app.on_message(
@@ -527,16 +549,17 @@ async def end(_, message: Message):
     global blacks
     global m
     global s
+    
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     list_of_admins = await getadmins(message.chat.id)
     if message.from_user.id not in list_of_admins:
-        await message.reply_text("Well, you're not admin, SO YOU CAN'T STOP"
-                                 + " ME, HAH!, how about i ban you?")
+        await message.reply_text("Well, you're not admin or Current Player, SO YOU CAN'T STOP"
+                                 + " ME, LOL")
         return
     try:
-        os.remove("audio.mp3")
+        os.remove("audio.webm")
     except:
         pass
 
@@ -545,7 +568,7 @@ async def end(_, message: Message):
     except:
         pass
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
@@ -567,21 +590,22 @@ async def end_callback(_, CallbackQuery):
     list_of_admins = await getadmins(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id not in list_of_admins:
         await app.answer_callback_query(
-            CallbackQuery.id, "Well, you're not admin, SO YOU CAN'T STOP"
-            + " ME, HAH!, how about i ban you?", show_alert=True)
+            CallbackQuery.id, "Well, you're not admin or Current Player, SO YOU CAN'T STOP"
+            + " ME, LOL", show_alert=True)
         return
     global blacks
     global m
     global s
+    
     chat_id = int(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id in blacks:
         return
     try:
-        os.remove("audio.mp3")
+        os.remove("audio.webm")
     except:
         pass
     try:
-        os.system("killall -9 mpv")
+        os.system(f"{kill} mpv")
     except:
         pass
     try:
@@ -669,5 +693,5 @@ async def users(client, message: Message):
     await message.reply_text(output)
 
 
-print("Bot Starting...")
+print("Bot Starting...\nFor Support Join https://t.me/PatheticProgrammers")
 app.run()
