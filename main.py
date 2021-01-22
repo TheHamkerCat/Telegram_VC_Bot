@@ -100,9 +100,9 @@ async def help(_, message: Message):
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
 /end To Stop Any Playing Music (only works for current user playing and to Admins).
-"/jiosaavn <song_name>" To Play A Song From Jiosaavn.
-"/youtube <song_name> or <song_link>" To Search For A Song And Play The Top-Most Song Or Play With A Link.
-"/playlist <youtube_playlist_url> To Play A Playlist From Youtube".
+"/jiosaavn" To Play A Song From Jiosaavn.
+"/youtube" To Search For A Song And Play The Top-Most Song Or Play With A Link.
+"/playlist" To Play A Playlist From Youtube.
 /telegram To Play A Song Directly From Telegram File.
 /radio To Play Radio Continuosly.
 /users To Get A List Of Blacklisted Users.
