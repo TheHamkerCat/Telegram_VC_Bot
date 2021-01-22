@@ -145,12 +145,15 @@ async def jiosaavn(_, message: Message):
     query = kwairi(message)
 
     m = await message.reply_text(f"Searching for `{query}`on JioSaavn")
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
-        ) as resp:
-            r = json.loads(await resp.text())
-
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
+            ) as resp:
+                r = json.loads(await resp.text())
+    except Exception as e:
+        await m.edit(str(e))
+        return
     sname = r[0]["song"]
     slink = r[0]["media_url"]
     ssingers = r[0]["singers"]
