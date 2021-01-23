@@ -37,7 +37,9 @@ def convert_seconds(seconds):
     seconds %= 60
     return "%02d:%02d" % (minutes, seconds)
 
-#Os Determination
+
+# Os Determination
+
 if os.name == 'nt':
     kill = "tskill"
 else:
@@ -45,6 +47,10 @@ else:
 
 # For Blacklist filter
 blacks = []
+# Global vars
+s = None
+m = None
+current_player = None
 
 
 # Ping and repo
@@ -54,6 +60,7 @@ async def repo(_, message: Message):
     await message.reply_text(
         "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
         + " | [Group](t.me/TheHamkerChat)", disable_web_page_preview=True)
+
 
 @app.on_message(
     filters.command(["ping"]) & filters.chat(sudo_chat_id) & ~filters.edited
@@ -100,6 +107,7 @@ async def help(_, message: Message):
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
 /end To Stop Any Playing Music (only works for current user playing and to Admins).
+"/deezer" To Play A Song From Deezer.
 "/jiosaavn" To Play A Song From Jiosaavn.
 "/youtube" To Search For A Song And Play The Top-Most Song Or Play With A Link.
 "/playlist" To Play A Playlist From Youtube.
@@ -115,11 +123,126 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
     )
 
 
+def changeImageSize(maxWidth, maxHeight, image):
+    widthRatio = maxWidth / image.size[0]
+    heightRatio = maxHeight / image.size[1]
+    newWidth = int(widthRatio * image.size[0])
+    newHeight = int(heightRatio * image.size[1])
+    newImage = image.resize((newWidth, newHeight))
+    return newImage
+
+# Deezer
+
+
+@app.on_message(
+    filters.command(["deezer"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
+)
+async def deezer(_, message: Message):
+    global blacks
+    if message.from_user.id in blacks:
+        await message.reply_text("You're Blacklisted, So Stop Spamming.")
+        return
+    global s
+    global m
+    global current_player
+
+    if len(message.command) < 2:
+        await message.reply_text("/jiosaavn requires an argument")
+        return
+    try:
+        os.system(f"{kill} mpv")
+    except:
+        pass
+    try:
+        await m.delete()
+    except:
+        pass
+    try:
+        await message.delete()
+    except:
+        pass
+    query = kwairi(message)
+    current_player = message.from_user.id
+    m = await message.reply_text(f"Searching for `{query}`on Deezer")
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"http://52.0.6.104:8000/deezer/{query}/1"
+            ) as resp:
+                r = json.loads(await resp.text())
+    except Exception as e:
+        await m.edit(str(e))
+        return
+    title = r[0]['title']
+    duration = convert_seconds(int(r[0]['duration']))
+    thumbnail = r[0]['thumbnail']
+    artist = r[0]['artist']
+    url = r[0]['url']
+    async with aiohttp.ClientSession() as session:
+        async with session.get(thumbnail) as resp:
+            if resp.status == 200:
+                f = await aiofiles.open("background.png", mode="wb")
+                await f.write(await resp.read())
+                await f.close()
+    image1 = Image.open("./background.png")
+    image2 = Image.open("etc/foreground.png")
+    image3 = changeImageSize(1280, 720, image1)
+    image4 = changeImageSize(1280, 720, image2)
+    image5 = image3.convert("RGBA")
+    image6 = image4.convert("RGBA")
+    Image.alpha_composite(image5, image6).save("temp.png")
+    img = Image.open("temp.png")
+    draw = ImageDraw.Draw(img)
+    font = ImageFont.truetype("etc/font.otf", 32)
+    draw.text(
+        (190, 550), f"Title: {title}", (255, 255, 255), font=font
+    )
+    draw.text(
+        (190, 590), f"Artist: {artist}", (255, 255, 255), font=font
+    )
+    draw.text(
+        (190, 630),
+        f"Duration: {duration} Seconds",
+        (255, 255, 255),
+        font=font,
+    )
+    draw.text(
+        (190, 670),
+        f"Played By: {message.from_user.first_name}",
+        (255, 255, 255),
+        font=font,
+    )
+    img.save("final.png")
+    os.remove("temp.png")
+    os.remove("background.png")
+    await m.delete()
+    m = await message.reply_photo(
+        caption=f"Playing `{title}` Via Deezer #music\nRequested by {message.from_user.first_name}",
+        photo="final.png",
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "STOP", callback_data="end"
+                    )
+                ]
+            ]
+        ),
+        parse_mode="markdown",
+    )
+
+    s = await asyncio.create_subprocess_shell(
+        f"mpv {url} --no-video",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    await s.wait()
+    await m.delete()
+
+
 # Jiosaavn
-# Global vars
-s = None
-m = None
-current_player = None
 
 
 @app.on_message(
@@ -135,7 +258,7 @@ async def jiosaavn(_, message: Message):
     global s
     global m
     global current_player
-    
+
     if len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
@@ -170,7 +293,7 @@ async def jiosaavn(_, message: Message):
     ssingers = r[0]["singers"]
     sthumb = r[0]["image"]
     sduration = r[0]["duration"]
-    sduration_converted = convert_seconds(int(sduration)) 
+    sduration_converted = convert_seconds(int(sduration))
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
         async with session.get(sthumb) as resp:
@@ -178,14 +301,6 @@ async def jiosaavn(_, message: Message):
                 f = await aiofiles.open("background.png", mode="wb")
                 await f.write(await resp.read())
                 await f.close()
-
-    def changeImageSize(maxWidth, maxHeight, image):
-        widthRatio = maxWidth / image.size[0]
-        heightRatio = maxHeight / image.size[1]
-        newWidth = int(widthRatio * image.size[0])
-        newHeight = int(heightRatio * image.size[1])
-        newImage = image.resize((newWidth, newHeight))
-        return newImage
 
     image1 = Image.open("./background.png")
     image2 = Image.open("etc/foreground.png")
@@ -220,7 +335,7 @@ async def jiosaavn(_, message: Message):
     os.remove("background.png")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing `{sname}` Via Jiosaavn #music\n>>>Requested by {message.from_user.first_name}<<<",
+        caption=f"Playing `{sname}` Via Jiosaavn #music\nRequested by {message.from_user.first_name}",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -298,14 +413,6 @@ async def ytplay(_, message: Message):
                 await f.write(await resp.read())
                 await f.close()
 
-    def changeImageSize(maxWidth, maxHeight, image):
-        widthRatio = maxWidth / image.size[0]
-        heightRatio = maxHeight / image.size[1]
-        newWidth = int(widthRatio * image.size[0])
-        newHeight = int(heightRatio * image.size[1])
-        newImage = image.resize((newWidth, newHeight))
-        return newImage
-
     image1 = Image.open("./background.png")
     image2 = Image.open("etc/foreground.png")
     image3 = changeImageSize(1280, 720, image1)
@@ -338,7 +445,7 @@ async def ytplay(_, message: Message):
         os.rename(audio_file, "audio.webm")
     await m.delete()
     m = await message.reply_photo(
-        caption=f"Playing [{title}]({link}) Via YouTube #music\n>>>Requested by {message.from_user.first_name}<<<",
+        caption=f"Playing [{title}]({link}) Via YouTube #music\nRequested by {message.from_user.first_name}",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
             [
@@ -448,7 +555,7 @@ async def tgplay(_, message: Message):
     global m
     global s
     global current_player
-    
+
     if not message.reply_to_message:
         await message.reply_text("Reply To A Telegram Audio To Play It.")
         return
@@ -538,9 +645,10 @@ async def getadmins(chat_id):
     admins = []
     async for i in app.iter_chat_members(chat_id, filter="administrators"):
         admins.append(i.user.id)
-    admins.append(current_player) #Includes Current Player ID
-    #print(admins)
+    admins.append(current_player)  # Includes Current Player ID
+    admins.append(owner_id)
     return admins
+
 
 @app.on_message(
     filters.command(["end"]) & filters.chat(sudo_chat_id) & ~filters.edited
@@ -549,7 +657,7 @@ async def end(_, message: Message):
     global blacks
     global m
     global s
-    
+
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -596,7 +704,7 @@ async def end_callback(_, CallbackQuery):
     global blacks
     global m
     global s
-    
+
     chat_id = int(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id in blacks:
         return
@@ -693,5 +801,5 @@ async def users(client, message: Message):
     await message.reply_text(output)
 
 
-print("Bot Starting...\nFor Support Join https://t.me/PatheticProgrammers")
+print("Bot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n")
 app.run()
