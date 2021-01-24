@@ -51,7 +51,7 @@ play music.
 ## Commands
 Command | Description
 :--- | :---
-/start To Start The bot.
+/start | To Start The bot.
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
 /end To Stop Any Playing Music (only works for current user playing and to Admins).
