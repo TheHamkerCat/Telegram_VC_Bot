@@ -61,7 +61,7 @@ Command | Description
 /telegram To Play A Song Directly From Telegram File.
 /radio To Play Radio Continuosly.
 /users To Get A List Of Blacklisted Users.
-
+/deezer To Play A Song From Deezer.
 Admin Commands:
 /black To Blacklist A User.
 /white To Whitelist A User.
