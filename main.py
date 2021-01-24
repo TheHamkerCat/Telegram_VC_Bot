@@ -187,29 +187,29 @@ async def deezer(_, message: Message):
                 await f.write(await resp.read())
                 await f.close()
     image1 = Image.open("./background.png")
-    image2 = Image.open("etc/foreground.png")
-    image3 = changeImageSize(1280, 720, image1)
-    image4 = changeImageSize(1280, 720, image2)
+    image2 = Image.open("etc/foreground_square.png")
+    image3 = changeImageSize(600, 500, image1)
+    image4 = changeImageSize(600, 500, image2)
     image5 = image3.convert("RGBA")
     image6 = image4.convert("RGBA")
     Image.alpha_composite(image5, image6).save("temp.png")
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/font.otf", 32)
+    font = ImageFont.truetype("etc/font.otf", 20)
     draw.text(
-        (190, 550), f"Title: {title}", (255, 255, 255), font=font
+        (150, 380), f"Title: {title}", (255, 255, 255), font=font
     )
     draw.text(
-        (190, 590), f"Artist: {artist}", (255, 255, 255), font=font
+        (150, 405), f"Artist: {artist}", (255, 255, 255), font=font
     )
     draw.text(
-        (190, 630),
+        (150, 430),
         f"Duration: {duration} Seconds",
         (255, 255, 255),
         font=font,
     )
     draw.text(
-        (190, 670),
+        (150, 455),
         f"Played By: {message.from_user.first_name}",
         (255, 255, 255),
         font=font,
@@ -303,29 +303,29 @@ async def jiosaavn(_, message: Message):
                 await f.close()
 
     image1 = Image.open("./background.png")
-    image2 = Image.open("etc/foreground.png")
-    image3 = changeImageSize(1280, 720, image1)
-    image4 = changeImageSize(1280, 720, image2)
+    image2 = Image.open("etc/foreground_square.png")
+    image3 = changeImageSize(600, 500, image1)
+    image4 = changeImageSize(600, 500, image2)
     image5 = image3.convert("RGBA")
     image6 = image4.convert("RGBA")
     Image.alpha_composite(image5, image6).save("temp.png")
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/font.otf", 32)
+    font = ImageFont.truetype("etc/font.otf", 20)
     draw.text(
-        (190, 550), f"Title: {sname}", (255, 255, 255), font=font
+        (150, 380), f"Title: {sname}", (255, 255, 255), font=font
     )
     draw.text(
-        (190, 590), f"Artist: {ssingers}", (255, 255, 255), font=font
+        (150, 405), f"Artist: {ssingers}", (255, 255, 255), font=font
     )
     draw.text(
-        (190, 630),
+        (150, 430),
         f"Duration: {sduration_converted} Seconds",
         (255, 255, 255),
         font=font,
     )
     draw.text(
-        (190, 670),
+        (150, 455),
         f"Played By: {message.from_user.first_name}",
         (255, 255, 255),
         font=font,
