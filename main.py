@@ -38,8 +38,19 @@ def convert_seconds(seconds):
     return "%02d:%02d" % (minutes, seconds)
 
 
+# Os Determination
+
+if os.name == 'nt':
+    kill = "tskill"
+else:
+    kill = "killall -9"
+
 # For Blacklist filter
 blacks = []
+# Global vars
+s = None
+m = None
+current_player = None
 
 
 # Global vars
@@ -444,6 +455,7 @@ async def ytplay(_, message: Message):
     query = kwairi(message)
     current_player = message.from_user.id
     is_playing = True
+    
     m = await message.reply_text(f"Searching for `{query}`on YouTube")
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -538,7 +550,6 @@ async def playlist(_, message: Message):
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-        
     elif is_playing:
         list_of_admins = await getadmins(message.chat.id)
         if message.from_user.id in list_of_admins:
@@ -630,7 +641,6 @@ async def tgplay(_, message: Message):
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-        
     elif is_playing:
         list_of_admins = await getadmins(message.chat.id)
         if message.from_user.id in list_of_admins:
@@ -700,7 +710,6 @@ async def radio(_, message: Message):
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-        
     elif is_playing:
         list_of_admins = await getadmins(message.chat.id)
         if message.from_user.id in list_of_admins:
@@ -714,7 +723,6 @@ async def radio(_, message: Message):
             await d.delete()
             await message.delete()
             return
-        
     try:
         os.system(f"{kill} mpv")
     except:
