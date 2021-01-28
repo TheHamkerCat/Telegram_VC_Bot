@@ -53,6 +53,14 @@ m = None
 current_player = None
 
 
+# Global vars
+s = None #var for player
+m = None #var for Track art message
+d = None #for stopping interruption of current playing song
+current_player = None #gets current player ID
+is_playing = False #for restricting users while playing!
+
+
 # Ping and repo
 
 @app.on_message(filters.command("repo") & ~filters.edited)
@@ -102,20 +110,20 @@ async def help(_, message: Message):
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     await message.reply_text(
-        """Currently These Commands Are Supported.
+        """**Currently These Commands Are Supported.**
 /start To Start The bot.
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
 /end To Stop Any Playing Music (only works for current user playing and to Admins).
-"/deezer" To Play A Song From Deezer.
-"/jiosaavn" To Play A Song From Jiosaavn.
-"/youtube" To Search For A Song And Play The Top-Most Song Or Play With A Link.
-"/playlist" To Play A Playlist From Youtube.
-/telegram To Play A Song Directly From Telegram File.
+/deezer "Song_Name" To Play A Song From Deezer.
+/jiosaavn "Song_Name" To Play A Song From Jiosaavn.
+/youtube "Song_Name" To Search For A Song And Play The Top-Most Song Or Play With A Link.
+/playlist "Youtube_Playlist_Link" To Play A Playlist From Youtube.
+/telegram While Taging a Song To Play From Telegram File.
 /radio To Play Radio Continuosly.
 /users To Get A List Of Blacklisted Users.
 
-Admin Commands:
+**Admin Commands**:
 /black To Blacklist A User.
 /white To Whitelist A User.
 
@@ -141,14 +149,29 @@ def changeImageSize(maxWidth, maxHeight, image):
 )
 async def deezer(_, message: Message):
     global blacks
+    global is_playing
+    global current_player
+    global s    
+    global m
+    global d
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    global s
-    global m
-    global current_player
-
-    if len(message.command) < 2:
+    elif is_playing:
+        list_of_admins = await getadmins(message.chat.id)
+        if message.from_user.id in list_of_admins:
+            pass
+        else:
+            d= await message.reply_text(
+               text="stop interrupting while others playing!",
+               disable_notification= True
+               )
+            await asyncio.sleep(2) # 2 sec delay before deletion
+            await d.delete()
+            await message.delete()
+            return
+        
+    elif len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
     try:
@@ -165,6 +188,7 @@ async def deezer(_, message: Message):
         pass
     query = kwairi(message)
     current_player = message.from_user.id
+    is_playing = True
     m = await message.reply_text(f"Searching for `{query}`on Deezer")
     try:
         async with aiohttp.ClientSession() as session:
@@ -240,6 +264,7 @@ async def deezer(_, message: Message):
     )
     await s.wait()
     await m.delete()
+    is_playing = False
 
 
 # Jiosaavn
@@ -252,14 +277,30 @@ async def deezer(_, message: Message):
 )
 async def jiosaavn(_, message: Message):
     global blacks
+    global is_playing
+    global current_player
+    global s    
+    global m
+    global d
+    
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    global s
-    global m
-    global current_player
-
-    if len(message.command) < 2:
+    elif is_playing:
+        list_of_admins = await getadmins(message.chat.id)
+        if message.from_user.id in list_of_admins:
+            pass
+        else:
+            d= await message.reply_text(
+               text="stop interrupting while others playing!",
+               disable_notification= True
+               )
+            await asyncio.sleep(2) # 2 sec delay before deletion
+            await d.delete()
+            await message.delete()
+            return
+        
+    elif len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
     try:
@@ -277,6 +318,7 @@ async def jiosaavn(_, message: Message):
 
     query = kwairi(message)
     current_player = message.from_user.id
+    is_playing = True
 
     m = await message.reply_text(f"Searching for `{query}`on JioSaavn")
     try:
@@ -356,6 +398,8 @@ async def jiosaavn(_, message: Message):
     )
     await s.wait()
     await m.delete()
+    is_playing=False
+
 
 
 # Youtube Play
@@ -365,14 +409,30 @@ async def jiosaavn(_, message: Message):
 )
 async def ytplay(_, message: Message):
     global blacks
+    global is_playing
+    global current_player
+    global s    
+    global m
+    global d
+    
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    global m
-    global s
-    global current_player
-
-    if len(message.command) < 2:
+    elif is_playing:
+        list_of_admins = await getadmins(message.chat.id)
+        if message.from_user.id in list_of_admins:
+            pass
+        else:
+            d= await message.reply_text(
+               text="stop interrupting while others playing!",
+               disable_notification= True
+               )
+            await asyncio.sleep(2) # 2 sec delay before deletion
+            await d.delete()
+            await message.delete()
+            return
+        
+    elif len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
     try:
@@ -394,6 +454,8 @@ async def ytplay(_, message: Message):
     ydl_opts = {"format": "bestaudio"}
     query = kwairi(message)
     current_player = message.from_user.id
+    is_playing = True
+    
     m = await message.reply_text(f"Searching for `{query}`on YouTube")
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -466,6 +528,7 @@ async def ytplay(_, message: Message):
     )
     await s.wait()
     await m.delete()
+    is_playing = False
 
 
 # youtube playlist
@@ -478,14 +541,30 @@ async def ytplay(_, message: Message):
 )
 async def playlist(_, message: Message):
     global blacks
+    global is_playing
+    global current_player
+    global s    
+    global m
+    global d
+    
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    global m
-    global s
-    global current_player
-
-    if len(message.command) != 2:
+    elif is_playing:
+        list_of_admins = await getadmins(message.chat.id)
+        if message.from_user.id in list_of_admins:
+            pass
+        else:
+            d= await message.reply_text(
+               text="stop interrupting while others playing!",
+               disable_notification= True
+               )
+            await asyncio.sleep(2) # 2 sec delay before deletion
+            await d.delete()
+            await message.delete()
+            return
+        
+    elif len(message.command) != 2:
         await message.reply_text(
             "/playlist requires one youtube playlist link"
         )
@@ -510,6 +589,7 @@ async def playlist(_, message: Message):
     link = message.command[1]
     ydl_opts = {"format": "bestaudio"}
     current_player = message.from_user.id
+    is_playing = True
 
     m = await message.reply_text("Processing Playlist...")
     with youtube_dl.YoutubeDL():
@@ -529,7 +609,7 @@ async def playlist(_, message: Message):
                     ydl.process_info(info_dict)
                     os.rename(audio_file, "audio.webm")
                 await m.edit(
-                    f"Playing `{result['entries'][i]['title']}`, Song Number `{ii}` In Playlist, `{len(result['entries']) - ii}` In Queue. \nRequested by - {message.from_user.mention}"
+                    f"Playing `{result['entries'][i]['title']}`. \nSong Number `{ii}` In Playlist. \n`{len(result['entries']) - ii}` In Queue. \nRequested by - {message.from_user.mention}"
                 )
                 s = await asyncio.create_subprocess_shell(
                     "mpv audio.webm --no-video",
@@ -539,6 +619,9 @@ async def playlist(_, message: Message):
                 await s.wait()
                 ii += 1
                 os.remove("audio.webm")
+            await s.wait()
+            await m.delete()
+            is_playing = False
 
 
 # Telegram Audio
@@ -549,14 +632,30 @@ async def playlist(_, message: Message):
 )
 async def tgplay(_, message: Message):
     global blacks
+    global is_playing
+    global current_player
+    global s    
+    global m
+    global d
+    
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    global m
-    global s
-    global current_player
-
-    if not message.reply_to_message:
+    elif is_playing:
+        list_of_admins = await getadmins(message.chat.id)
+        if message.from_user.id in list_of_admins:
+            pass
+        else:
+            d= await message.reply_text(
+               text="stop interrupting while others playing!",
+               disable_notification= True
+               )
+            await asyncio.sleep(2) # 2 sec delay before deletion
+            await d.delete()
+            await message.delete()
+            return
+        
+    elif not message.reply_to_message:
         await message.reply_text("Reply To A Telegram Audio To Play It.")
         return
     try:
@@ -580,6 +679,7 @@ async def tgplay(_, message: Message):
     except:
         pass
     current_player = message.from_user.id
+    is_playing = True
     m = await message.reply_text("Downloading")
     await app.download_media(message.reply_to_message, file_name="audio.webm")
     await m.edit(f"Playing `{message.reply_to_message.link}` via Telegram.\n>>>Requested by {message.from_user.first_name}<<<")
@@ -590,6 +690,7 @@ async def tgplay(_, message: Message):
     )
     await s.wait()
     await m.delete()
+    is_playing = False
     os.remove("downloads/audio.webm")
 
 
@@ -601,13 +702,27 @@ async def tgplay(_, message: Message):
 )
 async def radio(_, message: Message):
     global blacks
+    global is_playing
+    global current_player
+    global s    
+    global m
+    global d
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    global m
-    global s
-    global current_player
-
+    elif is_playing:
+        list_of_admins = await getadmins(message.chat.id)
+        if message.from_user.id in list_of_admins:
+            pass
+        else:
+            d= await message.reply_text(
+               text="stop interrupting while others playing!",
+               disable_notification= True
+               )
+            await asyncio.sleep(2) # 2 sec delay before deletion
+            await d.delete()
+            await message.delete()
+            return
     try:
         os.system(f"{kill} mpv")
     except:
@@ -626,6 +741,7 @@ async def radio(_, message: Message):
     except:
         pass
     current_player = message.from_user.id
+    is_playing = True
     m = await message.reply_text(
         f"Playing Radio\nRequested by - {message.from_user.mention}"
     )
@@ -636,6 +752,7 @@ async def radio(_, message: Message):
     )
     await s.wait()
     await m.delete()
+    is_playing = False
 
 
 # End Music
@@ -688,6 +805,7 @@ async def end(_, message: Message):
     except:
         pass
 
+    is_playing = False
     await message.reply_text(
         f"{message.from_user.mention} Stopped The Music."
     )
@@ -724,6 +842,7 @@ async def end_callback(_, CallbackQuery):
         await m.delete()
     except:
         pass
+    is_playing = False
     await app.send_message(
         chat_id,
         f"{CallbackQuery.from_user.mention} - {CallbackQuery.from_user.id} Stopped The Music.",
