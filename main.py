@@ -334,8 +334,9 @@ async def jiosaavn(_, message: Message):
         sthumb = r[0]["image"]
         sduration = r[0]["duration"]
         sduration_converted = convert_seconds(int(sduration))
-    except:
+    except Exception as e:
         await m.edit("Found Literally Nothing!, You Should Work On Your English.")
+        print(str(e))
         return
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
@@ -465,8 +466,9 @@ async def ytplay(_, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         duration = results[0]["duration"]
         views = results[0]["views"]
-    except:
+    except Exception as e:
         await m.edit("Found Literally Nothing!, You Should Work On Your English.")
+        print(str(e))
         return
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
@@ -625,7 +627,9 @@ async def playlist(_, message: Message):
                 await m.delete()
                 is_playing = False
     except Exception as e:
-        await m.edit(str(e))
+        await m.edit("Found Literally Nothing, Or YoutubeDl Ded AF")
+        print(str(e))
+        return
 
 
 # Telegram Audio
