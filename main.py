@@ -196,14 +196,14 @@ async def deezer(_, message: Message):
                 f"http://52.0.6.104:8000/deezer/{query}/1"
             ) as resp:
                 r = json.loads(await resp.text())
+        title = r[0]['title']
+        duration = convert_seconds(int(r[0]['duration']))
+        thumbnail = r[0]['thumbnail']
+        artist = r[0]['artist']
+        url = r[0]['url']
     except Exception as e:
         await m.edit(str(e))
         return
-    title = r[0]['title']
-    duration = convert_seconds(int(r[0]['duration']))
-    thumbnail = r[0]['thumbnail']
-    artist = r[0]['artist']
-    url = r[0]['url']
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
             if resp.status == 200:
