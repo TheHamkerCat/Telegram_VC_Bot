@@ -327,15 +327,16 @@ async def jiosaavn(_, message: Message):
                 f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
             ) as resp:
                 r = json.loads(await resp.text())
-    except Exception as e:
-        await m.edit(str(e))
+
+        sname = r[0]["song"]
+        slink = r[0]["media_url"]
+        ssingers = r[0]["singers"]
+        sthumb = r[0]["image"]
+        sduration = r[0]["duration"]
+        sduration_converted = convert_seconds(int(sduration))
+    except:
+        await m.edit("Found Literally Nothing!, You Should Work On Your English.")
         return
-    sname = r[0]["song"]
-    slink = r[0]["media_url"]
-    ssingers = r[0]["singers"]
-    sthumb = r[0]["image"]
-    sduration = r[0]["duration"]
-    sduration_converted = convert_seconds(int(sduration))
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
         async with session.get(sthumb) as resp:
@@ -459,14 +460,14 @@ async def ytplay(_, message: Message):
     m = await message.reply_text(f"Searching for `{query}`on YouTube")
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
-    except Exception as e:
-        await m.edit(str(e))
+        link = f"https://youtube.com{results[0]['url_suffix']}"
+        title = results[0]["title"]
+        thumbnail = results[0]["thumbnails"][0]
+        duration = results[0]["duration"]
+        views = results[0]["views"]
+    except:
+        await m.edit("Found Literally Nothing!, You Should Work On Your English.")
         return
-    link = f"https://youtube.com{results[0]['url_suffix']}"
-    title = results[0]["title"]
-    thumbnail = results[0]["thumbnails"][0]
-    duration = results[0]["duration"]
-    views = results[0]["views"]
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
@@ -592,36 +593,39 @@ async def playlist(_, message: Message):
     is_playing = True
 
     m = await message.reply_text("Processing Playlist...")
-    with youtube_dl.YoutubeDL():
-        result = youtube_dl.YoutubeDL().extract_info(link, download=False)
+    try:
+        with youtube_dl.YoutubeDL():
+            result = youtube_dl.YoutubeDL().extract_info(link, download=False)
 
-        if "entries" in result:
-            video = result["entries"]
-            await m.edit(
-                f"Found {len(result['entries'])} Videos In Playlist, Playing Them All.\n>>>Requested by {message.from_user.first_name}<<<"
-            )
-            ii = 1
-            for i, item in enumerate(video):
-                video = result["entries"][i]["webpage_url"]
-                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-                    info_dict = ydl.extract_info(video, download=False)
-                    audio_file = ydl.prepare_filename(info_dict)
-                    ydl.process_info(info_dict)
-                    os.rename(audio_file, "audio.webm")
+            if "entries" in result:
+                video = result["entries"]
                 await m.edit(
-                    f"Playing `{result['entries'][i]['title']}`. \nSong Number `{ii}` In Playlist. \n`{len(result['entries']) - ii}` In Queue. \nRequested by - {message.from_user.mention}"
+                    f"Found {len(result['entries'])} Videos In Playlist, Playing Them All.\n>>>Requested by {message.from_user.first_name}<<<"
                 )
-                s = await asyncio.create_subprocess_shell(
-                    "mpv audio.webm --no-video",
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
+                ii = 1
+                for i, item in enumerate(video):
+                    video = result["entries"][i]["webpage_url"]
+                    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                        info_dict = ydl.extract_info(video, download=False)
+                        audio_file = ydl.prepare_filename(info_dict)
+                        ydl.process_info(info_dict)
+                        os.rename(audio_file, "audio.webm")
+                    await m.edit(
+                        f"Playing `{result['entries'][i]['title']}`. \nSong Number `{ii}` In Playlist. \n`{len(result['entries']) - ii}` In Queue. \nRequested by - {message.from_user.mention}"
+                    )
+                    s = await asyncio.create_subprocess_shell(
+                        "mpv audio.webm --no-video",
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE,
+                    )
+                    await s.wait()
+                    ii += 1
+                    os.remove("audio.webm")
                 await s.wait()
-                ii += 1
-                os.remove("audio.webm")
-            await s.wait()
-            await m.delete()
-            is_playing = False
+                await m.delete()
+                is_playing = False
+    except Exception as e:
+        await m.edit(str(e))
 
 
 # Telegram Audio
