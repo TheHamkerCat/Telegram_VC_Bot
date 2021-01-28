@@ -172,7 +172,7 @@ async def deezer(_, message: Message):
             return
         
     elif len(message.command) < 2:
-        await message.reply_text("/jiosaavn requires an argument")
+        await message.reply_text("/deezer requires an argument")
         return
     try:
         os.system(f"{kill} mpv")
