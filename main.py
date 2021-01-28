@@ -201,8 +201,8 @@ async def deezer(_, message: Message):
         thumbnail = r[0]['thumbnail']
         artist = r[0]['artist']
         url = r[0]['url']
-    except Exception as e:
-        await m.edit(str(e))
+    except:
+        await m.edit("Found Literally Nothing, You Should Work On Your English!")
         return
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
