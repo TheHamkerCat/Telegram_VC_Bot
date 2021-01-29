@@ -10,7 +10,11 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import (
+    Message,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 from youtube_search import YoutubeSearch
 from config import owner_id, bot_token, radio_link, sudo_chat_id
 
@@ -40,7 +44,7 @@ def convert_seconds(seconds):
 
 # Os Determination
 
-if os.name == 'nt':
+if os.name == "nt":
     kill = "tskill"
 else:
     kill = "killall -9"
@@ -54,20 +58,23 @@ current_player = None
 
 
 # Global vars
-s = None #var for player
-m = None #var for Track art message
-d = None #for stopping interruption of current playing song
-current_player = None #gets current player ID
-is_playing = False #for restricting users while playing!
+s = None  # var for player
+m = None  # var for Track art message
+d = None  # for stopping interruption of current playing song
+current_player = None  # gets current player ID
+is_playing = False  # for restricting users while playing!
 
 
 # Ping and repo
+
 
 @app.on_message(filters.command("repo") & ~filters.edited)
 async def repo(_, message: Message):
     await message.reply_text(
         "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
-        + " | [Group](t.me/TheHamkerChat)", disable_web_page_preview=True)
+        + " | [Group](t.me/TheHamkerChat)",
+        disable_web_page_preview=True,
+    )
 
 
 @app.on_message(
@@ -139,6 +146,7 @@ def changeImageSize(maxWidth, maxHeight, image):
     newImage = image.resize((newWidth, newHeight))
     return newImage
 
+
 # Deezer
 
 
@@ -151,7 +159,7 @@ async def deezer(_, message: Message):
     global blacks
     global is_playing
     global current_player
-    global s    
+    global s
     global m
     global d
     if message.from_user.id in blacks:
@@ -162,15 +170,15 @@ async def deezer(_, message: Message):
         if message.from_user.id in list_of_admins:
             pass
         else:
-            d= await message.reply_text(
-               text="stop interrupting while others playing!",
-               disable_notification= True
-               )
-            await asyncio.sleep(2) # 2 sec delay before deletion
+            d = await message.reply_text(
+                text="stop interrupting while others playing!",
+                disable_notification=True,
+            )
+            await asyncio.sleep(2)  # 2 sec delay before deletion
             await d.delete()
             await message.delete()
             return
-        
+
     elif len(message.command) < 2:
         await message.reply_text("/deezer requires an argument")
         return
@@ -196,13 +204,15 @@ async def deezer(_, message: Message):
                 f"http://52.0.6.104:8000/deezer/{query}/1"
             ) as resp:
                 r = json.loads(await resp.text())
-        title = r[0]['title']
-        duration = convert_seconds(int(r[0]['duration']))
-        thumbnail = r[0]['thumbnail']
-        artist = r[0]['artist']
-        url = r[0]['url']
+        title = r[0]["title"]
+        duration = convert_seconds(int(r[0]["duration"]))
+        thumbnail = r[0]["thumbnail"]
+        artist = r[0]["artist"]
+        url = r[0]["url"]
     except:
-        await m.edit("Found Literally Nothing, You Should Work On Your English!")
+        await m.edit(
+            "Found Literally Nothing, You Should Work On Your English!"
+        )
         return
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
@@ -220,12 +230,8 @@ async def deezer(_, message: Message):
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/font.otf", 20)
-    draw.text(
-        (150, 380), f"Title: {title}", (255, 255, 255), font=font
-    )
-    draw.text(
-        (150, 405), f"Artist: {artist}", (255, 255, 255), font=font
-    )
+    draw.text((150, 380), f"Title: {title}", (255, 255, 255), font=font)
+    draw.text((150, 405), f"Artist: {artist}", (255, 255, 255), font=font)
     draw.text(
         (150, 430),
         f"Duration: {duration} Seconds",
@@ -246,13 +252,7 @@ async def deezer(_, message: Message):
         caption=f"Playing `{title}` Via Deezer #music\nRequested by {message.from_user.first_name}",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "STOP", callback_data="end"
-                    )
-                ]
-            ]
+            [[InlineKeyboardButton("STOP", callback_data="end")]]
         ),
         parse_mode="markdown",
     )
@@ -279,10 +279,10 @@ async def jiosaavn(_, message: Message):
     global blacks
     global is_playing
     global current_player
-    global s    
+    global s
     global m
     global d
-    
+
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -291,15 +291,15 @@ async def jiosaavn(_, message: Message):
         if message.from_user.id in list_of_admins:
             pass
         else:
-            d= await message.reply_text(
-               text="stop interrupting while others playing!",
-               disable_notification= True
-               )
-            await asyncio.sleep(2) # 2 sec delay before deletion
+            d = await message.reply_text(
+                text="stop interrupting while others playing!",
+                disable_notification=True,
+            )
+            await asyncio.sleep(2)  # 2 sec delay before deletion
             await d.delete()
             await message.delete()
             return
-        
+
     elif len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
@@ -335,7 +335,9 @@ async def jiosaavn(_, message: Message):
         sduration = r[0]["duration"]
         sduration_converted = convert_seconds(int(sduration))
     except Exception as e:
-        await m.edit("Found Literally Nothing!, You Should Work On Your English.")
+        await m.edit(
+            "Found Literally Nothing!, You Should Work On Your English."
+        )
         print(str(e))
         return
     await m.edit("Processing Thumbnail.")
@@ -356,12 +358,8 @@ async def jiosaavn(_, message: Message):
     img = Image.open("temp.png")
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/font.otf", 20)
-    draw.text(
-        (150, 380), f"Title: {sname}", (255, 255, 255), font=font
-    )
-    draw.text(
-        (150, 405), f"Artist: {ssingers}", (255, 255, 255), font=font
-    )
+    draw.text((150, 380), f"Title: {sname}", (255, 255, 255), font=font)
+    draw.text((150, 405), f"Artist: {ssingers}", (255, 255, 255), font=font)
     draw.text(
         (150, 430),
         f"Duration: {sduration_converted} Seconds",
@@ -382,13 +380,7 @@ async def jiosaavn(_, message: Message):
         caption=f"Playing `{sname}` Via Jiosaavn #music\nRequested by {message.from_user.first_name}",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "STOP", callback_data="end"
-                    )
-                ]
-            ]
+            [[InlineKeyboardButton("STOP", callback_data="end")]]
         ),
         parse_mode="markdown",
     )
@@ -400,23 +392,25 @@ async def jiosaavn(_, message: Message):
     )
     await s.wait()
     await m.delete()
-    is_playing=False
-
+    is_playing = False
 
 
 # Youtube Play
 
+
 @app.on_message(
-    filters.command(["youtube"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["youtube"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
 )
 async def ytplay(_, message: Message):
     global blacks
     global is_playing
     global current_player
-    global s    
+    global s
     global m
     global d
-    
+
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -425,15 +419,15 @@ async def ytplay(_, message: Message):
         if message.from_user.id in list_of_admins:
             pass
         else:
-            d= await message.reply_text(
-               text="stop interrupting while others playing!",
-               disable_notification= True
-               )
-            await asyncio.sleep(2) # 2 sec delay before deletion
+            d = await message.reply_text(
+                text="stop interrupting while others playing!",
+                disable_notification=True,
+            )
+            await asyncio.sleep(2)  # 2 sec delay before deletion
             await d.delete()
             await message.delete()
             return
-        
+
     elif len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
@@ -457,7 +451,7 @@ async def ytplay(_, message: Message):
     query = kwairi(message)
     current_player = message.from_user.id
     is_playing = True
-    
+
     m = await message.reply_text(f"Searching for `{query}`on YouTube")
     try:
         results = YoutubeSearch(query, max_results=1).to_dict()
@@ -467,7 +461,9 @@ async def ytplay(_, message: Message):
         duration = results[0]["duration"]
         views = results[0]["views"]
     except Exception as e:
-        await m.edit("Found Literally Nothing!, You Should Work On Your English.")
+        await m.edit(
+            "Found Literally Nothing!, You Should Work On Your English."
+        )
         print(str(e))
         return
     await m.edit("Processing Thumbnail.")
@@ -513,13 +509,7 @@ async def ytplay(_, message: Message):
         caption=f"Playing [{title}]({link}) Via YouTube #music\nRequested by {message.from_user.first_name}",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "STOP", callback_data="end"
-                    )
-                ]
-            ]
+            [[InlineKeyboardButton("STOP", callback_data="end")]]
         ),
         parse_mode="markdown",
     )
@@ -546,10 +536,10 @@ async def playlist(_, message: Message):
     global blacks
     global is_playing
     global current_player
-    global s    
+    global s
     global m
     global d
-    
+
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -558,24 +548,18 @@ async def playlist(_, message: Message):
         if message.from_user.id in list_of_admins:
             pass
         else:
-            d= await message.reply_text(
-               text="stop interrupting while others playing!",
-               disable_notification= True
-               )
-            await asyncio.sleep(2) # 2 sec delay before deletion
+            d = await message.reply_text(
+                text="stop interrupting while others playing!",
+                disable_notification=True,
+            )
+            await asyncio.sleep(2)  # 2 sec delay before deletion
             await d.delete()
             await message.delete()
             return
-        
-    elif len(message.command) != 2:
+    elif message.entities[1]["type"] != "url" or len(message.command) != 2:
         await message.reply_text(
             "/playlist requires one youtube playlist link"
-                )
-        return
-    elif message.entities[1]['type'] != 'url':
-        await message.reply_text(
-            "/playlist requires one youtube playlist link"
-                )
+        )
     try:
         await message.delete()
     except:
@@ -601,7 +585,9 @@ async def playlist(_, message: Message):
     m = await message.reply_text("Processing Playlist...")
     try:
         with youtube_dl.YoutubeDL():
-            result = youtube_dl.YoutubeDL().extract_info(link, download=False)
+            result = youtube_dl.YoutubeDL().extract_info(
+                link, download=False
+            )
 
             if "entries" in result:
                 video = result["entries"]
@@ -640,16 +626,18 @@ async def playlist(_, message: Message):
 
 
 @app.on_message(
-    filters.command(["telegram"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["telegram"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
 )
 async def tgplay(_, message: Message):
     global blacks
     global is_playing
     global current_player
-    global s    
+    global s
     global m
     global d
-    
+
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -658,15 +646,15 @@ async def tgplay(_, message: Message):
         if message.from_user.id in list_of_admins:
             pass
         else:
-            d= await message.reply_text(
-               text="stop interrupting while others playing!",
-               disable_notification= True
-               )
-            await asyncio.sleep(2) # 2 sec delay before deletion
+            d = await message.reply_text(
+                text="stop interrupting while others playing!",
+                disable_notification=True,
+            )
+            await asyncio.sleep(2)  # 2 sec delay before deletion
             await d.delete()
             await message.delete()
             return
-        
+
     elif not message.reply_to_message:
         await message.reply_text("Reply To A Telegram Audio To Play It.")
         return
@@ -693,8 +681,12 @@ async def tgplay(_, message: Message):
     current_player = message.from_user.id
     is_playing = True
     m = await message.reply_text("Downloading")
-    await app.download_media(message.reply_to_message, file_name="audio.webm")
-    await m.edit(f"Playing `{message.reply_to_message.link}` via Telegram.\n>>>Requested by {message.from_user.first_name}<<<")
+    await app.download_media(
+        message.reply_to_message, file_name="audio.webm"
+    )
+    await m.edit(
+        f"Playing `{message.reply_to_message.link}` via Telegram.\n>>>Requested by {message.from_user.first_name}<<<"
+    )
     s = await asyncio.create_subprocess_shell(
         "mpv downloads/audio.webm --no-video",
         stdout=asyncio.subprocess.PIPE,
@@ -710,13 +702,15 @@ async def tgplay(_, message: Message):
 
 
 @app.on_message(
-    filters.command(["radio"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["radio"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
 )
 async def radio(_, message: Message):
     global blacks
     global is_playing
     global current_player
-    global s    
+    global s
     global m
     global d
     if message.from_user.id in blacks:
@@ -727,11 +721,11 @@ async def radio(_, message: Message):
         if message.from_user.id in list_of_admins:
             pass
         else:
-            d= await message.reply_text(
-               text="stop interrupting while others playing!",
-               disable_notification= True
-               )
-            await asyncio.sleep(2) # 2 sec delay before deletion
+            d = await message.reply_text(
+                text="stop interrupting while others playing!",
+                disable_notification=True,
+            )
+            await asyncio.sleep(2)  # 2 sec delay before deletion
             await d.delete()
             await message.delete()
             return
@@ -786,14 +780,17 @@ async def end(_, message: Message):
     global blacks
     global m
     global s
+    global is_playing
 
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
     list_of_admins = await getadmins(message.chat.id)
     if message.from_user.id not in list_of_admins:
-        await message.reply_text("Well, you're not admin or Current Player, SO YOU CAN'T STOP"
-                                 + " ME, LOL")
+        await message.reply_text(
+            "Well, you're not admin or Current Player, SO YOU CAN'T STOP"
+            + " ME, LOL"
+        )
         return
     try:
         os.remove("audio.webm")
@@ -828,12 +825,16 @@ async def end_callback(_, CallbackQuery):
     list_of_admins = await getadmins(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id not in list_of_admins:
         await app.answer_callback_query(
-            CallbackQuery.id, "Well, you're not admin or Current Player, SO YOU CAN'T STOP"
-            + " ME, LOL", show_alert=True)
+            CallbackQuery.id,
+            "Well, you're not admin or Current Player, SO YOU CAN'T STOP"
+            + " ME, LOL",
+            show_alert=True,
+        )
         return
     global blacks
     global m
     global s
+    global is_playing
 
     chat_id = int(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id in blacks:
@@ -865,7 +866,9 @@ async def end_callback(_, CallbackQuery):
 
 
 @app.on_message(
-    filters.command(["black"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["black"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
 )
 async def blacklist(_, message: Message):
     global blacks
@@ -890,7 +893,9 @@ async def blacklist(_, message: Message):
 
 
 @app.on_message(
-    filters.command(["white"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["white"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
 )
 async def whitelist(_, message: Message):
     global blacks
@@ -913,7 +918,9 @@ async def whitelist(_, message: Message):
 
 
 @app.on_message(
-    filters.command(["users"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["users"])
+    & filters.chat(sudo_chat_id)
+    & ~filters.edited
 )
 async def users(client, message: Message):
     global blacks
@@ -932,5 +939,7 @@ async def users(client, message: Message):
     await message.reply_text(output)
 
 
-print("Bot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n")
+print(
+    "Bot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n"
+)
 app.run()
