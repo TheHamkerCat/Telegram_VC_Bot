@@ -570,8 +570,12 @@ async def playlist(_, message: Message):
     elif len(message.command) != 2:
         await message.reply_text(
             "/playlist requires one youtube playlist link"
-        )
+                )
         return
+    elif message.entities[1]['type'] != 'url':
+        await message.reply_text(
+            "/playlist requires one youtube playlist link"
+                )
     try:
         await message.delete()
     except:
