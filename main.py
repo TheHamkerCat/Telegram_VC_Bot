@@ -467,7 +467,6 @@ async def ytplay(_, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         duration = results[0]["duration"]
         views = results[0]["views"]
-        print(time_to_seconds(duration))
         if time_to_seconds(duration)>=1800: #duration limit
                 await m.edit("Bruh! Only songs within 30 Mins")
                 is_playing=False
