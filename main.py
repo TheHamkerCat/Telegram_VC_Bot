@@ -42,6 +42,11 @@ def convert_seconds(seconds):
     return "%02d:%02d" % (minutes, seconds)
 
 
+def time_to_seconds(time):
+    stringt = str(time)
+    return sum(int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(':'))))
+
+
 # Os Determination
 
 if os.name == "nt":
@@ -147,7 +152,7 @@ def changeImageSize(maxWidth, maxHeight, image):
     return newImage
 
 
-# Deezer
+# Deezer----------------------------------------------------------------------------------------
 
 
 @app.on_message(
@@ -213,6 +218,7 @@ async def deezer(_, message: Message):
         await m.edit(
             "Found Literally Nothing, You Should Work On Your English!"
         )
+        is_playing=False
         return
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
@@ -267,7 +273,7 @@ async def deezer(_, message: Message):
     is_playing = False
 
 
-# Jiosaavn
+# Jiosaavn--------------------------------------------------------------------------------------
 
 
 @app.on_message(
@@ -339,6 +345,7 @@ async def jiosaavn(_, message: Message):
             "Found Literally Nothing!, You Should Work On Your English."
         )
         print(str(e))
+        is_playing=False
         return
     await m.edit("Processing Thumbnail.")
     async with aiohttp.ClientSession() as session:
@@ -395,7 +402,7 @@ async def jiosaavn(_, message: Message):
     is_playing = False
 
 
-# Youtube Play
+# Youtube Play-----------------------------------------------------------------------------------
 
 
 @app.on_message(
@@ -460,10 +467,16 @@ async def ytplay(_, message: Message):
         thumbnail = results[0]["thumbnails"][0]
         duration = results[0]["duration"]
         views = results[0]["views"]
+        print(time_to_seconds(duration))
+        if time_to_seconds(duration)>=1800: #duration limit
+                await m.edit("Bruh! Only songs within 30 Mins")
+                is_playing=False
+                return    
     except Exception as e:
         await m.edit(
             "Found Literally Nothing!, You Should Work On Your English."
         )
+        is_playing=False
         print(str(e))
         return
     await m.edit("Processing Thumbnail.")
@@ -524,7 +537,7 @@ async def ytplay(_, message: Message):
     is_playing = False
 
 
-# youtube playlist
+# youtube playlist-------------------------------------------------------------------------------
 
 
 @app.on_message(
@@ -622,7 +635,7 @@ async def playlist(_, message: Message):
         return
 
 
-# Telegram Audio
+# Telegram Audio--------------------------------------------------------------------------------
 
 
 @app.on_message(
@@ -679,6 +692,14 @@ async def tgplay(_, message: Message):
     except:
         pass
     current_player = message.from_user.id
+    if message.reply_to_message.audio:
+        if int(message.reply_to_message.audio.file_size) >= 104857600:
+            await message.reply_text('Bruh! Only songs within 100 MB')
+            return
+    elif message.reply_to_message.document:
+        if int(message.reply_to_message.document.file_size) >= 104857600:
+            await message.reply_text('Bruh! Only songs within 100 MB')
+            return
     is_playing = True
     m = await message.reply_text("Downloading")
     await app.download_media(
@@ -698,7 +719,7 @@ async def tgplay(_, message: Message):
     os.remove("downloads/audio.webm")
 
 
-# Radio
+# Radio-----------------------------------------------------------------------------------------
 
 
 @app.on_message(
@@ -761,7 +782,7 @@ async def radio(_, message: Message):
     is_playing = False
 
 
-# End Music
+# End Music-------------------------------------------------------------------------------------
 
 
 async def getadmins(chat_id):
@@ -858,7 +879,7 @@ async def end_callback(_, CallbackQuery):
     is_playing = False
     await app.send_message(
         chat_id,
-        f"{CallbackQuery.from_user.mention} - {CallbackQuery.from_user.id} Stopped The Music.",
+        f"{CallbackQuery.from_user.mention} Stopped The Music.",
     )
 
 
