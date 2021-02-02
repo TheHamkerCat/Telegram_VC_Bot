@@ -151,6 +151,31 @@ def changeImageSize(maxWidth, maxHeight, image):
     newImage = image.resize((newWidth, newHeight))
     return newImage
 
+async def prepare(s, m, message):
+    try:
+        os.system(f"{kill} mpv")
+    except:
+        pass
+    try:
+        await m.delete()
+    except:
+        pass
+    try:
+        await message.delete()
+    except:
+        pass
+    try:
+        os.remove("audio.webm")
+    except:
+        pass
+    try:
+        os.remove("downloads/audio.webm")
+    except:
+        pass
+    try:
+        s.terminate()
+    except:
+        pass
 
 # Deezer----------------------------------------------------------------------------------------
 
@@ -187,18 +212,9 @@ async def deezer(_, message: Message):
     elif len(message.command) < 2:
         await message.reply_text("/deezer requires an argument")
         return
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        await message.delete()
-    except:
-        pass
+    
+    await prepare(s, m, message)
+    
     query = kwairi(message)
     current_player = message.from_user.id
     is_playing = True
@@ -309,18 +325,8 @@ async def jiosaavn(_, message: Message):
     elif len(message.command) < 2:
         await message.reply_text("/jiosaavn requires an argument")
         return
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        await message.delete()
-    except:
-        pass
+
+    await prepare(s, m, message)
 
     query = kwairi(message)
     current_player = message.from_user.id
@@ -438,22 +444,9 @@ async def ytplay(_, message: Message):
     elif len(message.command) < 2:
         await message.reply_text("/youtube requires one argument")
         return
-    try:
-        await message.delete()
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
+    
+    await prepare(s, m, message)
+    
     ydl_opts = {"format": "bestaudio"}
     query = kwairi(message)
     current_player = message.from_user.id
@@ -572,22 +565,8 @@ async def playlist(_, message: Message):
         await message.reply_text(
             "/playlist requires one youtube playlist link"
         )
-    try:
-        await message.delete()
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
+
+    await prepare(s, m, message)
 
     link = message.command[1]
     ydl_opts = {"format": "bestaudio"}
@@ -670,26 +649,9 @@ async def tgplay(_, message: Message):
     elif not message.reply_to_message:
         await message.reply_text("Reply To A Telegram Audio To Play It.")
         return
-    try:
-        await message.delete()
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
-    try:
-        os.remove("downloads/audio.webm")
-    except:
-        pass
+
+    await prepare(s, m, message)
+
     current_player = message.from_user.id
     if message.reply_to_message.audio:
         if int(message.reply_to_message.audio.file_size) >= 104857600:
@@ -749,23 +711,9 @@ async def radio(_, message: Message):
             await d.delete()
             await message.delete()
             return
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        await message.delete()
-    except:
-        pass
 
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
+    await prepare(s, m, message)
+
     current_player = message.from_user.id
     is_playing = True
     m = await message.reply_text(
@@ -812,27 +760,8 @@ async def end(_, message: Message):
             + " ME, LOL"
         )
         return
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
 
-    try:
-        await message.delete()
-    except:
-        pass
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        s.terminate()
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
+    await prepare(s, m, message)
 
     is_playing = False
     await message.reply_text(
@@ -859,22 +788,9 @@ async def end_callback(_, CallbackQuery):
     chat_id = int(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id in blacks:
         return
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        s.terminate()
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
+
+    await prepare(s, m, Message)
+
     is_playing = False
     await app.send_message(
         chat_id,
@@ -960,6 +876,6 @@ async def users(client, message: Message):
 
 
 print(
-    "Bot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n"
+    "\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n"
 )
 app.run()
