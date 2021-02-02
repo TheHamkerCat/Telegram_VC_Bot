@@ -127,12 +127,7 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
     & ~filters.edited
 )
 async def deezer(_, message: Message):
-    global blacks
-    global is_playing
-    global current_player
-    global s
-    global m
-    global d
+    global blacks, is_playing, current_player, s, m, d
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -210,12 +205,7 @@ async def deezer(_, message: Message):
     & ~filters.edited
 )
 async def jiosaavn(_, message: Message):
-    global blacks
-    global is_playing
-    global current_player
-    global s
-    global m
-    global d
+    global blacks, is_playing, current_player, s, m, d
 
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -298,12 +288,7 @@ async def jiosaavn(_, message: Message):
     & ~filters.edited
 )
 async def ytplay(_, message: Message):
-    global blacks
-    global is_playing
-    global current_player
-    global s
-    global m
-    global d
+    global blacks, is_playing, current_player, s, m, d
 
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -391,12 +376,7 @@ async def ytplay(_, message: Message):
     & ~filters.edited
 )
 async def playlist(_, message: Message):
-    global blacks
-    global is_playing
-    global current_player
-    global s
-    global m
-    global d
+    global blacks, is_playing, current_player, s, m, d
 
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -475,12 +455,7 @@ async def playlist(_, message: Message):
     & ~filters.edited
 )
 async def tgplay(_, message: Message):
-    global blacks
-    global is_playing
-    global current_player
-    global s
-    global m
-    global d
+    global blacks, is_playing, current_player, s, m, d
 
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -542,12 +517,8 @@ async def tgplay(_, message: Message):
     & ~filters.edited
 )
 async def radio(_, message: Message):
-    global blacks
-    global is_playing
-    global current_player
-    global s
-    global m
-    global d
+    global blacks, is_playing, current_player, s, m, d
+
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
@@ -598,10 +569,7 @@ async def getadmins(chat_id):
     filters.command(["end"]) & filters.chat(sudo_chat_id) & ~filters.edited
 )
 async def end(_, message: Message):
-    global blacks
-    global m
-    global s
-    global is_playing
+    global blacks, m, s, is_playing
 
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
@@ -624,6 +592,7 @@ async def end(_, message: Message):
 
 @app.on_callback_query(filters.regex("end"))
 async def end_callback(_, CallbackQuery):
+    global blacks, m, s, is_playing
     list_of_admins = await getadmins(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id not in list_of_admins:
         await app.answer_callback_query(
@@ -633,10 +602,6 @@ async def end_callback(_, CallbackQuery):
             show_alert=True,
         )
         return
-    global blacks
-    global m
-    global s
-    global is_playing
 
     chat_id = int(CallbackQuery.message.chat.id)
     if CallbackQuery.from_user.id in blacks:
