@@ -2,13 +2,10 @@ from __future__ import unicode_literals
 import youtube_dl
 import asyncio
 import aiohttp
-import aiofiles
 import time
 import json
 import os
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
+
 from pyrogram import Client, filters
 from pyrogram.types import (
     Message,
@@ -17,6 +14,12 @@ from pyrogram.types import (
 )
 from youtube_search import YoutubeSearch
 from config import owner_id, bot_token, radio_link, sudo_chat_id
+from functions import (
+        kwairi, convert_seconds, time_to_seconds,
+        prepare, generate_cover_square,
+        generate_cover
+        )
+
 
 app = Client(
     ":memory:",
@@ -25,34 +28,6 @@ app = Client(
     api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e",
 )
 
-
-# Get User Input
-def kwairi(message):
-    query = ""
-    for i in message.command[1:]:
-        query += f"{i} "
-    return query
-
-
-def convert_seconds(seconds):
-    seconds = seconds % (24 * 3600)
-    seconds %= 3600
-    minutes = seconds // 60
-    seconds %= 60
-    return "%02d:%02d" % (minutes, seconds)
-
-
-def time_to_seconds(time):
-    stringt = str(time)
-    return sum(int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(':'))))
-
-
-# Os Determination
-
-if os.name == "nt":
-    kill = "tskill"
-else:
-    kill = "killall -9"
 
 # For Blacklist filter
 blacks = []
@@ -143,40 +118,6 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
     )
 
 
-def changeImageSize(maxWidth, maxHeight, image):
-    widthRatio = maxWidth / image.size[0]
-    heightRatio = maxHeight / image.size[1]
-    newWidth = int(widthRatio * image.size[0])
-    newHeight = int(heightRatio * image.size[1])
-    newImage = image.resize((newWidth, newHeight))
-    return newImage
-
-async def prepare(s, m, message):
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    try:
-        await m.delete()
-    except:
-        pass
-    try:
-        await message.delete()
-    except:
-        pass
-    try:
-        os.remove("audio.webm")
-    except:
-        pass
-    try:
-        os.remove("downloads/audio.webm")
-    except:
-        pass
-    try:
-        s.terminate()
-    except:
-        pass
-
 # Deezer----------------------------------------------------------------------------------------
 
 
@@ -236,39 +177,10 @@ async def deezer(_, message: Message):
         )
         is_playing=False
         return
-    async with aiohttp.ClientSession() as session:
-        async with session.get(thumbnail) as resp:
-            if resp.status == 200:
-                f = await aiofiles.open("background.png", mode="wb")
-                await f.write(await resp.read())
-                await f.close()
-    image1 = Image.open("./background.png")
-    image2 = Image.open("etc/foreground_square.png")
-    image3 = changeImageSize(600, 500, image1)
-    image4 = changeImageSize(600, 500, image2)
-    image5 = image3.convert("RGBA")
-    image6 = image4.convert("RGBA")
-    Image.alpha_composite(image5, image6).save("temp.png")
-    img = Image.open("temp.png")
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/font.otf", 20)
-    draw.text((150, 380), f"Title: {title}", (255, 255, 255), font=font)
-    draw.text((150, 405), f"Artist: {artist}", (255, 255, 255), font=font)
-    draw.text(
-        (150, 430),
-        f"Duration: {duration} Seconds",
-        (255, 255, 255),
-        font=font,
-    )
-    draw.text(
-        (150, 455),
-        f"Played By: {message.from_user.first_name}",
-        (255, 255, 255),
-        font=font,
-    )
-    img.save("final.png")
-    os.remove("temp.png")
-    os.remove("background.png")
+    await m.edit("Generating Thumbnail")
+
+    await generate_cover_square(message, title, artist, duration, thumbnail)
+
     await m.delete()
     m = await message.reply_photo(
         caption=f"Playing `{title}` Via Deezer #music\nRequested by {message.from_user.first_name}",
@@ -354,40 +266,9 @@ async def jiosaavn(_, message: Message):
         is_playing=False
         return
     await m.edit("Processing Thumbnail.")
-    async with aiohttp.ClientSession() as session:
-        async with session.get(sthumb) as resp:
-            if resp.status == 200:
-                f = await aiofiles.open("background.png", mode="wb")
-                await f.write(await resp.read())
-                await f.close()
 
-    image1 = Image.open("./background.png")
-    image2 = Image.open("etc/foreground_square.png")
-    image3 = changeImageSize(600, 500, image1)
-    image4 = changeImageSize(600, 500, image2)
-    image5 = image3.convert("RGBA")
-    image6 = image4.convert("RGBA")
-    Image.alpha_composite(image5, image6).save("temp.png")
-    img = Image.open("temp.png")
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/font.otf", 20)
-    draw.text((150, 380), f"Title: {sname}", (255, 255, 255), font=font)
-    draw.text((150, 405), f"Artist: {ssingers}", (255, 255, 255), font=font)
-    draw.text(
-        (150, 430),
-        f"Duration: {sduration_converted} Seconds",
-        (255, 255, 255),
-        font=font,
-    )
-    draw.text(
-        (150, 455),
-        f"Played By: {message.from_user.first_name}",
-        (255, 255, 255),
-        font=font,
-    )
-    img.save("final.png")
-    os.remove("temp.png")
-    os.remove("background.png")
+    await generate_cover_square(message, sname, ssingers, sduration_converted, sthumb)
+
     await m.delete()
     m = await message.reply_photo(
         caption=f"Playing `{sname}` Via Jiosaavn #music\nRequested by {message.from_user.first_name}",
@@ -461,9 +342,9 @@ async def ytplay(_, message: Message):
         duration = results[0]["duration"]
         views = results[0]["views"]
         if time_to_seconds(duration)>=1800: #duration limit
-                await m.edit("Bruh! Only songs within 30 Mins")
-                is_playing=False
-                return    
+            await m.edit("Bruh! Only songs within 30 Mins")
+            is_playing=False
+            return    
     except Exception as e:
         await m.edit(
             "Found Literally Nothing!, You Should Work On Your English."
@@ -472,37 +353,9 @@ async def ytplay(_, message: Message):
         print(str(e))
         return
     await m.edit("Processing Thumbnail.")
-    async with aiohttp.ClientSession() as session:
-        async with session.get(thumbnail) as resp:
-            if resp.status == 200:
-                f = await aiofiles.open("background.png", mode="wb")
-                await f.write(await resp.read())
-                await f.close()
 
-    image1 = Image.open("./background.png")
-    image2 = Image.open("etc/foreground.png")
-    image3 = changeImageSize(1280, 720, image1)
-    image4 = changeImageSize(1280, 720, image2)
-    image5 = image3.convert("RGBA")
-    image6 = image4.convert("RGBA")
-    Image.alpha_composite(image5, image6).save("temp.png")
-    img = Image.open("temp.png")
-    draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("etc/font.otf", 32)
-    draw.text((190, 550), f"Title: {title}", (255, 255, 255), font=font)
-    draw.text(
-        (190, 590), f"Duration: {duration}", (255, 255, 255), font=font
-    )
-    draw.text((190, 630), f"Views: {views}", (255, 255, 255), font=font)
-    draw.text(
-        (190, 670),
-        f"Played By: {message.from_user.first_name}",
-        (255, 255, 255),
-        font=font,
-    )
-    img.save("final.png")
-    os.remove("temp.png")
-    os.remove("background.png")
+    await generate_cover(message, title, views, duration, thumbnail)
+
     await m.edit("Downloading Music.")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)
@@ -586,7 +439,7 @@ async def playlist(_, message: Message):
                     f"Found {len(result['entries'])} Videos In Playlist, Playing Them All.\n>>>Requested by {message.from_user.first_name}<<<"
                 )
                 ii = 1
-                for i, item in enumerate(video):
+                for i in video:
                     video = result["entries"][i]["webpage_url"]
                     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                         info_dict = ydl.extract_info(video, download=False)
