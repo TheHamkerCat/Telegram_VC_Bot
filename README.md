@@ -47,6 +47,9 @@ your PC or Server's audio output to audio input. [For Linux]
 11. Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
 
+> Watch The Video Tutorial if you still can't do this 
+
+[How to deploy the Telegram Voice Chat Bot on VPS using Ubuntu/Debian](https://youtu.be/DozNTe_cydw)
 
 ## Commands
 Command | Description
