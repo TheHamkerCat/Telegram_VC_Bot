@@ -539,18 +539,16 @@ async def radio(_, message: Message):
     await prepare(s, m, message)
 
     current_player = message.from_user.id
-    is_playing = True
     m = await message.reply_text(
         f"Playing Radio\nRequested by - {message.from_user.mention}"
     )
     s = await asyncio.create_subprocess_shell(
-        f"mpv {radio_link} --no-video",
+        f"mpv --no-cache {radio_link} --no-video",
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
     await s.wait()
     await m.delete()
-    is_playing = False
 
 
 # End Music-------------------------------------------------------------------------------------
