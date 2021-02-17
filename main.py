@@ -263,7 +263,7 @@ async def deezer(query):
         chat_id=sudo_chat_id,
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("STOP", callback_data="end")]]
+            [[InlineKeyboardButton("Skip", callback_data="end")]]
         ),
         parse_mode="markdown",
     )
@@ -317,7 +317,7 @@ async def jiosaavn(query):
         caption=f"Playing `{sname}` Via Jiosaavn",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("STOP", callback_data="end")]]
+            [[InlineKeyboardButton("Skip", callback_data="end")]]
         ),
         parse_mode="markdown",
     )
@@ -373,7 +373,7 @@ async def ytplay(query):
         caption=f"Playing [{title}]({link}) Via YouTube",
         photo="final.png",
         reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("STOP", callback_data="end")]]
+            [[InlineKeyboardButton("Skip", callback_data="end")]]
         ),
         parse_mode="markdown",
     )
