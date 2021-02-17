@@ -406,6 +406,7 @@ async def tgplay(_, message):
         await message.reply_text(
             "You Can Only Play Telegram Files After The Queue Gets Finished."
         )
+        return
     if message.reply_to_message.audio:
         if int(message.reply_to_message.audio.file_size) >= 104857600:
             await message.reply_text("Bruh! Only songs within 100 MB")
