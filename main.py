@@ -84,9 +84,16 @@ async def queuer(_, message):
         await message.reply_text(
             "**Usage:**\n/play youtube/saavn/deezer [song_name]"
         )
+        return
     text = message.text.split(None, 2)[1:]
     service = text[0]
     song_name = text[1]
+    services = ["youtube", "deezer", "saavn"]
+    if service not in services:
+        await message.reply_text(
+            "**Usage:**\n/play youtube/saavn/deezer [song_name]"
+        )
+        return
     queue.append({"service": service, "song": song_name})
     await message.reply_text("Added To Queue.")
     await play()
@@ -126,7 +133,7 @@ async def end_callback(_, CallbackQuery):
     if CallbackQuery.from_user.id not in list_of_admins:
         await app.answer_callback_query(
             CallbackQuery.id,
-            "Well, you're not admin or Current Player, SO YOU CAN'T SKIP"
+            "Well, you're not admin, SO YOU CAN'T SKIP"
             + "LOL",
             show_alert=True,
         )
