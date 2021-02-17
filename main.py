@@ -100,7 +100,7 @@ async def queuer(_, message):
 )
 async def skip(_, message):
     global playing
-    if message.from_user.id in blacklist:
+    if message.from_user.id in blacks:
         return
     if message.from_user.id not in getadmins(sudo_chat_id):
         return
