@@ -82,7 +82,7 @@ async def queuer(_, message):
         return
     if len(message.command) < 3:
         await message.reply_text(
-            "**Usage:**\n/play youtube/saavn/deezer <song_name>"
+            "**Usage:**\n/play youtube/saavn/deezer [song_name]"
         )
     text = message.text.split(None, 2)[1:]
     service = text[0]
@@ -218,7 +218,7 @@ async def help(_, message: Message):
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
 /skip To Skip The Current Playing Music.
-/play <youtube/saavn/deezer> <song_name>
+/play <youtube/saavn/deezer> [song_name]
 /telegram While Taging a Song To Play From Telegram File.
 /users To Get A List Of Blacklisted Users.
 
