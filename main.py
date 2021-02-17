@@ -20,6 +20,7 @@ from functions import (
     time_to_seconds,
     generate_cover_square,
     generate_cover,
+    kill
 )
 
 
@@ -116,7 +117,7 @@ async def skip(_, message):
         return
     playing = False
     try:
-        os.system("killall mpv")
+        os.system(kill)
     except:
         pass
     await message.reply_text("Skipped!")
@@ -141,7 +142,7 @@ async def end_callback(_, CallbackQuery):
 
     playing = False
     try:
-        os.system("killall mpv")
+        os.system(kill)
     except:
         pass
     await app.answer_callback_query(
