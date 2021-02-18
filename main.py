@@ -13,9 +13,8 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
 )
 from youtube_search import YoutubeSearch
-from config import owner_id, bot_token, radio_link, sudo_chat_id
+from config import owner_id, bot_token, sudo_chat_id
 from functions import (
-    kwairi,
     convert_seconds,
     time_to_seconds,
     generate_cover_square,
@@ -60,17 +59,29 @@ async def play():
                 print(f"Playing {song} via {service}")
                 playing = True
                 del queue[0]
-                await ytplay(song)
+                try:
+                    await ytplay(song)
+                except Exception as e:
+                    print(str(e))
+                    pass
             elif service == "saavn":
                 print(f"Playing {song} via {service}")
                 playing = True
                 del queue[0]
-                await jiosaavn(song)
+                try:
+                    await jiosaavn(song)
+                except Exception as e:
+                    print(str(e))
+                    pass
             elif service == "deezer":
                 print(f"Playing {song} via {service}")
                 playing = True
                 del queue[0]
-                await deezer(song)
+                try:
+                    await deezer(song)
+                except Exception as e:
+                    print(str(e))
+                    pass
 
 # Queue Append
 
@@ -128,6 +139,7 @@ async def skip(_, message):
 
 @app.on_callback_query(filters.regex("end"))
 async def end_callback(_, CallbackQuery):
+    global playing
     if CallbackQuery.from_user.id in blacks:
         return
     list_of_admins = await getadmins(sudo_chat_id)
@@ -139,7 +151,9 @@ async def end_callback(_, CallbackQuery):
             show_alert=True,
         )
         return
-
+    if len(queue) == 0:
+        await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        return
     playing = False
     try:
         os.system(kill)
@@ -164,7 +178,7 @@ async def queue_list(_, message):
         for song in queue:
             text += f"**{i}. Platform:** {song['service']} | **Song:** {song['song']}\n"
             i += 1
-        await message.reply_text(text)
+        await message.reply_text(text, disable_web_page_preview=True)
     else:
         await message.reply_text("Queue Is Empty, Just Like Your Life.")
 
