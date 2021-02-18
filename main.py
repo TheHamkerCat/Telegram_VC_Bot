@@ -272,6 +272,7 @@ async def deezer(query):
         await m.edit(
             "Found Literally Nothing, You Should Work On Your English!"
         )
+        playing = False
         return
     await m.edit("Generating Thumbnail")
 
@@ -323,12 +324,11 @@ async def jiosaavn(query):
             "Found Literally Nothing!, You Should Work On Your English."
         )
         print(str(e))
+        playing = False
         return
     await m.edit("Processing Thumbnail.")
 
-    await generate_cover_square(
-        message, sname, ssingers, sduration_converted, sthumb
-    )
+    await generate_cover_square(sname, ssingers, sduration_converted, sthumb)
 
     await m.delete()
     m = await app.send_photo(
@@ -369,13 +369,13 @@ async def ytplay(query):
         views = results[0]["views"]
         if time_to_seconds(duration) >= 1800:  # duration limit
             await m.edit("Bruh! Only songs within 30 Mins")
-            is_playing = False
+            playing = False
             return
     except Exception as e:
         await m.edit(
             "Found Literally Nothing!, You Should Work On Your English."
         )
-        is_playing = False
+        playing = False
         print(str(e))
         return
     await m.edit("Processing Thumbnail.")
@@ -414,6 +414,7 @@ async def ytplay(query):
         filters.chat(sudo_chat_id) & ~filters.edited
         )
 async def tgplay(_, message):
+    global playing
     if len(queue) != 0:
         await message.reply_text(
             "You Can Only Play Telegram Files After The Queue Gets Finished."
@@ -422,10 +423,12 @@ async def tgplay(_, message):
     if message.reply_to_message.audio:
         if int(message.reply_to_message.audio.file_size) >= 104857600:
             await message.reply_text("Bruh! Only songs within 100 MB")
+            playing = False
             return
     elif message.reply_to_message.document:
         if int(message.reply_to_message.document.file_size) >= 104857600:
             await message.reply_text("Bruh! Only songs within 100 MB")
+            playing = False
             return
     m = await message.reply_text("Downloading")
     await app.download_media(message.reply_to_message, file_name="audio.webm")
@@ -437,7 +440,7 @@ async def tgplay(_, message):
     )
     await s.wait()
     await m.delete()
-    is_playing = False
+    playing = False
     os.remove("downloads/audio.webm")
 
 
