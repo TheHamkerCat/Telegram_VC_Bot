@@ -97,18 +97,21 @@ async def queuer(_, message):
             "**Usage:**\n/play youtube/saavn/deezer [song_name]"
         )
         return
+    await message.delete()
     text = message.text.split(None, 2)[1:]
     service = text[0]
     song_name = text[1]
     services = ["youtube", "deezer", "saavn"]
     if service not in services:
-        await message.reply_text(
-            "**Usage:**\n/play youtube/saavn/deezer [song_name]"
+        await app.send_message(message.chat.id,
+            text="**Usage:**\n/play youtube/saavn/deezer [song_name]"
         )
         return
     queue.append({"service": service, "song": song_name})
-    await message.reply_text("Added To Queue.")
+    m = await app.send_message(message.chat.id, text=f"Added To Queue.")
     await play()
+    await asyncio.sleep(3)
+    await m.delete()
 
 
 # Skip command
@@ -131,7 +134,10 @@ async def skip(_, message):
         os.system(f"{kill} mpv")
     except:
         pass
-    await message.reply_text("Skipped!")
+    m = await message.reply_text("Skipped!")
+    await asyncio.sleep(5)
+    await m.delete()
+    await message.delete()
 
 
 # Skip button
@@ -175,10 +181,12 @@ async def queue_list(_, message):
         for song in queue:
             text += f"**{i}. Platform:** {song['service']} | **Song:** {song['song']}\n"
             i += 1
-        await message.reply_text(text, disable_web_page_preview=True)
+        m = await message.reply_text(text, disable_web_page_preview=True)
     else:
-        await message.reply_text("Queue Is Empty, Just Like Your Life.")
-
+        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
+    await asyncio.sleep(5)
+    await m.delete()
+    await message.delete()
 
 # Ping and repo
 
