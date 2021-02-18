@@ -121,7 +121,7 @@ async def skip(_, message):
     global playing
     if message.from_user.id in blacks:
         return
-    if message.from_user.id not in getadmins(sudo_chat_id):
+    if message.from_user.id not in await getadmins(sudo_chat_id):
         return
     if len(queue) == 0:
         await message.reply_text("Queue Is Empty, Just Like Your Life.")
