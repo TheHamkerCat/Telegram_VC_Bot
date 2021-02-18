@@ -128,7 +128,7 @@ async def skip(_, message):
         return
     playing = False
     try:
-        os.system(kill)
+        os.system(f"{kill} mpv")
     except:
         pass
     await message.reply_text("Skipped!")
@@ -152,18 +152,15 @@ async def end_callback(_, CallbackQuery):
         )
         return
     if len(queue) == 0:
-        await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        await app.answer_callback_query(CallbackQuery.id,
+                "Queue Is Empty, Just Like Your Life.", show_alert=True)
         return
     playing = False
     try:
-        os.system(kill)
+        os.system(f"{kill} mpv")
     except:
         pass
-    await app.answer_callback_query(
-            CallbackQuery.id,
-            "Skipped!",
-            show_alert=True,
-        )
+    await app.answer_callback_query(CallbackQuery.id, "Skipped!", show_alert=True)
 
 
 @app.on_message(
