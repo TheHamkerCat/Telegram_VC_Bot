@@ -127,7 +127,10 @@ async def skip(_, message):
     if message.from_user.id not in await getadmins(sudo_chat_id):
         return
     if len(queue) == 0:
-        await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        await asyncio.sleep(5)
+        await m.delete()
+        await message.delete()
         return
     playing = False
     try:
