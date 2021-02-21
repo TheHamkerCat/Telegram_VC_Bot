@@ -72,6 +72,7 @@ async def generate_cover_square(requested_by, title, artist, duration, thumbnail
         (255, 255, 255),
         font=font,
     )
+
     draw.text(
         (150, 455),
         f"Played By: {requested_by}",
@@ -84,6 +85,7 @@ async def generate_cover_square(requested_by, title, artist, duration, thumbnail
 
 
 # Generate cover for youtube
+
 async def generate_cover(requested_by, title, views, duration, thumbnail):
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:

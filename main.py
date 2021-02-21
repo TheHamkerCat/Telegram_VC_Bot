@@ -264,7 +264,6 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
 
 # Deezer----------------------------------------------------------------------------------------
 
-
 async def deezer(requested_by, query):
     global playing
     m = await app.send_message(
@@ -288,7 +287,6 @@ async def deezer(requested_by, query):
         playing = False
         return
     await m.edit("Generating Thumbnail")
-
     await generate_cover_square(requested_by, title, artist, duration, thumbnail)
 
     await m.delete()
@@ -313,7 +311,6 @@ async def deezer(requested_by, query):
 
 
 # Jiosaavn--------------------------------------------------------------------------------------
-
 
 async def jiosaavn(requested_by, query):
     global playing
@@ -341,9 +338,7 @@ async def jiosaavn(requested_by, query):
         playing = False
         return
     await m.edit("Processing Thumbnail.")
-
     await generate_cover_square(requested_by, sname, ssingers, sduration_converted, sthumb)
-
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
