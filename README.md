@@ -57,14 +57,11 @@ Command | Description
 /start | To Start The bot.
 /help | To Show This Message.
 /ping | To Ping All Datacenters Of Telegram.
-/end | To Stop Any Playing Music (only works for current user playing and to Admins).
-/jiosaavn <song_name> | To Play A Song From Jiosaavn.
-/youtube <song_name> or <song_link> | To Search For A Song And Play The Top-Most Song Or Play With A Link.
-/playlist <youtube_playlist_url> | To Play A Playlist From Youtube.
+/skip | To Skip Any Playing Music.
+/play youtube/saavn/deezer [song_name] | To Play A Song.
 /telegram | To Play A Song Directly From Telegram File.
-/radio | To Play Radio Continuosly.
 /users | To Get A List Of Blacklisted Users.
-/deezer | To Play A Song From Deezer.
+/queue | To Check Queue Status.
 Admin Commands:
 /black | To Blacklist A User.
 /white | To Whitelist A User.
