@@ -55,6 +55,7 @@ async def play():
         if len(queue) != 0:
             service = queue[0]["service"]
             song = queue[0]["song"]
+            requested_by = queue[0]["requested_by"]
             if service == "youtube":
                 print(f"Playing {song} via {service}")
                 playing = True
@@ -101,13 +102,14 @@ async def queuer(_, message):
     text = message.text.split(None, 2)[1:]
     service = text[0]
     song_name = text[1]
+    requested_by = message.from_user.first_name
     services = ["youtube", "deezer", "saavn"]
     if service not in services:
         await app.send_message(message.chat.id,
             text="**Usage:**\n/play youtube/saavn/deezer [song_name]"
         )
         return
-    queue.append({"service": service, "song": song_name})
+    queue.append({"service": service, "song": song_name, "requested_by": requested_by})
     m = await app.send_message(message.chat.id, text=f"Added To Queue.")
     await play()
     await asyncio.sleep(3)
@@ -263,7 +265,7 @@ NOTE: Do Not Assign These Commands To Bot Via BotFather"""
 # Deezer----------------------------------------------------------------------------------------
 
 
-async def deezer(query):
+async def deezer(requested_by, query):
     global playing
     m = await app.send_message(
         sudo_chat_id, text=f"Searching for `{query}` on Deezer"
@@ -287,7 +289,7 @@ async def deezer(query):
         return
     await m.edit("Generating Thumbnail")
 
-    await generate_cover_square(title, artist, duration, thumbnail)
+    await generate_cover_square(requested_by, title, artist, duration, thumbnail)
 
     await m.delete()
     m = await app.send_photo(
@@ -312,7 +314,7 @@ async def deezer(query):
 # Jiosaavn--------------------------------------------------------------------------------------
 
 
-async def jiosaavn(query):
+async def jiosaavn(requested_by, query):
     global playing
     m = await app.send_message(
         sudo_chat_id, text=f"Searching for `{query}` on JioSaavn"
@@ -339,7 +341,7 @@ async def jiosaavn(query):
         return
     await m.edit("Processing Thumbnail.")
 
-    await generate_cover_square(sname, ssingers, sduration_converted, sthumb)
+    await generate_cover_square(requested_by, sname, ssingers, sduration_converted, sthumb)
 
     await m.delete()
     m = await app.send_photo(
@@ -365,7 +367,7 @@ async def jiosaavn(query):
 # Youtube Play-----------------------------------------------------------------------------------
 
 
-async def ytplay(query):
+async def ytplay(requested_by, query):
     global playing
     ydl_opts = {"format": "bestaudio"}
     m = await app.send_message(
@@ -390,7 +392,7 @@ async def ytplay(query):
         print(str(e))
         return
     await m.edit("Processing Thumbnail.")
-    await generate_cover(title, views, duration, thumbnail)
+    await generate_cover(requested_by, title, views, duration, thumbnail)
     await m.edit("Downloading Music.")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)

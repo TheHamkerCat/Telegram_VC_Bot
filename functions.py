@@ -47,7 +47,7 @@ def changeImageSize(maxWidth, maxHeight, image):
 
 
 # Generate cover for jiosaavn and deezer
-async def generate_cover_square(title, artist, duration, thumbnail):
+async def generate_cover_square(requested_by, title, artist, duration, thumbnail):
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
             if resp.status == 200:
@@ -72,13 +72,19 @@ async def generate_cover_square(title, artist, duration, thumbnail):
         (255, 255, 255),
         font=font,
     )
+    draw.text(
+        (150, 455),
+        f"Played By: {requested_by}",
+        (255, 255, 255),
+        font=font,
+    )
     img.save("final.png")
     os.remove("temp.png")
     os.remove("background.png")
 
 
 # Generate cover for youtube
-async def generate_cover(title, views, duration, thumbnail):
+async def generate_cover(requested_by, title, views, duration, thumbnail):
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
             if resp.status == 200:
@@ -101,6 +107,11 @@ async def generate_cover(title, views, duration, thumbnail):
         (190, 590), f"Duration: {duration}", (255, 255, 255), font=font
     )
     draw.text((190, 630), f"Views: {views}", (255, 255, 255), font=font)
+    draw.text((190, 670),
+        f"Played By: {requested_by}",
+        (255, 255, 255),
+        font=font,
+    )
     img.save("final.png")
     os.remove("temp.png")
     os.remove("background.png")
