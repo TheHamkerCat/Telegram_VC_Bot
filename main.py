@@ -250,7 +250,7 @@ async def help(_, message: Message):
 /help To Show This Message.
 /ping To Ping All Datacenters Of Telegram.
 /skip To Skip The Current Playing Music.
-/play <youtube/saavn/deezer> [song_name]
+/play youtube/saavn/deezer [song_name]
 /telegram While Taging a Song To Play From Telegram File.
 /users To Get A List Of Blacklisted Users.
 
@@ -295,6 +295,7 @@ async def deezer(requested_by, query):
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         photo="final.png",
+        caption=f"Playing [{title}]({url}) Via Deezer.",
         reply_markup=InlineKeyboardMarkup(
             [[InlineKeyboardButton("Skip", callback_data="end")]]
         ),
