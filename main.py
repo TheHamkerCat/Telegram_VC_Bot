@@ -61,7 +61,7 @@ async def play():
                 playing = True
                 del queue[0]
                 try:
-                    await ytplay(song)
+                    await ytplay(requested_by, song)
                 except Exception as e:
                     print(str(e))
                     pass
@@ -70,7 +70,7 @@ async def play():
                 playing = True
                 del queue[0]
                 try:
-                    await jiosaavn(song)
+                    await jiosaavn(requested_by, song)
                 except Exception as e:
                     print(str(e))
                     pass
@@ -79,7 +79,7 @@ async def play():
                 playing = True
                 del queue[0]
                 try:
-                    await deezer(song)
+                    await deezer(requested_by, song)
                 except Exception as e:
                     print(str(e))
                     pass
