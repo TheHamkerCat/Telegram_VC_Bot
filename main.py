@@ -272,7 +272,7 @@ async def deezer(requested_by, query):
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                f"http://52.0.6.104:8000/deezer/{query}/1"
+                f"http://52.0.6.104:8000/deezer?query={query}&count=1"
             ) as resp:
                 r = json.loads(await resp.text())
         title = r[0]["title"]
