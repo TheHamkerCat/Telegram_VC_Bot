@@ -47,6 +47,10 @@ async def getadmins(chat_id):
     admins.append(owner_id)
     return admins
 
+@app.on_message(filters.command("kill") & filters.user(owner_id))
+async def killbot(_, message):
+    await message.reply_text("Killed!")
+    quit()
 
 # Join Voice Chat
 
