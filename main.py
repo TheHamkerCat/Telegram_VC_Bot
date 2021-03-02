@@ -80,7 +80,7 @@ async def joinvc(_, message):
 # List Voice Chats
 
 
-@app.on_message(filters.command("listvc") & filters.chat(owner_id))
+@app.on_message(filters.command("listvc") & filters.user(owner_id))
 async def listvc(_, message):
     if not joined_chats:
         await message.edit_text("No Chats Found")
