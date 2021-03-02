@@ -172,7 +172,7 @@ async def end_callback(_, CallbackQuery):
     except:
         pass
     await app.answer_callback_query(CallbackQuery.id, "Skipped!", show_alert=True)
-
+    await app.send_message(sudo_chat_id, text=f"{CallbackQuery.from_user.mention} Skipped The Music.")
 
 @app.on_message(
     filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited
