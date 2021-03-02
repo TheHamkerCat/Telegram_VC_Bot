@@ -1,9 +1,7 @@
 from __future__ import unicode_literals
 import youtube_dl
 import asyncio
-import aiohttp
 import time
-import json
 import os
 from pyrogram.raw.functions.channels import GetFullChannel
 from pyrogram.raw.functions.phone import LeaveGroupCall
@@ -16,6 +14,7 @@ from functions import (
     convert_seconds,
     time_to_seconds,
     download_and_transcode_song,
+    transcode,
     fetch,
     generate_cover_square,
     generate_cover,
