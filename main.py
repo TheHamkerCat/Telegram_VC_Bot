@@ -28,15 +28,13 @@ app = Client(
     api_hash=api_hash
 )
 
-vc = GroupCall(app, 'input.raw')
-
 
 # For Blacklist filter
 blacks = []
 # Global vars
 playing = False
 queue = []
-joined_chats = []
+joined_chats = {}
 
 
 # Admins list
@@ -63,10 +61,16 @@ async def joinvc(_, message):
     if len(message.command) != 2:
         await message.reply_text("/joinvc [CHAT_ID]")
         return
-    chat_id = int(message.text.split(None, 1)[1])
-    await vc.start(chat_id)
-    joined_chats.append(chat_id)
-    await message.reply_text("Joined The Voice Chat.")
+    try:
+        chat_id = int(message.text.split(None, 1)[1])
+        vc = GroupCall(app, 'input.raw')
+        await vc.start(chat_id)
+        joined_chats[chat_id] = vc
+        await message.reply_text("Joined The Voice Chat.")
+    except Exception as e:
+        print(str(e))
+        await app.send_message(owner_id, text=str(e))
+
 
 
 # Leave Voice Chat
@@ -82,12 +86,30 @@ async def leavevc(_, message):
     if len(message.command) != 2:
         await message.reply_text("/leavevc [CHAT_ID]")
         return
-    chat_id = int(message.text.split(None, 1)[1])
-    full_chat = await app.send(GetFullChannel(channel=(await app.resolve_peer(chat_id))))
-    await app.send(LeaveGroupCall(call=full_chat.full_chat.call, source=0))
-    joined_chats.remove(chat_id)
-    await message.reply_text("Left The Voice Chat.")
+    try:
+        chat_id = int(message.text.split(None, 1)[1])
+        full_chat = await app.send(GetFullChannel(channel=(await app.resolve_peer(chat_id))))
+        await app.send(LeaveGroupCall(call=full_chat.full_chat.call, source=0))
+        del joined_chats[chat_id]
+        await message.reply_text("Left The Voice Chat.")
+    except Exception as e:
+        print(str(e))
+        await app.send_message(owner_id, text=str(e))
 
+
+# Stop Playing
+
+
+@app.on_message(
+    filters.command("stop") & filters.chat(sudo_chat_id) & ~filters.edited
+    )
+async def stopvc(_, message):
+    try:
+        (joined_chats[message.chat.id]).stop_playout() 
+        await message.reply_text("Player Stopped!")
+    except Exception as e:
+        print(str(e))
+        await app.send_message(owner_id, text=str(e))
 
 
 # Queue handler
@@ -95,7 +117,7 @@ async def leavevc(_, message):
 async def play():
     global queue, playing
     while not playing:
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         if len(queue) != 0:
             service = queue[0]["service"]
             song = queue[0]["song"]
