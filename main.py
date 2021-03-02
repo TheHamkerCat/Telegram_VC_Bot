@@ -1,19 +1,18 @@
 from __future__ import unicode_literals
 import youtube_dl
 import asyncio
+import ffmpeg
 import aiohttp
 import time
 import json
 import os
-
+from pyrogram.raw.functions.channels import GetFullChannel
+from pyrogram.raw.functions.phone import LeaveGroupCall
 from pyrogram import Client, filters
-from pyrogram.types import (
-    Message,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-)
+from pyrogram.types import Message
 from youtube_search import YoutubeSearch
-from config import owner_id, bot_token, sudo_chat_id
+from config import owner_id, sudo_chat_id, api_id, api_hash
+from pytgcalls import GroupCall
 from functions import (
     convert_seconds,
     time_to_seconds,
@@ -24,17 +23,21 @@ from functions import (
 
 
 app = Client(
-    ":memory:",
-    bot_token=bot_token,
-    api_id=6,
-    api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e",
+    "tgvc",
+    api_id=api_id,
+    api_hash=api_hash
 )
+
+vc = GroupCall(app, 'input.raw')
+
 
 # For Blacklist filter
 blacks = []
 # Global vars
 playing = False
 queue = []
+joined_chats = []
+
 
 # Admins list
 
@@ -45,6 +48,47 @@ async def getadmins(chat_id):
         admins.append(i.user.id)
     admins.append(owner_id)
     return admins
+
+
+# Join Voice Chat
+
+
+@app.on_message(
+    filters.command("joinvc") & filters.chat(sudo_chat_id) & ~filters.edited
+    )
+async def joinvc(_, message):
+    if message.chat.id in joined_chats:
+        await message.reply_text("Bot Is Already In Voice Chat.")
+        return
+    if len(message.command) != 2:
+        await message.reply_text("/joinvc [CHAT_ID]")
+        return
+    chat_id = int(message.text.split(None, 1)[1])
+    await vc.start(chat_id)
+    joined_chats.append(chat_id)
+    await message.reply_text("Joined The Voice Chat.")
+
+
+# Leave Voice Chat
+
+
+@app.on_message(
+    filters.command("leavevc") & filters.chat(sudo_chat_id) & ~filters.edited
+    )
+async def leavevc(_, message):
+    if message.chat.id not in joined_chats:
+        await message.reply_text("Bot Is Not In Voice Chat.")
+        return
+    if len(message.command) != 2:
+        await message.reply_text("/leavevc [CHAT_ID]")
+        return
+    chat_id = int(message.text.split(None, 1)[1])
+    full_chat = await app.send(GetFullChannel(channel=(await app.resolve_peer(chat_id))))
+    await app.send(LeaveGroupCall(call=full_chat.full_chat.call, source=0))
+    joined_chats.remove(chat_id)
+    await message.reply_text("Left The Voice Chat.")
+
+
 
 # Queue handler
 
@@ -145,35 +189,6 @@ async def skip(_, message):
     await message.delete()
 
 
-# Skip button
-
-
-@app.on_callback_query(filters.regex("end"))
-async def end_callback(_, CallbackQuery):
-    global playing
-    if CallbackQuery.from_user.id in blacks:
-        return
-    list_of_admins = await getadmins(sudo_chat_id)
-    if CallbackQuery.from_user.id not in list_of_admins:
-        await app.answer_callback_query(
-            CallbackQuery.id,
-            "Well, you're not admin, SO YOU CAN'T SKIP"
-            + "LOL",
-            show_alert=True,
-        )
-        return
-    if len(queue) == 0:
-        await app.answer_callback_query(CallbackQuery.id,
-                "Queue Is Empty, Just Like Your Life.", show_alert=True)
-        return
-    playing = False
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
-    await app.answer_callback_query(CallbackQuery.id, "Skipped!", show_alert=True)
-    await app.send_message(sudo_chat_id, text=f"{CallbackQuery.from_user.mention} Skipped The Music.")
-
 @app.on_message(
     filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited
     )
@@ -198,15 +213,17 @@ async def queue_list(_, message):
 
 @app.on_message(filters.command("repo") & ~filters.edited)
 async def repo(_, message: Message):
-    await message.reply_text(
+    m = await message.reply_text(
         "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
         + " | [Group](t.me/TheHamkerChat)",
         disable_web_page_preview=True,
     )
+    await asyncio.sleep(5)
+    await m.delete()
 
 
 @app.on_message(
-    filters.command(["ping"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command("ping") & filters.chat(sudo_chat_id) & ~filters.edited
 )
 async def ping(_, message):
     global blacks
@@ -293,17 +310,13 @@ async def deezer(requested_by, query):
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         photo="final.png",
-        caption=f"Playing [{title}]({url}) Via Deezer.",
-        reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Skip", callback_data="end")]]
-        ),
-        parse_mode="markdown",
+        caption=f"Playing [{title}]({url}) Via Deezer."
     )
 
     s = await asyncio.create_subprocess_shell(
         f"mpv {url} --no-video",
         stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
     )
     await s.wait()
     await m.delete()
@@ -343,11 +356,7 @@ async def jiosaavn(requested_by, query):
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         caption=f"Playing `{sname}` Via Jiosaavn",
-        photo="final.png",
-        reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Skip", callback_data="end")]]
-        ),
-        parse_mode="markdown",
+        photo="final.png"
     )
 
     s = await asyncio.create_subprocess_shell(
@@ -394,25 +403,18 @@ async def ytplay(requested_by, query):
         info_dict = ydl.extract_info(link, download=False)
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
-        os.rename(audio_file, "audio.webm")
+    await m.edit("Transcoding")
+    ffmpeg.input(audio_file).output("input.raw", format='s16le', acodec='pcm_s16le',
+        ac=2, ar='48k'
+    ).overwrite_output().run()
+    os.remove(audio_file)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         caption=f"Playing [{title}]({link}) Via YouTube",
-        photo="final.png",
-        reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Skip", callback_data="end")]]
-        ),
-        parse_mode="markdown",
+        photo="final.png"
     )
     os.remove("final.png")
-    s = await asyncio.create_subprocess_shell(
-        "mpv audio.webm --no-video",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    await s.wait()
-    await m.delete()
     playing = False
 
 

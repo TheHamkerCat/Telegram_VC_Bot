@@ -1,5 +1,7 @@
 OpenCC
 Pillow
+pytgcalls
+ffmpeg-python
 Pyrogram
 TgCrypto
 youtube_dl
