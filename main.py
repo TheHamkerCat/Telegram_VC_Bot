@@ -55,6 +55,7 @@ async def getadmins(chat_id):
     filters.command("joinvc") & filters.chat(sudo_chat_id) & ~filters.edited
     )
 async def joinvc(_, message):
+    global joined_chats
     if message.chat.id in joined_chats:
         await message.reply_text("Bot Is Already In Voice Chat.")
         return
@@ -80,6 +81,7 @@ async def joinvc(_, message):
     filters.command("leavevc") & filters.chat(sudo_chat_id) & ~filters.edited
     )
 async def leavevc(_, message):
+    global joined_chats
     if message.chat.id not in joined_chats:
         await message.reply_text("Bot Is Not In Voice Chat.")
         return
@@ -104,6 +106,9 @@ async def leavevc(_, message):
     filters.command("stop") & filters.chat(sudo_chat_id) & ~filters.edited
     )
 async def stopvc(_, message):
+    if not joined_chats[message.chat.id]:
+        await message.reply_text("Already Stopped.")
+        return
     try:
         (joined_chats[message.chat.id]).stop_playout() 
         await message.reply_text("Player Stopped!")
