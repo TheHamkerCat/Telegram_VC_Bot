@@ -450,6 +450,7 @@ async def ytplay(requested_by, query):
     os.remove("final.png")
     await asyncio.sleep(duration)
     playing = False
+    await m.delete()
 
 
 # Telegram Audio--------------------------------------------------------------------------------
