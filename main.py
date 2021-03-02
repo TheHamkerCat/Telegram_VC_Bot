@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import youtube_dl
 import asyncio
-import ffmpeg
 import aiohttp
 import time
 import json
@@ -16,6 +15,8 @@ from pytgcalls import GroupCall
 from functions import (
     convert_seconds,
     time_to_seconds,
+    download_and_transcode_song,
+    fetch,
     generate_cover_square,
     generate_cover,
     kill
@@ -35,7 +36,7 @@ blacks = []
 playing = False
 queue = []
 joined_chats = {}
-
+input_file = "input.raw"
 
 # Admins list
 
@@ -60,15 +61,15 @@ async def killbot(_, message):
     )
 async def joinvc(_, message):
     global joined_chats
-    if message.chat.id in joined_chats:
-        await message.reply_text("Bot Is Already In Voice Chat.")
-        return
     if len(message.command) != 2:
         await message.reply_text("/joinvc [CHAT_ID]")
         return
     try:
         chat_id = int(message.text.split(None, 1)[1])
-        vc = GroupCall(app, 'input.raw')
+        if chat_id in joined_chats:
+            await message.reply_text("Bot Is Already In Voice Chat.")
+            return
+        vc = GroupCall(app, input_file)
         await vc.start(chat_id)
         joined_chats[chat_id] = vc
         await message.reply_text("Joined The Voice Chat.")
@@ -319,11 +320,7 @@ async def deezer(requested_by, query):
         sudo_chat_id, text=f"Searching for `{query}` on Deezer"
     )
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"http://52.0.6.104:8000/deezer?query={query}&count=1"
-            ) as resp:
-                r = json.loads(await resp.text())
+        r = await fetch(f"http://52.0.6.104:8000/deezer?query={query}&count=1")
         title = r[0]["title"]
         duration = convert_seconds(int(r[0]["duration"]))
         thumbnail = r[0]["thumbnail"]
@@ -337,20 +334,17 @@ async def deezer(requested_by, query):
         return
     await m.edit("Generating Thumbnail")
     await generate_cover_square(requested_by, title, artist, duration, thumbnail)
-
+    await m.edit("Downloading And Transcoding.")
+    await download_and_transcode_song(url)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         photo="final.png",
         caption=f"Playing [{title}]({url}) Via Deezer."
     )
-
-    s = await asyncio.create_subprocess_shell(
-        f"mpv {url} --no-video",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
-    )
-    await s.wait()
+    os.remove("final.png")
+    await asyncio.sleep(int(r[0]["duration"]))
+    os.remove(input_file)
     await m.delete()
     playing = False
 
@@ -363,12 +357,7 @@ async def jiosaavn(requested_by, query):
         sudo_chat_id, text=f"Searching for `{query}` on JioSaavn"
     )
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
-            ) as resp:
-                r = json.loads(await resp.text())
-
+        r = await fetch(f"https://jiosaavnapi.bhadoo.uk/result/?query={query}")
         sname = r[0]["song"]
         slink = r[0]["media_url"]
         ssingers = r[0]["singers"]
@@ -384,19 +373,17 @@ async def jiosaavn(requested_by, query):
         return
     await m.edit("Processing Thumbnail.")
     await generate_cover_square(requested_by, sname, ssingers, sduration_converted, sthumb)
+    await m.edit("Downloading And Transcoding.")
+    await download_and_transcode_song(slink)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         caption=f"Playing `{sname}` Via Jiosaavn",
         photo="final.png"
     )
-
-    s = await asyncio.create_subprocess_shell(
-        f"mpv {slink} --no-video",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    await s.wait()
+    os.remove("final.png")
+    await asyncio.sleep(sduration)
+    os.remove(input_file)
     await m.delete()
     playing = False
 
@@ -437,10 +424,7 @@ async def ytplay(requested_by, query):
         ydl.process_info(info_dict)
     await m.edit("Transcoding")
     os.rename(audio_file, "audio.webm")
-    ffmpeg.input("audio.webm").output("input.raw", format='s16le', acodec='pcm_s16le',
-        ac=2, ar='48k'
-    ).overwrite_output().run()
-    os.remove("audio.webm")
+    transcode("audio.webm")
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,

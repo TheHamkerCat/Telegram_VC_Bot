@@ -1,10 +1,29 @@
 import os
 import aiohttp
 import aiofiles
+import ffmpeg
+import json
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+#Download song
+async def download_and_transcode_song(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                f = await aiofiles.open('song.raw', mode='wb')
+                await f.write(await resp.read())
+                await f.close()
+    ffmpeg.input('song.raw').output("input.raw", format='s16le', acodec='pcm_s16le', ac=2, ar='48k').overwrite_output().run() 
+    os.remove('song.raw')
+
+
+# Fetch
+async def fetch(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            return json.loads(await resp.text())
 
 # Os Determination
 if os.name == "nt":
