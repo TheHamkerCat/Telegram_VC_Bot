@@ -56,7 +56,7 @@ async def killbot(_, message):
 
 
 @app.on_message(
-    filters.command("joinvc") & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command("joinvc") & filters.user(owner_id) & ~filters.edited
     )
 async def joinvc(_, message):
     global joined_chats
@@ -77,46 +77,22 @@ async def joinvc(_, message):
         await app.send_message(owner_id, text=str(e))
 
 
+# List Voice Chats
 
-# Leave Voice Chat
 
-
-@app.on_message(
-    filters.command("leavevc") & filters.chat(sudo_chat_id) & ~filters.edited
-    )
-async def leavevc(_, message):
-    global joined_chats
-    if message.chat.id not in joined_chats:
-        await message.reply_text("Bot Is Not In Voice Chat.")
+@app.on_message(filters.command("listvc") & filters.chat(owner_id))
+async def listvc(_, message):
+    if not joined_chats:
+        await message.edit_text("No Chats Found")
         return
-    if len(message.command) != 2:
-        await message.reply_text("/leavevc [CHAT_ID]")
-        return
+    text = ""
+    i = 1
     try:
-        chat_id = int(message.text.split(None, 1)[1])
-        full_chat = await app.send(GetFullChannel(channel=(await app.resolve_peer(chat_id))))
-        await app.send(LeaveGroupCall(call=full_chat.full_chat.call, source=0))
-        del joined_chats[chat_id]
-        await message.reply_text("Left The Voice Chat.")
-    except Exception as e:
-        print(str(e))
-        await app.send_message(owner_id, text=str(e))
-
-
-# Stop Playing
-
-
-@app.on_message(
-    filters.command("stop") & filters.chat(sudo_chat_id) & ~filters.edited
-    )
-async def stopvc(_, message):
-    chat_id = message.chat.id
-    if chat_id not in joined_chats:
-        await message.reply_text("Already Stopped.")
-        return
-    try:
-        (joined_chats[chat_id]).stop_playout() 
-        await message.reply_text("Player Stopped!")
+        for joined_chat in joined_chats:
+            name = (await app.get_chat(joined_chat)).title
+            text += f"**{i}.** **{name}**\n"
+            i += 1
+        await message.reply_text(text)
     except Exception as e:
         print(str(e))
         await app.send_message(owner_id, text=str(e))
@@ -300,6 +276,8 @@ async def help(_, message: Message):
 /ping To Ping All Datacenters Of Telegram.
 /skip To Skip The Current Playing Music.
 /play youtube/saavn/deezer [song_name]
+/joinvc [CHAT_ID] To Join A Voice Chat, Only For Owner
+/listvc To List Vcs
 /telegram While Taging a Song To Play From Telegram File.
 /users To Get A List Of Blacklisted Users.
 
