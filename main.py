@@ -404,10 +404,11 @@ async def ytplay(requested_by, query):
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
     await m.edit("Transcoding")
-    ffmpeg.input(audio_file).output("input.raw", format='s16le', acodec='pcm_s16le',
+    os.rename(audio_file, "audio.webm")
+    ffmpeg.input("audio.webm").output("input.raw", format='s16le', acodec='pcm_s16le',
         ac=2, ar='48k'
     ).overwrite_output().run()
-    os.remove(audio_file)
+    os.remove("audio.webm")
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
