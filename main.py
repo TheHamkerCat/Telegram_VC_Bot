@@ -448,7 +448,7 @@ async def ytplay(requested_by, query):
         photo="final.png"
     )
     os.remove("final.png")
-    await asyncio.sleep(duration)
+    await asyncio.sleep(time_to_seconds(duration))
     playing = False
     await m.delete()
 
