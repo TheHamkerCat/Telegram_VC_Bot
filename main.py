@@ -106,11 +106,12 @@ async def leavevc(_, message):
     filters.command("stop") & filters.chat(sudo_chat_id) & ~filters.edited
     )
 async def stopvc(_, message):
-    if not joined_chats[message.chat.id]:
+    chat_id = message.chat.id
+    if chat_id not in joined_chats:
         await message.reply_text("Already Stopped.")
         return
     try:
-        (joined_chats[message.chat.id]).stop_playout() 
+        (joined_chats[chat_id]).stop_playout() 
         await message.reply_text("Player Stopped!")
     except Exception as e:
         print(str(e))
