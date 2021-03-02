@@ -443,13 +443,6 @@ async def tgplay(_, message):
     m = await message.reply_text("Downloading")
     await app.download_media(message.reply_to_message, file_name="audio.webm")
     await m.edit(f"Playing `{message.reply_to_message.link}`")
-    s = await asyncio.create_subprocess_shell(
-        "mpv downloads/audio.webm --no-video",
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    await s.wait()
-    await m.delete()
     playing = False
     os.remove("downloads/audio.webm")
 
