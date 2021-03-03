@@ -29,7 +29,7 @@ app = Client(
 
 try:
     with app:
-        app.send_message(sudo_chat_id, text="**Userbot Online!, Use /joinvc To Join Voice Chat.**"
+        app.send_message(sudo_chat_id, text="**Userbot Online!, Use /joinvc To Join Voice Chat.**")
 except:
     pass
 
