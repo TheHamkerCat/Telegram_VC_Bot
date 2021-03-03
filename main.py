@@ -60,6 +60,7 @@ async def killbot(_, message):
 
 @app.on_message(filters.command("authorize") & filters.user(owner_id))
 async def authorize(_, message):
+    global sudo_chats
     chat_id = message.chat.id
     if chat_id in sudo_chats:
         await message.reply_text("Chat Already Authorized.")
@@ -73,6 +74,7 @@ async def authorize(_, message):
 
 @app.on_message(filters.command("unauthorize") & filters.user(owner_id))
 async def unauthorize(_, message):
+    global sudo_chats
     chat_id = message.chat.id
     if chat_id not in sudo_chats:
         await message.reply_text("Chat Already Unauthorized.")
