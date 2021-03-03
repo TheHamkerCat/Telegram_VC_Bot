@@ -208,9 +208,11 @@ async def play():
 
 
 @app.on_message(
-    filters.command("play") & filters.chat(sudo_chats) & ~filters.edited
+    filters.command("play") &  ~filters.edited
 )
 async def queuer(_, message):
+    if message.chat.id not in sudo_chats:
+        return
     if len(message.command) < 3:
         await message.reply_text(
             "**Usage:**\n/play youtube/saavn/deezer [song_name]"
