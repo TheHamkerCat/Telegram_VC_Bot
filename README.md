@@ -37,12 +37,16 @@ Command | Description
 /ping | To Ping All Datacenters Of Telegram.
 /skip | To Skip Any Playing Music.
 /play youtube/saavn/deezer [song_name] | To Play A Song.
-/joinvc [CHAT-ID] | To Join A Voice Chat.
-/listvc | To Get A List Of Joined Voice Chats.
 /telegram | To Play A Song Directly From Telegram File.
 /users | To Get A List Of Blacklisted Users.
 /queue | To Check Queue Status.
-Admin Commands:
+
+Owner Commands:
+/joinvc [CHAT-ID] | To Join A Voice Chat.
+/leavevc [CHAT-ID] | To Leave A Voice Chat.
+/listvc | To Get A List Of Joined Voice Chats.
+/authorize | To Authorize A Chat.
+/unauthorize | To Unauthorise A Chat.
 /black | To Blacklist A User.
 /white | To Whitelist A User.
 

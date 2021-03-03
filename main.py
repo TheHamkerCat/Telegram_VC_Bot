@@ -17,23 +17,17 @@ from functions import (
     generate_cover_square,
     generate_cover,
 )
+from misc import HELP_TEXT, USERBOT_ONLINE_TEXT
 
-
-app = Client(
-    "tgvc",
-    api_id=api_id,
-    api_hash=api_hash
-)
+app = Client("tgvc", api_id=api_id, api_hash=api_hash)
 
 
 try:
     with app:
-        app.send_message(sudo_chat_id, text="**Userbot Online!, Use /joinvc To Join Voice Chat.**")
+        app.send_message(sudo_chat_id, text=USERBOT_ONLINE_TEXT)
 except:
     pass
 
-# For Blacklist filter
-blacks = []
 # Global vars
 playing = False
 queue = []
@@ -50,6 +44,10 @@ async def getadmins(chat_id):
         admins.append(i.user.id)
     admins.append(owner_id)
     return admins
+
+
+# Kill The Script
+
 
 @app.on_message(filters.command("kill") & filters.user(owner_id))
 async def killbot(_, message):
@@ -88,7 +86,7 @@ async def unauthorize(_, message):
 
 @app.on_message(
     filters.command("joinvc") & filters.user(owner_id) & ~filters.edited
-    )
+)
 async def joinvc(client, message):
     global joined_chats
     if len(message.command) > 2:
@@ -117,9 +115,11 @@ async def joinvc(client, message):
 # Leave vc
 
 
-@app.on_message(filters.command("leavevc") & filters.user(owner_id) & ~filters.edited)
+@app.on_message(
+    filters.command("leavevc") & filters.user(owner_id) & ~filters.edited
+)
 async def leavevc(_, message):
-    #just using this to pop chat_id from joined_chats for now
+    # just using this to pop chat_id from joined_chats for now
     global joined_chats
     if len(message.command) > 2:
         await message.reply_text("/leavevc [CHAT_ID]")
@@ -136,7 +136,6 @@ async def leavevc(_, message):
     await asyncio.sleep(5)
     await m.delete()
     await message.delete()
-
 
 
 # List Voice Chats
@@ -161,6 +160,7 @@ async def listvc(_, message):
 
 
 # Queue handler
+
 
 async def play():
     global queue, playing
@@ -201,12 +201,13 @@ async def play():
                     await app.send_message(owner_id, text=str(e))
                     pass
 
+
 # Queue Append
 
 
 @app.on_message(
     filters.command("play") & filters.chat(sudo_chats) & ~filters.edited
-    )
+)
 async def queuer(_, message):
     if message.from_user.id in blacks:
         return
@@ -222,11 +223,14 @@ async def queuer(_, message):
     requested_by = message.from_user.first_name
     services = ["youtube", "deezer", "saavn"]
     if service not in services:
-        await app.send_message(message.chat.id,
-            text="**Usage:**\n/play youtube/saavn/deezer [song_name]"
+        await app.send_message(
+            message.chat.id,
+            text="**Usage:**\n/play youtube/saavn/deezer [song_name]",
         )
         return
-    queue.append({"service": service, "song": song_name, "requested_by": requested_by})
+    queue.append(
+        {"service": service, "song": song_name, "requested_by": requested_by}
+    )
     m = await app.send_message(message.chat.id, text=f"Added To Queue.")
     await play()
     await asyncio.sleep(3)
@@ -260,7 +264,7 @@ async def skip(_, message):
 
 @app.on_message(
     filters.command("queue") & filters.chat(sudo_chats) & ~filters.edited
-    )
+)
 async def queue_list(_, message):
     if message.from_user.id in blacks:
         return
@@ -276,6 +280,7 @@ async def queue_list(_, message):
     await asyncio.sleep(5)
     await m.delete()
     await message.delete()
+
 
 # Ping and repo
 
@@ -322,35 +327,17 @@ async def start(_, message: Message):
 # Help
 
 
-@app.on_message(
-    filters.command(["help"]) & ~filters.edited
-)
+@app.on_message(filters.command(["help"]) & ~filters.edited)
 async def help(_, message: Message):
     global blacks
     if message.from_user.id in blacks:
         await message.reply_text("You're Blacklisted, So Stop Spamming.")
         return
-    await message.reply_text(
-        """**Currently These Commands Are Supported.**
-/start To Start The bot.
-/help To Show This Message.
-/ping To Ping All Datacenters Of Telegram.
-/skip To Skip The Current Playing Music.
-/play youtube/saavn/deezer [song_name]
-/joinvc [CHAT_ID] To Join A Voice Chat, Only For Owner
-/listvc To List Vcs
-/telegram While Taging a Song To Play From Telegram File.
-/users To Get A List Of Blacklisted Users.
-
-**Admin Commands**:
-/black To Blacklist A User.
-/white To Whitelist A User.
-
-NOTE: Do Not Assign These Commands To Bot Via BotFather"""
-    )
+    await message.reply_text(HELP_TEXT)
 
 
 # Deezer----------------------------------------------------------------------------------------
+
 
 async def deezer(requested_by, query):
     global playing
@@ -358,7 +345,9 @@ async def deezer(requested_by, query):
         sudo_chat_id, text=f"Searching for `{query}` on Deezer"
     )
     try:
-        r = await fetch(f"http://52.0.6.104:8000/deezer?query={query}&count=1")
+        r = await fetch(
+            f"http://52.0.6.104:8000/deezer?query={query}&count=1"
+        )
         title = r[0]["title"]
         duration = convert_seconds(int(r[0]["duration"]))
         thumbnail = r[0]["thumbnail"]
@@ -371,14 +360,16 @@ async def deezer(requested_by, query):
         playing = False
         return
     await m.edit("Generating Thumbnail")
-    await generate_cover_square(requested_by, title, artist, duration, thumbnail)
+    await generate_cover_square(
+        requested_by, title, artist, duration, thumbnail
+    )
     await m.edit("Downloading And Transcoding.")
     await download_and_transcode_song(url)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         photo="final.png",
-        caption=f"Playing [{title}]({url}) Via Deezer."
+        caption=f"Playing [{title}]({url}) Via Deezer.",
     )
     os.remove("final.png")
     await asyncio.sleep(int(r[0]["duration"]))
@@ -388,13 +379,16 @@ async def deezer(requested_by, query):
 
 # Jiosaavn--------------------------------------------------------------------------------------
 
+
 async def jiosaavn(requested_by, query):
     global playing
     m = await app.send_message(
         sudo_chat_id, text=f"Searching for `{query}` on JioSaavn"
     )
     try:
-        r = await fetch(f"https://jiosaavnapi.bhadoo.uk/result/?query={query}")
+        r = await fetch(
+            f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
+        )
         sname = r[0]["song"]
         slink = r[0]["media_url"]
         ssingers = r[0]["singers"]
@@ -409,14 +403,16 @@ async def jiosaavn(requested_by, query):
         playing = False
         return
     await m.edit("Processing Thumbnail.")
-    await generate_cover_square(requested_by, sname, ssingers, sduration_converted, sthumb)
+    await generate_cover_square(
+        requested_by, sname, ssingers, sduration_converted, sthumb
+    )
     await m.edit("Downloading And Transcoding.")
     await download_and_transcode_song(slink)
     await m.delete()
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         caption=f"Playing `{sname}` Via Jiosaavn",
-        photo="final.png"
+        photo="final.png",
     )
     os.remove("final.png")
     await asyncio.sleep(sduration)
@@ -465,7 +461,7 @@ async def ytplay(requested_by, query):
     m = await app.send_photo(
         chat_id=sudo_chat_id,
         caption=f"Playing [{title}]({link}) Via YouTube",
-        photo="final.png"
+        photo="final.png",
     )
     os.remove("final.png")
     await asyncio.sleep(time_to_seconds(duration))
@@ -476,9 +472,9 @@ async def ytplay(requested_by, query):
 # Telegram Audio--------------------------------------------------------------------------------
 
 
-@app.on_message(filters.command("telegram") &
-        filters.chat(sudo_chat_id) & ~filters.edited
-        )
+@app.on_message(
+    filters.command("telegram") & filters.chat(sudo_chat_id) & ~filters.edited
+)
 async def tgplay(_, message):
     global playing
     if len(queue) != 0:
@@ -506,77 +502,6 @@ async def tgplay(_, message):
     os.remove("downloads/audio.webm")
 
 
-# Ban
-
-
-@app.on_message(
-    filters.command(["black"]) & filters.chat(sudo_chat_id) & ~filters.edited
-)
-async def blacklist(_, message: Message):
-    global blacks
-    if message.from_user.id != owner_id:
-        await message.reply_text("Only owner can blacklist users.")
-        return
-    if not message.reply_to_message:
-        await message.reply_text(
-            "Reply to a message with /black to blacklist a user."
-        )
-        return
-    if message.reply_to_message.from_user.id in blacks:
-        await message.reply_text("This user is already blacklisted.")
-        return
-    blacks.append(message.reply_to_message.from_user.id)
-    await message.reply_text(
-        f"Blacklisted {message.reply_to_message.from_user.mention}"
-    )
-
-
-# Unban
-
-
-@app.on_message(
-    filters.command(["white"]) & filters.chat(sudo_chat_id) & ~filters.edited
-)
-async def whitelist(_, message: Message):
-    global blacks
-    if message.from_user.id != owner_id:
-        await message.reply_text("Only owner can whitelist users.")
-        return
-    if not message.reply_to_message:
-        await message.reply_text("Reply to a message to whitelist a user.")
-        return
-    if message.reply_to_message.from_user.id in blacks:
-        blacks.remove(message.reply_to_message.from_user.id)
-        await message.reply_text(
-            f"Whitelisted {message.reply_to_message.from_user.mention}"
-        )
-    else:
-        await message.reply_text("This user is already whitelisted.")
-
-
-# Blacklisted users
-
-
-@app.on_message(
-    filters.command(["users"]) & filters.chat(sudo_chat_id) & ~filters.edited
-)
-async def users(client, message: Message):
-    global blacks
-    if message.from_user.id in blacks:
-        await message.reply_text("You're Blacklisted, So Stop Spamming.")
-        return
-    output = "Blacklisted Users:\n"
-    n = 1
-    for i in blacks:
-        usern = (await client.get_users(i)).mention
-        output += f"{n}. {usern}\n"
-        n += 1
-    if len(blacks) == 0:
-        await message.reply_text("No Users Are Blacklisted")
-        return
-    await message.reply_text(output)
-
-
 print(
     "\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n"
 )
@@ -586,3 +511,4 @@ try:
 except KeyboardInterrupt:
     print("Killed!")
     exit()
+
