@@ -58,7 +58,7 @@ async def killbot(_, message):
 @app.on_message(
     filters.command("joinvc") & filters.user(owner_id) & ~filters.edited
     )
-async def joinvc(_, message):
+async def joinvc(client, message):
     global joined_chats
     if len(message.command) != 2:
         await message.reply_text("/joinvc [CHAT_ID]")
@@ -68,7 +68,7 @@ async def joinvc(_, message):
         if chat_id in joined_chats:
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
-        vc = GroupCall(app, input_file)
+        vc = GroupCall(client, input_file)
         await vc.start(chat_id)
         joined_chats[chat_id] = vc
         await message.reply_text("Joined The Voice Chat.")
