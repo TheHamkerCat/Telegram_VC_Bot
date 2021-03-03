@@ -3,8 +3,6 @@ import youtube_dl
 import asyncio
 import time
 import os
-from pyrogram.raw.functions.channels import GetFullChannel
-from pyrogram.raw.functions.phone import LeaveGroupCall
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from youtube_search import YoutubeSearch
@@ -78,6 +76,27 @@ async def joinvc(_, message):
     except Exception as e:
         print(str(e))
         await app.send_message(owner_id, text=str(e))
+
+
+# Leave vc
+
+
+@app.on_message(filters.command("leavevc") & filters.user(owner_id) & ~filters.edited)
+async def leavevc(_, message):
+    #just using this to pop chat_id from joined_chats for now
+    global joined_chats
+    if len(message.command) > 2:
+        await message.reply_text("/leavevc [CHAT_ID]")
+        return
+    if len(message.command) == 1:
+        chat_id = message.chat.id
+    if len(message.command) == 2:
+        chat_id = int(message.text.split(None, 1)[1])
+    if chat_id not in joined_chats:
+        await message.reply_text("Already out of the voice chat")
+        return
+    del joined_chats[chat_id]
+
 
 
 # List Voice Chats
