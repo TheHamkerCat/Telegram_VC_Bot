@@ -60,11 +60,14 @@ async def killbot(_, message):
     )
 async def joinvc(_, message):
     global joined_chats
-    if len(message.command) != 2:
+    if len(message.command) > 2:
         await message.reply_text("/joinvc [CHAT_ID]")
         return
-    try:
+    if len(message.command) == 1:
+        chat_id = message.chat.id
+    if len(message.command) == 2:
         chat_id = int(message.text.split(None, 1)[1])
+    try:
         if chat_id in joined_chats:
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
