@@ -27,6 +27,12 @@ app = Client(
 )
 
 
+try:
+    with app:
+        app.send_message(sudo_chat_id, text="**Userbot Online!, Use /joinvc To Join Voice Chat.**"
+except:
+    pass
+
 # For Blacklist filter
 blacks = []
 # Global vars
@@ -343,7 +349,6 @@ async def deezer(requested_by, query):
     )
     os.remove("final.png")
     await asyncio.sleep(int(r[0]["duration"]))
-    os.remove(input_file)
     await m.delete()
     playing = False
 
@@ -382,7 +387,6 @@ async def jiosaavn(requested_by, query):
     )
     os.remove("final.png")
     await asyncio.sleep(sduration)
-    os.remove(input_file)
     await m.delete()
     playing = False
 
