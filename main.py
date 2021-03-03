@@ -38,6 +38,7 @@ blacks = []
 playing = False
 queue = []
 joined_chats = {}
+sudo_chats = [sudo_chat_id]
 input_file = "input.raw"
 
 # Admins list
@@ -54,6 +55,33 @@ async def getadmins(chat_id):
 async def killbot(_, message):
     await message.reply_text("Killed!")
     quit()
+
+
+# AllowChat
+
+
+@app.on_message(filters.command("authorize") & filters.user(owner_id))
+async def authorize(_, message):
+    chat_id = message.chat.id
+    if chat_id in sudo_chats:
+        await message.reply_text("Chat Already Authorized.")
+        return
+    sudo_chats.append(chat_id)
+    await message.reply_text("Chat Authorized.")
+
+
+# Deny Chats
+
+
+@app.on_message(filters.command("unauthorize") & filters.user(owner_id))
+async def unauthorize(_, message):
+    chat_id = message.chat.id
+    if chat_id not in sudo_chats:
+        await message.reply_text("Chat Already Unauthorized.")
+        return
+    sudo_chats.remove(chat_id)
+    await message.reply_text("Chat Unauthorized.")
+
 
 # Join Voice Chat
 
@@ -177,7 +205,7 @@ async def play():
 
 
 @app.on_message(
-    filters.command("play") & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command("play") & filters.chat(sudo_chats) & ~filters.edited
     )
 async def queuer(_, message):
     if message.from_user.id in blacks:
@@ -209,7 +237,7 @@ async def queuer(_, message):
 
 
 @app.on_message(
-    filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command("skip") & filters.chat(sudo_chats) & ~filters.edited
 )
 async def skip(_, message):
     global playing
@@ -231,7 +259,7 @@ async def skip(_, message):
 
 
 @app.on_message(
-    filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command("queue") & filters.chat(sudo_chats) & ~filters.edited
     )
 async def queue_list(_, message):
     if message.from_user.id in blacks:
@@ -264,7 +292,7 @@ async def repo(_, message: Message):
 
 
 @app.on_message(
-    filters.command("ping") & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command("ping") & filters.chat(sudo_chats) & ~filters.edited
 )
 async def ping(_, message):
     global blacks
@@ -295,7 +323,7 @@ async def start(_, message: Message):
 
 
 @app.on_message(
-    filters.command(["help"]) & filters.chat(sudo_chat_id) & ~filters.edited
+    filters.command(["help"]) & ~filters.edited
 )
 async def help(_, message: Message):
     global blacks
