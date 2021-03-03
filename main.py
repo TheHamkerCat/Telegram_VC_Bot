@@ -16,7 +16,6 @@ from functions import (
     fetch,
     generate_cover_square,
     generate_cover,
-    kill
 )
 
 
@@ -78,7 +77,10 @@ async def joinvc(_, message):
         vc = GroupCall(app, input_file)
         await vc.start(chat_id)
         joined_chats[chat_id] = vc
-        await message.reply_text("Joined The Voice Chat.")
+        m = await message.reply_text("Joined The Voice Chat.")
+        await asyncio.sleep(5)
+        await m.delete()
+        await message.delete()
     except Exception as e:
         print(str(e))
         await app.send_message(owner_id, text=str(e))
@@ -102,6 +104,10 @@ async def leavevc(_, message):
         await message.reply_text("Already out of the voice chat")
         return
     del joined_chats[chat_id]
+    m = await message.reply_text("Left The Voice Chat")
+    await asyncio.sleep(5)
+    await m.delete()
+    await message.delete()
 
 
 
@@ -144,6 +150,7 @@ async def play():
                     await ytplay(requested_by, song)
                 except Exception as e:
                     print(str(e))
+                    await app.send_message(owner_id, text=str(e))
                     pass
             elif service == "saavn":
                 print(f"Playing {song} via {service}")
@@ -153,6 +160,7 @@ async def play():
                     await jiosaavn(requested_by, song)
                 except Exception as e:
                     print(str(e))
+                    await app.send_message(owner_id, text=str(e))
                     pass
             elif service == "deezer":
                 print(f"Playing {song} via {service}")
@@ -162,6 +170,7 @@ async def play():
                     await deezer(requested_by, song)
                 except Exception as e:
                     print(str(e))
+                    await app.send_message(owner_id, text=str(e))
                     pass
 
 # Queue Append
@@ -215,10 +224,6 @@ async def skip(_, message):
         await message.delete()
         return
     playing = False
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
     m = await message.reply_text("Skipped!")
     await asyncio.sleep(5)
     await m.delete()
