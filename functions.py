@@ -33,12 +33,6 @@ async def fetch(url):
         async with session.get(url) as resp:
             return json.loads(await resp.text())
 
-# Os Determination
-if os.name == "nt":
-    kill = "tskill"
-else:
-    kill = "killall -9"
-
 
 # Get User Input
 def kwairi(message):

@@ -3,8 +3,6 @@ import youtube_dl
 import asyncio
 import time
 import os
-from pyrogram.raw.functions.channels import GetFullChannel
-from pyrogram.raw.functions.phone import LeaveGroupCall
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from youtube_search import YoutubeSearch
@@ -18,7 +16,6 @@ from functions import (
     fetch,
     generate_cover_square,
     generate_cover,
-    kill
 )
 
 
@@ -28,6 +25,12 @@ app = Client(
     api_hash=api_hash
 )
 
+
+try:
+    with app:
+        app.send_message(sudo_chat_id, text="**Userbot Online!, Use /joinvc To Join Voice Chat.**")
+except:
+    pass
 
 # For Blacklist filter
 blacks = []
@@ -60,21 +63,52 @@ async def killbot(_, message):
     )
 async def joinvc(client, message):
     global joined_chats
-    if len(message.command) != 2:
+    if len(message.command) > 2:
         await message.reply_text("/joinvc [CHAT_ID]")
         return
-    try:
+    if len(message.command) == 1:
+        chat_id = message.chat.id
+    if len(message.command) == 2:
         chat_id = int(message.text.split(None, 1)[1])
+    try:
         if chat_id in joined_chats:
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
         vc = GroupCall(client, input_file)
         await vc.start(chat_id)
         joined_chats[chat_id] = vc
-        await message.reply_text("Joined The Voice Chat.")
+        m = await message.reply_text("Joined The Voice Chat.")
+        await asyncio.sleep(5)
+        await m.delete()
+        await message.delete()
     except Exception as e:
         print(str(e))
         await app.send_message(owner_id, text=str(e))
+
+
+# Leave vc
+
+
+@app.on_message(filters.command("leavevc") & filters.user(owner_id) & ~filters.edited)
+async def leavevc(_, message):
+    #just using this to pop chat_id from joined_chats for now
+    global joined_chats
+    if len(message.command) > 2:
+        await message.reply_text("/leavevc [CHAT_ID]")
+        return
+    if len(message.command) == 1:
+        chat_id = message.chat.id
+    if len(message.command) == 2:
+        chat_id = int(message.text.split(None, 1)[1])
+    if chat_id not in joined_chats:
+        await message.reply_text("Already out of the voice chat")
+        return
+    del joined_chats[chat_id]
+    m = await message.reply_text("Left The Voice Chat")
+    await asyncio.sleep(5)
+    await m.delete()
+    await message.delete()
+
 
 
 # List Voice Chats
@@ -116,6 +150,7 @@ async def play():
                     await ytplay(requested_by, song)
                 except Exception as e:
                     print(str(e))
+                    await app.send_message(owner_id, text=str(e))
                     pass
             elif service == "saavn":
                 print(f"Playing {song} via {service}")
@@ -125,6 +160,7 @@ async def play():
                     await jiosaavn(requested_by, song)
                 except Exception as e:
                     print(str(e))
+                    await app.send_message(owner_id, text=str(e))
                     pass
             elif service == "deezer":
                 print(f"Playing {song} via {service}")
@@ -134,6 +170,7 @@ async def play():
                     await deezer(requested_by, song)
                 except Exception as e:
                     print(str(e))
+                    await app.send_message(owner_id, text=str(e))
                     pass
 
 # Queue Append
@@ -187,10 +224,6 @@ async def skip(_, message):
         await message.delete()
         return
     playing = False
-    try:
-        os.system(f"{kill} mpv")
-    except:
-        pass
     m = await message.reply_text("Skipped!")
     await asyncio.sleep(5)
     await m.delete()
@@ -321,7 +354,6 @@ async def deezer(requested_by, query):
     )
     os.remove("final.png")
     await asyncio.sleep(int(r[0]["duration"]))
-    os.remove(input_file)
     await m.delete()
     playing = False
 
@@ -360,7 +392,6 @@ async def jiosaavn(requested_by, query):
     )
     os.remove("final.png")
     await asyncio.sleep(sduration)
-    os.remove(input_file)
     await m.delete()
     playing = False
 
