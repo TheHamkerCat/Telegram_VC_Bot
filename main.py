@@ -209,8 +209,6 @@ async def play():
     filters.command("play") & filters.chat(sudo_chats) & ~filters.edited
 )
 async def queuer(_, message):
-    if message.from_user.id in blacks:
-        return
     if len(message.command) < 3:
         await message.reply_text(
             "**Usage:**\n/play youtube/saavn/deezer [song_name]"
@@ -245,8 +243,6 @@ async def queuer(_, message):
 )
 async def skip(_, message):
     global playing
-    if message.from_user.id in blacks:
-        return
     if message.from_user.id not in await getadmins(sudo_chat_id):
         return
     if len(queue) == 0:
@@ -266,8 +262,6 @@ async def skip(_, message):
     filters.command("queue") & filters.chat(sudo_chats) & ~filters.edited
 )
 async def queue_list(_, message):
-    if message.from_user.id in blacks:
-        return
     if len(queue) != 0:
         i = 1
         text = ""
@@ -301,9 +295,6 @@ async def repo(_, message: Message):
 )
 async def ping(_, message):
     global blacks
-    if message.from_user.id in blacks:
-        await message.reply_text("You're Blacklisted, So Stop Spamming.")
-        return
     start_time = int(round(time.time() * 1000))
     m = await message.reply_text(".")
     end_time = int(round(time.time() * 1000))
@@ -316,9 +307,6 @@ async def ping(_, message):
 @app.on_message(filters.command(["start"]) & ~filters.edited)
 async def start(_, message: Message):
     global blacks
-    if message.from_user.id in blacks:
-        await message.reply_text("You're Blacklisted, So Stop Spamming.")
-        return
     await message.reply_text(
         "Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support."
     )
@@ -330,9 +318,6 @@ async def start(_, message: Message):
 @app.on_message(filters.command(["help"]) & ~filters.edited)
 async def help(_, message: Message):
     global blacks
-    if message.from_user.id in blacks:
-        await message.reply_text("You're Blacklisted, So Stop Spamming.")
-        return
     await message.reply_text(HELP_TEXT)
 
 
