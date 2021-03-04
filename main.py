@@ -103,7 +103,7 @@ async def joinvc(_, message):
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
         vc = GroupCall(app, input_file)
-        await vc.start(chat_id)
+        await vc.start(chat_id, False)
         joined_chats[chat_id] = vc
         m = await message.reply_text("Joined The Voice Chat.")
         await asyncio.sleep(5)
