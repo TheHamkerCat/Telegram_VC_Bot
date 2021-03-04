@@ -20,7 +20,8 @@ from functions import (
 from misc import HELP_TEXT, USERBOT_ONLINE_TEXT
 
 app = Client("tgvc", api_id=api_id, api_hash=api_hash)
-
+input_file = "input.raw"
+vc = GroupCall(app, input_file)
 
 try:
     with app:
@@ -33,7 +34,7 @@ playing = False
 queue = []
 joined_chats = {}
 sudo_chats = [sudo_chat_id]
-input_file = "input.raw"
+
 
 # Admins list
 
@@ -83,6 +84,7 @@ async def unauthorize(_, message):
     await message.reply_text("Chat Unauthorized.")
 
 
+
 # Join Voice Chat
 
 
@@ -102,8 +104,7 @@ async def joinvc(_, message):
         if chat_id in joined_chats:
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
-        vc = GroupCall(app, input_file)
-        await vc.start(chat_id, False)
+        await vc.start(chat_id)
         joined_chats[chat_id] = vc
         m = await message.reply_text("Joined The Voice Chat.")
         await asyncio.sleep(5)
