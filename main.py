@@ -83,9 +83,6 @@ async def unauthorize(_, message):
     await message.reply_text("Chat Unauthorized.")
 
 
-vc = GroupCall(app, input_file)
-
-
 # Join Voice Chat
 
 
@@ -105,6 +102,7 @@ async def joinvc(_, message):
         if chat_id in joined_chats:
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
+        vc = GroupCall(app, input_file)
         await vc.start(chat_id)
         joined_chats[chat_id] = vc
         m = await message.reply_text("Joined The Voice Chat.")
