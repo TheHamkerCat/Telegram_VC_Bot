@@ -208,7 +208,7 @@ async def play():
 
 
 @app.on_message(
-    filters.command("play") &  ~filters.edited
+    filters.command("play") & ~filters.edited
 )
 async def queuer(_, message):
     if message.chat.id not in sudo_chats:
@@ -500,4 +500,3 @@ try:
 except KeyboardInterrupt:
     print("Killed!")
     exit()
-
