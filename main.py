@@ -6,7 +6,7 @@ import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from youtube_search import YoutubeSearch
-from config import owner_id, sudo_chat_id, api_id, api_hash
+from config import owner_id, sudo_chat_id, api_id, api_hash, ARQ
 from pytgcalls import GroupCall
 from functions import (
     convert_seconds,
@@ -335,7 +335,7 @@ async def deezer(requested_by, query):
     )
     try:
         r = await fetch(
-            f"http://52.0.6.104:8000/deezer?query={query}&count=1"
+            f"{ARQ}deezer?query={query}&count=1"
         )
         title = r[0]["title"]
         duration = convert_seconds(int(r[0]["duration"]))
@@ -376,7 +376,7 @@ async def jiosaavn(requested_by, query):
     )
     try:
         r = await fetch(
-            f"https://jiosaavnapi.bhadoo.uk/result/?query={query}"
+            f"{ARQ}saavn?query={query}"
         )
         sname = r[0]["song"]
         slink = r[0]["media_url"]
