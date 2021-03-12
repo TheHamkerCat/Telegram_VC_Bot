@@ -1,16 +1,37 @@
 import os
 import aiohttp
 import aiofiles
+import ffmpeg
+import json
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
 
-# Os Determination
-if os.name == "nt":
-    kill = "tskill"
-else:
-    kill = "killall -9"
+def transcode(filename):
+    ffmpeg.input(filename).output("input.raw", format='s16le', acodec='pcm_s16le', ac=2, ar='48k').overwrite_output().run() 
+    os.remove(filename)
+
+
+
+
+#Download song
+async def download_and_transcode_song(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                f = await aiofiles.open('song.mp3', mode='wb')
+                await f.write(await resp.read())
+                await f.close()
+    ffmpeg.input('song.mp3').output("input.raw", format='s16le', acodec='pcm_s16le', ac=2, ar='48k').overwrite_output().run() 
+    os.remove('song.mp3')
+
+
+# Fetch
+async def fetch(url):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            return json.loads(await resp.text())
 
 
 # Get User Input
