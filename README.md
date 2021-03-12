@@ -1,6 +1,6 @@
-# Telegram Voice-Chat Bot
+# Telegram Voice-Chat Bot [ Pytgcalls ]
 
-Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
+Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In Your Group.
 
 <img src="https://i.imgur.com/8S8NVy0.png" width="530" height="400">
 
@@ -8,22 +8,14 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 # Support
 
 1. All linux based os.
-2. Windows
-3. Mac
 
-# Diagram
-
-<img src="etc/scheme.png" width="919" height="448">
 
 ## Requirements
 
-- Python 3.6 or higher
-- A [Telegram bot token](//t.me/botfather)
-- Bot needs to be admin in the chat, atleast give message delete permissions.
-- Install `mpv` with
-
-`pkg install mpv` - for Android,  `sudo apt-get install mpv` - for ubuntu, `sudo pacman -S mpv `  - for ArchLinux, I use arch btw
-- For Windows Download mpv from https://sourceforge.net/projects/mpv-player-windows/files/ and run Mpv-installer as administrator the add mpv file to path envionment!
+- Python 3.6 or higher 
+- Userbot Needs To Be Admin In The Chat
+- Install `ffmpeg` with
+`pkg install ffmpeg` - for Android,  `sudo apt-get install ffmpeg` - for ubuntu, `sudo pacman -S ffmpeg `  - for ArchLinux, I use arch btw
 
 ## Run
 
@@ -32,24 +24,10 @@ Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group
 3. `pip3 install -r requirements.txt`, to install the requirements.
 4. `cp sample_config.py config.py`
 5. Edit `config.py` with your own values.
-6. If you are on linux follow [this](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/vnc.md) 
-instruction to set up vnc. If you are using windows you can skip this step.
-6. Download Telegram desktop from https://desktop.telegram.org , Log in using your second account, and connect 
-to 
-the 
-voice chat in your group.
-7. Follow [This](https://unix.stackexchange.com/questions/82259/how-to-pipe-audio-output-to-mic-input) to route 
-your PC or Server's audio output to audio input. [For Linux]
-8. If you're on windows, Follow 
-[This](https://superuser.com/questions/1133750/set-output-audio-of-windows-as-input-audio-of-microphone) or install Virtual Audio Cable instead.
-9. Run the bot `python3 main.py`
-10. Open Telegram and start voice chat.
-11. Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
+6. Run the bot `python3 main.py`
+8. Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
 
-> Watch The Video Tutorial if you still can't do this 
-
-[How to deploy the Telegram Voice Chat Bot on VPS using Ubuntu/Debian](https://youtu.be/DozNTe_cydw)
 
 ## Commands
 Command | Description
@@ -62,15 +40,20 @@ Command | Description
 /telegram | To Play A Song Directly From Telegram File.
 /users | To Get A List Of Blacklisted Users.
 /queue | To Check Queue Status.
-Admin Commands:
+
+Owner Commands:
+/joinvc [CHAT-ID] | To Join A Voice Chat.
+/leavevc [CHAT-ID] | To Leave A Voice Chat.
+/listvc | To Get A List Of Joined Voice Chats.
+/authorize | To Authorize A Chat.
+/unauthorize | To Unauthorise A Chat.
 /black | To Blacklist A User.
 /white | To Whitelist A User.
 
 ## Note
 
-1. More services will be added soon.
-2. Termux is not completely supported yet, might take a week or two.
-3. If you want any help you can ask [here](https://t.me/PatheticProgrammers)
+1. If you want any help you can ask [here](https://t.me/PatheticProgrammers)
+2. Expect some bugs.
 
 ## Credits
-1. `https://github.com/cyberboysumanjay/JioSaavnAPI` [For JioSaavnAPI]
+1. @MarshalX [For TgCalls]
