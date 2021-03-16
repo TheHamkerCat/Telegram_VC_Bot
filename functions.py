@@ -2,7 +2,6 @@ import os
 import aiohttp
 import aiofiles
 import ffmpeg
-import json
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
@@ -11,8 +10,6 @@ from PIL import ImageDraw
 def transcode(filename):
     ffmpeg.input(filename).output("input.raw", format='s16le', acodec='pcm_s16le', ac=2, ar='48k').overwrite_output().run() 
     os.remove(filename)
-
-
 
 
 #Download song
@@ -25,21 +22,6 @@ async def download_and_transcode_song(url):
                 await f.close()
     ffmpeg.input('song.mp3').output("input.raw", format='s16le', acodec='pcm_s16le', ac=2, ar='48k').overwrite_output().run() 
     os.remove('song.mp3')
-
-
-# Fetch
-async def fetch(url):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            return json.loads(await resp.text())
-
-
-# Get User Input
-def kwairi(message):
-    query = ""
-    for i in message.command[1:]:
-        query += f"{i} "
-    return query
 
 
 # Convert seconds to mm:ss
