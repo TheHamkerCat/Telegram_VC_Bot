@@ -36,59 +36,57 @@ vc = GroupCall(
 arq = ARQ(ARQ_API)
 
 
-@app.on_message(filters.command("start") & ~filters.edited)
-async def start(_, message: Message):
-    await message.reply_text(START_TEXT)
+@app.on_message(filters.command("start") & filters.chat(sudo_chat_id))
+async def start(_, message):
+    await send(START_TEXT)
 
 
-@app.on_message(filters.command("help") & ~filters.edited)
-async def help(_, message: Message):
-    await message.reply_text(HELP_TEXT)
+@app.on_message(filters.command("help") & filters.chat(sudo_chat_id))
+async def help(_, message):
+    await send(HELP_TEXT)
 
 
-@app.on_message(filters.command("repo") & ~filters.edited)
-async def repo(_, message: Message):
-    m = await message.reply_text(REPO_TEXT,
-        disable_web_page_preview=True,
-    )
+@app.on_message(filters.command("repo") & filters.chat(sudo_chat_id))
+async def repo(_, message):
+    await send(REPO_TEXT)
 
 
-@app.on_message(filters.command("joinvc") & filters.user(owner_id) & ~filters.edited)
+@app.on_message(filters.command("joinvc") & filters.user(owner_id) & filters.chat(sudo_chat_id))
 async def joinvc(_, message):
     global chat_joined
     try:
         if chat_joined:
-            await message.reply_text("Bot Is Already In Voice Chat.")
+            await send("Bot Is Already In Voice Chat.")
             return
         chat_id = message.chat.id
         await vc.start(chat_id)
         chat_joined = True
-        m = await message.reply_text("Joined The Voice Chat.")
+        m = await send("Joined The Voice Chat.")
     except Exception as e:
         print(str(e))
-        await app.send_message(owner_id, text=str(e))
+        await send(str(e))
 
 
-@app.on_message(filters.command("leavevc") & filters.user(owner_id) & ~filters.edited)
+@app.on_message(filters.command("leavevc") & filters.user(owner_id) & filters.chat(sudo_chat_id))
 async def leavevc(_, message):
     global chat_joined
     if not chat_joined:
-        await message.reply_text("Already out of the voice chat")
+        await send("Already out of the voice chat")
         return
     chat_joined = False
-    m = await message.reply_text("Left The Voice Chat")
+    m = await send("Left The Voice Chat")
 
 
-@app.on_message(filters.command("kill") & filters.user(owner_id))
+@app.on_message(filters.command("kill") & filters.user(owner_id) & filters.chat(sudo_chat_id))
 async def killbot(_, message):
-    await message.reply_text("Killed!")
+    await send("Killed!")
     quit()
 
 
-@app.on_message(filters.command("play") & ~filters.edited & filters.chat(sudo_chat_id))
+@app.on_message(filters.command("play") & filters.chat(sudo_chat_id))
 async def queuer(_, message):
     if len(message.command) < 3:
-        await message.reply_text("**Usage:**\n/play youtube/saavn/deezer [song_name]")
+        await send("**Usage:**\n/play youtube/saavn/deezer [song_name]")
         return
     await message.delete()
     text = message.text.split(None, 2)[1:]
@@ -97,23 +95,20 @@ async def queuer(_, message):
     requested_by = message.from_user.first_name
     services = ["youtube", "deezer", "saavn"]
     if service not in services:
-        await app.send_message(
-            message.chat.id,
-            text="**Usage:**\n/play youtube/saavn/deezer [song_name]",
-        )
+        await send("**Usage:**\n/play youtube/saavn/deezer [song_name]")
         return
     queue.append({"service": service, "song": song_name, "requested_by": requested_by})
-    m = await app.send_message(message.chat.id, text=f"Added To Queue.")
+    await send("Added To Queue.")
 
 
 @app.on_message(filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited)
 async def skip(_, message):
     global playing
     if len(queue) == 0:
-        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        m = await send("Queue Is Empty, Just Like Your Life.")
         return
     playing = False
-    m = await message.reply_text("Skipped!")
+    m = await send("Skipped!")
 
 
 @app.on_message(filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited)
@@ -124,9 +119,9 @@ async def queue_list(_, message):
         for song in queue:
             text += f"**{i}. Platform:** {song['service']} | **Song:** {song['song']}\n"
             i += 1
-        m = await message.reply_text(text, disable_web_page_preview=True)
+        m = await send(text)
     else:
-        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        m = await send("Queue Is Empty, Just Like Your Life.")
 
 
 # Queue handler
@@ -141,14 +136,14 @@ async def play():
             song = queue[0]["song"]
             requested_by = queue[0]["requested_by"]
             if service == "youtube":
-                print(f"Playing {song} via {service}")
                 playing = True
                 del queue[0]
                 try:
                     await ytplay(requested_by, song)
                 except Exception as e:
                     print(str(e))
-                    await app.send_message(owner_id, text=str(e))
+                    await send(str(e))
+                    playing = False
                     pass
             elif service == "saavn":
                 print(f"Playing {song} via {service}")
@@ -158,7 +153,8 @@ async def play():
                     await jiosaavn(requested_by, song)
                 except Exception as e:
                     print(str(e))
-                    await app.send_message(owner_id, text=str(e))
+                    await send(str(e))
+                    playing = False
                     pass
             elif service == "deezer":
                 print(f"Playing {song} via {service}")
@@ -168,7 +164,8 @@ async def play():
                     await deezer(requested_by, song)
                 except Exception as e:
                     print(str(e))
-                    await app.send_message(owner_id, text=str(e))
+                    await send(str(e))
+                    playing = False
                     pass
 
 
@@ -177,7 +174,7 @@ async def play():
 
 async def deezer(requested_by, query):
     global playing
-    m = await app.send_message(sudo_chat_id, text=f"Searching for `{query}` on Deezer")
+    m = await send(f"__**Searching for {query} on Deezer**__")
     try:
         songs = await arq.deezer(query, 1)
         title = songs[0].title
@@ -210,9 +207,7 @@ async def deezer(requested_by, query):
 
 async def jiosaavn(requested_by, query):
     global playing
-    m = await app.send_message(
-        sudo_chat_id, text=f"Searching for `{query}` on JioSaavn"
-    )
+    m = await send(f"__**Searching for {query} on JioSaavn**__")
     try:
         songs = await arq.saavn(query)
         sname = songs[0].song
@@ -250,7 +245,7 @@ async def jiosaavn(requested_by, query):
 async def ytplay(requested_by, query):
     global playing
     ydl_opts = {"format": "bestaudio"}
-    m = await app.send_message(sudo_chat_id, text=f"Searching for `{query}` on YouTube")
+    m = await send(f"__**Searching for {query} on YouTube**__")
     try:
         results = await arq.youtube(query, 1)
         link = f"https://youtube.com{results[0].url_suffix}"
@@ -298,28 +293,32 @@ async def ytplay(requested_by, query):
 async def tgplay(_, message):
     global playing
     if len(queue) != 0:
-        await message.reply_text(
-            "You Can Only Play Telegram Files After The Queue Gets Finished."
-        )
+        await send("You Can Only Play Telegram Files After The Queue Gets Finished.")
         return
     if not message.reply_to_message:
-        await message.reply_text("Reply to an audio")
+        await send("Reply to an audio")
         return
     if message.reply_to_message.audio:
         if int(message.reply_to_message.audio.file_size) >= 104857600:
-            await message.reply_text("Bruh! Only songs within 100 MB")
+            await send("Bruh! Only songs within 100 MB")
             playing = False
             return
     elif message.reply_to_message.document:
         if int(message.reply_to_message.document.file_size) >= 104857600:
-            await message.reply_text("Bruh! Only songs within 100 MB")
+            await send("Bruh! Only songs within 100 MB")
             playing = False
             return
-    m = await message.reply_text("Downloading")
+    m = await send("Downloading")
     await app.download_media(message.reply_to_message, file_name="audio.webm")
     await m.edit(f"Playing `{message.reply_to_message.link}`")
+    ## TODO Need to actually play the music lol
     playing = False
     os.remove("downloads/audio.webm")
+
+
+async def send(text):
+    m = await app.send_message(sudo_chat_id, text=text)
+    return m
 
 
 print("\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n")
