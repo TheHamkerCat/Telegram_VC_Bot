@@ -5,4 +5,4 @@ owner_id = 1243703097
 
 
 # Arq Api, don't make changes here
-ARQ = "https://thearq.tech/"
+ARQ_API = "https://thearq.tech"

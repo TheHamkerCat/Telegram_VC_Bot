@@ -2,9 +2,8 @@ OpenCC
 Pillow
 pytgcalls
 ffmpeg-python
+python-arq
 Pyrogram
 TgCrypto
 youtube_dl
-youtube_search
-aiohttp
 aiofiles

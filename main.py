@@ -5,57 +5,32 @@ import time
 import os
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from youtube_search import YoutubeSearch
-from config import owner_id, sudo_chat_id, api_id, api_hash, ARQ
+from config import owner_id, sudo_chat_id, api_id, api_hash, ARQ_API
 from pytgcalls import GroupCall
+from Python_ARQ import ARQ
 from functions import (
     convert_seconds,
     time_to_seconds,
     download_and_transcode_song,
     transcode,
-    fetch,
     generate_cover_square,
     generate_cover,
 )
 from misc import HELP_TEXT, USERBOT_ONLINE_TEXT
 
-app = Client("tgvc", api_id=api_id, api_hash=api_hash)
-
-
-try:
-    with app:
-        app.send_message(sudo_chat_id, text=USERBOT_ONLINE_TEXT)
-except:
-    pass
 
 # Global vars
 playing = False
 queue = []
-joined_chats = {}
-sudo_chats = [sudo_chat_id]
+chat_joined = False
 input_file = "input.raw"
 
-# Admins list
 
-
-async def getadmins(chat_id):
-    admins = []
-    async for i in app.iter_chat_members(chat_id, filter="administrators"):
-        admins.append(i.user.id)
-    admins.append(owner_id)
-    return admins
-
-
-# Kill The Script
-
-
-@app.on_message(filters.command("kill") & filters.user(owner_id))
-async def killbot(_, message):
-    await message.reply_text("Killed!")
-    quit()
-
-
+app = Client("tgvc", api_id=api_id, api_hash=api_hash)
 vc = GroupCall(app, input_file)
+arq = ARQ(ARQ_API)
+
+
 # Join Voice Chat
 
 
@@ -63,24 +38,15 @@ vc = GroupCall(app, input_file)
     filters.command("joinvc") & filters.user(owner_id) & ~filters.edited
 )
 async def joinvc(_, message):
-    global joined_chats
-    if len(message.command) > 2:
-        await message.reply_text("/joinvc [CHAT_ID]")
-        return
-    if len(message.command) == 1:
-        chat_id = message.chat.id
-    if len(message.command) == 2:
-        chat_id = int(message.text.split(None, 1)[1])
+    global chat_joined
     try:
-        if chat_id in joined_chats:
+        if chat_joined:
             await message.reply_text("Bot Is Already In Voice Chat.")
             return
+        chat_id = message.chat.id
         await vc.start(chat_id)
-        joined_chats[chat_id] = vc
+        chat_joined = True
         m = await message.reply_text("Joined The Voice Chat.")
-        await asyncio.sleep(5)
-        await m.delete()
-        await message.delete()
     except Exception as e:
         print(str(e))
         await app.send_message(owner_id, text=str(e))
@@ -93,23 +59,21 @@ async def joinvc(_, message):
     filters.command("leavevc") & filters.user(owner_id) & ~filters.edited
 )
 async def leavevc(_, message):
-    # just using this to pop chat_id from joined_chats for now
-    global joined_chats
-    if len(message.command) > 2:
-        await message.reply_text("/leavevc [CHAT_ID]")
-        return
-    if len(message.command) == 1:
-        chat_id = message.chat.id
-    if len(message.command) == 2:
-        chat_id = int(message.text.split(None, 1)[1])
-    if chat_id not in joined_chats:
+    global chat_joined
+    if not chat_joined:
         await message.reply_text("Already out of the voice chat")
         return
-    del joined_chats[chat_id]
+    chat_joined = False
     m = await message.reply_text("Left The Voice Chat")
-    await asyncio.sleep(5)
-    await m.delete()
-    await message.delete()
+
+
+# Kill The Script
+
+
+@app.on_message(filters.command("kill") & filters.user(owner_id))
+async def killbot(_, message):
+    await message.reply_text("Killed!")
+    quit()
 
 
 # Queue handler
@@ -159,11 +123,9 @@ async def play():
 
 
 @app.on_message(
-    filters.command("play") & ~filters.edited
-)
+    filters.command("play") & ~filters.edited & filters.chat(sudo_chat_id)
+    )
 async def queuer(_, message):
-    if message.chat.id not in sudo_chats:
-        return
     if len(message.command) < 3:
         await message.reply_text(
             "**Usage:**\n/play youtube/saavn/deezer [song_name]"
@@ -185,36 +147,28 @@ async def queuer(_, message):
         {"service": service, "song": song_name, "requested_by": requested_by}
     )
     m = await app.send_message(message.chat.id, text=f"Added To Queue.")
-    await play()
-    await asyncio.sleep(3)
-    await m.delete()
 
 
 # Skip command
 
 
 @app.on_message(
-    filters.command("skip") & filters.chat(sudo_chats) & ~filters.edited
+    filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited
 )
 async def skip(_, message):
     global playing
-    if message.from_user.id not in await getadmins(sudo_chat_id):
-        return
     if len(queue) == 0:
         m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
-        await asyncio.sleep(5)
-        await m.delete()
-        await message.delete()
         return
     playing = False
     m = await message.reply_text("Skipped!")
-    await asyncio.sleep(5)
-    await m.delete()
-    await message.delete()
+
+
+# Query command
 
 
 @app.on_message(
-    filters.command("queue") & filters.chat(sudo_chats) & ~filters.edited
+    filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited
 )
 async def queue_list(_, message):
     if len(queue) != 0:
@@ -226,28 +180,26 @@ async def queue_list(_, message):
         m = await message.reply_text(text, disable_web_page_preview=True)
     else:
         m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
-    await asyncio.sleep(5)
-    await m.delete()
-    await message.delete()
+
+
+# Repo
+
 
 
 @app.on_message(filters.command("repo") & ~filters.edited)
 async def repo(_, message: Message):
     m = await message.reply_text(
         "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
-        + " | [Group](t.me/TheHamkerChat)",
+        + " | [Group](t.me/PatheticProgrammers)",
         disable_web_page_preview=True,
     )
-    await asyncio.sleep(5)
-    await m.delete()
 
 
 # Start
 
 
-@app.on_message(filters.command(["start"]) & ~filters.edited)
+@app.on_message(filters.command("start") & ~filters.edited)
 async def start(_, message: Message):
-    global blacks
     await message.reply_text(
         "Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support."
     )
@@ -256,9 +208,8 @@ async def start(_, message: Message):
 # Help
 
 
-@app.on_message(filters.command(["help"]) & ~filters.edited)
+@app.on_message(filters.command("help") & ~filters.edited)
 async def help(_, message: Message):
-    global blacks
     await message.reply_text(HELP_TEXT)
 
 
@@ -271,14 +222,12 @@ async def deezer(requested_by, query):
         sudo_chat_id, text=f"Searching for `{query}` on Deezer"
     )
     try:
-        r = await fetch(
-            f"{ARQ}deezer?query={query}&count=1"
-        )
-        title = r[0]["title"]
-        duration = convert_seconds(int(r[0]["duration"]))
-        thumbnail = r[0]["thumbnail"]
-        artist = r[0]["artist"]
-        url = r[0]["url"]
+        songs = await arq.deezer(query, 1)
+        title = songs[0].title
+        duration = convert_seconds(int(songs[0].duration))
+        thumbnail = songs[0].thumbnail
+        artist = songs[0].artist
+        url = songs[0].url
     except:
         await m.edit(
             "Found Literally Nothing, You Should Work On Your English!"
@@ -312,14 +261,12 @@ async def jiosaavn(requested_by, query):
         sudo_chat_id, text=f"Searching for `{query}` on JioSaavn"
     )
     try:
-        r = await fetch(
-            f"{ARQ}saavn?query={query}"
-        )
-        sname = r[0]["song"]
-        slink = r[0]["media_url"]
-        ssingers = r[0]["singers"]
-        sthumb = r[0]["image"]
-        sduration = r[0]["duration"]
+        songs = await arq.saavn(query)
+        sname = songs[0].song
+        slink = songs[0].media_url
+        ssingers = songs[0].singers
+        sthumb = songs[0].image
+        sduration = songs[0].duration
         sduration_converted = convert_seconds(int(sduration))
     except Exception as e:
         await m.edit(
@@ -356,13 +303,13 @@ async def ytplay(requested_by, query):
         sudo_chat_id, text=f"Searching for `{query}` on YouTube"
     )
     try:
-        results = YoutubeSearch(query, max_results=1).to_dict()
-        link = f"https://youtube.com{results[0]['url_suffix']}"
-        title = results[0]["title"]
-        thumbnail = results[0]["thumbnails"][0]
-        duration = results[0]["duration"]
-        views = results[0]["views"]
-        if time_to_seconds(duration) >= 1800:  # duration limit
+        results = await arq.youtube(query, 1) 
+        link = f"https://youtube.com{results[0].url_suffix}"
+        title = results[0].title
+        thumbnail = results[0].thumbnails[0]
+        duration = results[0].duration
+        views = results[0].views
+        if time_to_seconds(duration) >= 1800:
             await m.edit("Bruh! Only songs within 30 Mins")
             playing = False
             return
@@ -431,6 +378,13 @@ async def tgplay(_, message):
 print(
     "\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n"
 )
+
+try:
+    with app:
+        app.send_message(sudo_chat_id, text=USERBOT_ONLINE_TEXT)
+except:
+    pass
+
 
 try:
     app.run()
