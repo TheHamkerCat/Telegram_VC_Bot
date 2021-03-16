@@ -55,34 +55,6 @@ async def killbot(_, message):
     quit()
 
 
-# AllowChat
-
-
-@app.on_message(filters.command("authorize") & filters.user(owner_id))
-async def authorize(_, message):
-    global sudo_chats
-    chat_id = message.chat.id
-    if chat_id in sudo_chats:
-        await message.reply_text("Chat Already Authorized.")
-        return
-    sudo_chats.append(chat_id)
-    await message.reply_text("Chat Authorized.")
-
-
-# Deny Chats
-
-
-@app.on_message(filters.command("unauthorize") & filters.user(owner_id))
-async def unauthorize(_, message):
-    global sudo_chats
-    chat_id = message.chat.id
-    if chat_id not in sudo_chats:
-        await message.reply_text("Chat Already Unauthorized.")
-        return
-    sudo_chats.remove(chat_id)
-    await message.reply_text("Chat Unauthorized.")
-
-
 vc = GroupCall(app, input_file)
 # Join Voice Chat
 
@@ -138,27 +110,6 @@ async def leavevc(_, message):
     await asyncio.sleep(5)
     await m.delete()
     await message.delete()
-
-
-# List Voice Chats
-
-
-@app.on_message(filters.command("listvc") & filters.user(owner_id))
-async def listvc(_, message):
-    if not joined_chats:
-        await message.edit_text("No Chats Found")
-        return
-    text = ""
-    i = 1
-    try:
-        for joined_chat in joined_chats:
-            name = (await app.get_chat(joined_chat)).title
-            text += f"**{i}.** **{name}**\n"
-            i += 1
-        await message.reply_text(text)
-    except Exception as e:
-        print(str(e))
-        await app.send_message(owner_id, text=str(e))
 
 
 # Queue handler
@@ -280,9 +231,6 @@ async def queue_list(_, message):
     await message.delete()
 
 
-# Ping and repo
-
-
 @app.on_message(filters.command("repo") & ~filters.edited)
 async def repo(_, message: Message):
     m = await message.reply_text(
@@ -292,17 +240,6 @@ async def repo(_, message: Message):
     )
     await asyncio.sleep(5)
     await m.delete()
-
-
-@app.on_message(
-    filters.command("ping") & filters.chat(sudo_chats) & ~filters.edited
-)
-async def ping(_, message):
-    global blacks
-    start_time = int(round(time.time() * 1000))
-    m = await message.reply_text(".")
-    end_time = int(round(time.time() * 1000))
-    await m.edit(f"{end_time - start_time} ms")
 
 
 # Start
