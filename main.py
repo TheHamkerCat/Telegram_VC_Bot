@@ -16,27 +16,44 @@ from functions import (
     generate_cover_square,
     generate_cover,
 )
-from misc import HELP_TEXT, USERBOT_ONLINE_TEXT
+from misc import HELP_TEXT, USERBOT_ONLINE_TEXT, START_TEXT, REPO_TEXT
 
 
-# Global vars
-playing = False
-queue = []
-chat_joined = False
-input_file = "input.raw"
 
+queue = []  # This is where the whole song queue is stored
+playing = False # Tells if something is playing or not
+chat_joined = False # Tell if chat is joined or not
 
+# Pyrogram Clint
 app = Client("tgvc", api_id=api_id, api_hash=api_hash)
-vc = GroupCall(app, input_file)
+
+# Pytgcalls handler
+vc = GroupCall(
+    app, input_filename="input.raw", play_on_repeat=True, enable_logs_to_console=True
+)
+
+# Arq Client
 arq = ARQ(ARQ_API)
 
 
-# Join Voice Chat
+@app.on_message(filters.command("start") & ~filters.edited)
+async def start(_, message: Message):
+    await message.reply_text(START_TEXT)
 
 
-@app.on_message(
-    filters.command("joinvc") & filters.user(owner_id) & ~filters.edited
-)
+@app.on_message(filters.command("help") & ~filters.edited)
+async def help(_, message: Message):
+    await message.reply_text(HELP_TEXT)
+
+
+@app.on_message(filters.command("repo") & ~filters.edited)
+async def repo(_, message: Message):
+    m = await message.reply_text(REPO_TEXT,
+        disable_web_page_preview=True,
+    )
+
+
+@app.on_message(filters.command("joinvc") & filters.user(owner_id) & ~filters.edited)
 async def joinvc(_, message):
     global chat_joined
     try:
@@ -52,12 +69,7 @@ async def joinvc(_, message):
         await app.send_message(owner_id, text=str(e))
 
 
-# Leave vc
-
-
-@app.on_message(
-    filters.command("leavevc") & filters.user(owner_id) & ~filters.edited
-)
+@app.on_message(filters.command("leavevc") & filters.user(owner_id) & ~filters.edited)
 async def leavevc(_, message):
     global chat_joined
     if not chat_joined:
@@ -67,13 +79,54 @@ async def leavevc(_, message):
     m = await message.reply_text("Left The Voice Chat")
 
 
-# Kill The Script
-
-
 @app.on_message(filters.command("kill") & filters.user(owner_id))
 async def killbot(_, message):
     await message.reply_text("Killed!")
     quit()
+
+
+@app.on_message(filters.command("play") & ~filters.edited & filters.chat(sudo_chat_id))
+async def queuer(_, message):
+    if len(message.command) < 3:
+        await message.reply_text("**Usage:**\n/play youtube/saavn/deezer [song_name]")
+        return
+    await message.delete()
+    text = message.text.split(None, 2)[1:]
+    service = text[0]
+    song_name = text[1]
+    requested_by = message.from_user.first_name
+    services = ["youtube", "deezer", "saavn"]
+    if service not in services:
+        await app.send_message(
+            message.chat.id,
+            text="**Usage:**\n/play youtube/saavn/deezer [song_name]",
+        )
+        return
+    queue.append({"service": service, "song": song_name, "requested_by": requested_by})
+    m = await app.send_message(message.chat.id, text=f"Added To Queue.")
+
+
+@app.on_message(filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited)
+async def skip(_, message):
+    global playing
+    if len(queue) == 0:
+        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
+        return
+    playing = False
+    m = await message.reply_text("Skipped!")
+
+
+@app.on_message(filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited)
+async def queue_list(_, message):
+    if len(queue) != 0:
+        i = 1
+        text = ""
+        for song in queue:
+            text += f"**{i}. Platform:** {song['service']} | **Song:** {song['song']}\n"
+            i += 1
+        m = await message.reply_text(text, disable_web_page_preview=True)
+    else:
+        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
 
 
 # Queue handler
@@ -119,108 +172,12 @@ async def play():
                     pass
 
 
-# Queue Append
-
-
-@app.on_message(
-    filters.command("play") & ~filters.edited & filters.chat(sudo_chat_id)
-    )
-async def queuer(_, message):
-    if len(message.command) < 3:
-        await message.reply_text(
-            "**Usage:**\n/play youtube/saavn/deezer [song_name]"
-        )
-        return
-    await message.delete()
-    text = message.text.split(None, 2)[1:]
-    service = text[0]
-    song_name = text[1]
-    requested_by = message.from_user.first_name
-    services = ["youtube", "deezer", "saavn"]
-    if service not in services:
-        await app.send_message(
-            message.chat.id,
-            text="**Usage:**\n/play youtube/saavn/deezer [song_name]",
-        )
-        return
-    queue.append(
-        {"service": service, "song": song_name, "requested_by": requested_by}
-    )
-    m = await app.send_message(message.chat.id, text=f"Added To Queue.")
-
-
-# Skip command
-
-
-@app.on_message(
-    filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited
-)
-async def skip(_, message):
-    global playing
-    if len(queue) == 0:
-        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
-        return
-    playing = False
-    m = await message.reply_text("Skipped!")
-
-
-# Query command
-
-
-@app.on_message(
-    filters.command("queue") & filters.chat(sudo_chat_id) & ~filters.edited
-)
-async def queue_list(_, message):
-    if len(queue) != 0:
-        i = 1
-        text = ""
-        for song in queue:
-            text += f"**{i}. Platform:** {song['service']} | **Song:** {song['song']}\n"
-            i += 1
-        m = await message.reply_text(text, disable_web_page_preview=True)
-    else:
-        m = await message.reply_text("Queue Is Empty, Just Like Your Life.")
-
-
-# Repo
-
-
-
-@app.on_message(filters.command("repo") & ~filters.edited)
-async def repo(_, message: Message):
-    m = await message.reply_text(
-        "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
-        + " | [Group](t.me/PatheticProgrammers)",
-        disable_web_page_preview=True,
-    )
-
-
-# Start
-
-
-@app.on_message(filters.command("start") & ~filters.edited)
-async def start(_, message: Message):
-    await message.reply_text(
-        "Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support."
-    )
-
-
-# Help
-
-
-@app.on_message(filters.command("help") & ~filters.edited)
-async def help(_, message: Message):
-    await message.reply_text(HELP_TEXT)
-
-
 # Deezer----------------------------------------------------------------------------------------
 
 
 async def deezer(requested_by, query):
     global playing
-    m = await app.send_message(
-        sudo_chat_id, text=f"Searching for `{query}` on Deezer"
-    )
+    m = await app.send_message(sudo_chat_id, text=f"Searching for `{query}` on Deezer")
     try:
         songs = await arq.deezer(query, 1)
         title = songs[0].title
@@ -229,15 +186,11 @@ async def deezer(requested_by, query):
         artist = songs[0].artist
         url = songs[0].url
     except:
-        await m.edit(
-            "Found Literally Nothing, You Should Work On Your English!"
-        )
+        await m.edit("Found Literally Nothing, You Should Work On Your English!")
         playing = False
         return
     await m.edit("Generating Thumbnail")
-    await generate_cover_square(
-        requested_by, title, artist, duration, thumbnail
-    )
+    await generate_cover_square(requested_by, title, artist, duration, thumbnail)
     await m.edit("Downloading And Transcoding.")
     await download_and_transcode_song(url)
     await m.delete()
@@ -269,9 +222,7 @@ async def jiosaavn(requested_by, query):
         sduration = songs[0].duration
         sduration_converted = convert_seconds(int(sduration))
     except Exception as e:
-        await m.edit(
-            "Found Literally Nothing!, You Should Work On Your English."
-        )
+        await m.edit("Found Literally Nothing!, You Should Work On Your English.")
         print(str(e))
         playing = False
         return
@@ -299,11 +250,9 @@ async def jiosaavn(requested_by, query):
 async def ytplay(requested_by, query):
     global playing
     ydl_opts = {"format": "bestaudio"}
-    m = await app.send_message(
-        sudo_chat_id, text=f"Searching for `{query}` on YouTube"
-    )
+    m = await app.send_message(sudo_chat_id, text=f"Searching for `{query}` on YouTube")
     try:
-        results = await arq.youtube(query, 1) 
+        results = await arq.youtube(query, 1)
         link = f"https://youtube.com{results[0].url_suffix}"
         title = results[0].title
         thumbnail = results[0].thumbnails[0]
@@ -314,9 +263,7 @@ async def ytplay(requested_by, query):
             playing = False
             return
     except Exception as e:
-        await m.edit(
-            "Found Literally Nothing!, You Should Work On Your English."
-        )
+        await m.edit("Found Literally Nothing!, You Should Work On Your English.")
         playing = False
         print(str(e))
         return
@@ -375,9 +322,7 @@ async def tgplay(_, message):
     os.remove("downloads/audio.webm")
 
 
-print(
-    "\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n"
-)
+print("\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n")
 
 try:
     with app:
@@ -386,8 +331,4 @@ except:
     pass
 
 
-try:
-    app.run()
-except KeyboardInterrupt:
-    print("Killed!")
-    exit()
+app.run()

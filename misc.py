@@ -10,3 +10,8 @@ HELP_TEXT = """**Currently These Commands Are Supported.**
 NOTE: Do Not Assign These Commands To Bot Via BotFather"""
 
 USERBOT_ONLINE_TEXT = "**Userbot Online!, Use /joinvc To Join Voice Chat.**"
+
+START_TEXT = "Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support."
+
+REPO_TEXT = "[Github](https://github.com/thehamkercat/Telegram_vc_bot)" \
+            + " | [Group](t.me/PatheticProgrammers)"
