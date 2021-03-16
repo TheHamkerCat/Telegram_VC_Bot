@@ -16,9 +16,11 @@ queue = []  # This is where the whole song queue is stored
 playing = False # Tells if something is playing or not
 chat_joined = False # Tell if chat is joined or not
 
-# Pyrogram Clint
+# Pyrogram Client
 app = Client("tgvc", api_id=api_id, api_hash=api_hash)
 
+# Pytgcalls Client
+vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
 
 # Arq Client
 arq = ARQ(ARQ_API)
@@ -46,7 +48,6 @@ async def joinvc(_, message):
         if chat_joined:
             await send("Bot Is Already In Voice Chat.")
             return
-        vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
         chat_id = message.chat.id
         await vc.start(chat_id)
         chat_joined = True
