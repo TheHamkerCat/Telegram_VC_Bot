@@ -4,19 +4,11 @@ import asyncio
 import time
 import os
 from pyrogram import Client, filters
-from pyrogram.types import Message
-from config import owner_id, sudo_chat_id, api_id, api_hash, ARQ_API
 from pytgcalls import GroupCall
 from Python_ARQ import ARQ
-from functions import (
-    convert_seconds,
-    time_to_seconds,
-    download_and_transcode_song,
-    transcode,
-    generate_cover_square,
-    generate_cover,
-)
-from misc import HELP_TEXT, USERBOT_ONLINE_TEXT, START_TEXT, REPO_TEXT
+from config import *
+from functions import *
+from misc import * 
 
 
 
@@ -27,10 +19,6 @@ chat_joined = False # Tell if chat is joined or not
 # Pyrogram Clint
 app = Client("tgvc", api_id=api_id, api_hash=api_hash)
 
-# Pytgcalls handler
-vc = GroupCall(
-    app, input_filename="input.raw", play_on_repeat=True, enable_logs_to_console=True
-)
 
 # Arq Client
 arq = ARQ(ARQ_API)
@@ -58,6 +46,7 @@ async def joinvc(_, message):
         if chat_joined:
             await send("Bot Is Already In Voice Chat.")
             return
+        vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
         chat_id = message.chat.id
         await vc.start(chat_id)
         chat_joined = True
@@ -317,7 +306,7 @@ async def tgplay(_, message):
 
 
 async def send(text):
-    m = await app.send_message(sudo_chat_id, text=text)
+    m = await app.send_message(sudo_chat_id, text=text, disable_web_page_preview=True)
     return m
 
 
