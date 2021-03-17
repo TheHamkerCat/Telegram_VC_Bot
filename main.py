@@ -109,6 +109,7 @@ async def skip(_, message):
         return
     playing = False
     m = await send("__**Skipped!**__")
+    await play()
 
 
 @app.on_message(filters.command("queue") & filters.chat(sudo_chat_id))
