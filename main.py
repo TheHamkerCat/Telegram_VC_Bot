@@ -36,6 +36,12 @@ chat_joined = False # Tell if chat is joined or not
 # Pyrogram Client
 app = Client("tgvc", api_id=api_id, api_hash=api_hash)
 
+try:
+    with app:
+        app.send_message(sudo_chat_id, text=USERBOT_ONLINE_TEXT)
+except:
+    pass
+
 # Pytgcalls Client
 vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
 
@@ -335,12 +341,6 @@ async def send(text):
 
 
 print("\nBot Starting...\nFor Support Join https://t.me/PatheticProgrammers\n")
-
-try:
-    with app:
-        app.send_message(sudo_chat_id, text=USERBOT_ONLINE_TEXT)
-except:
-    pass
 
 
 app.run()
