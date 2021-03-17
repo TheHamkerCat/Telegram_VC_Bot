@@ -233,7 +233,7 @@ async def jiosaavn(requested_by, query):
         photo="final.png",
     )
     os.remove("final.png")
-    await asyncio.sleep(sduration)
+    await asyncio.sleep(int(sduration))
     await m.delete()
     playing = False
 
@@ -278,7 +278,7 @@ async def ytplay(requested_by, query):
         photo="final.png",
     )
     os.remove("final.png")
-    await asyncio.sleep(time_to_seconds(duration))
+    await asyncio.sleep(int(time_to_seconds(duration))
     playing = False
     await m.delete()
 
