@@ -6,9 +6,26 @@ import os
 from pyrogram import Client, filters
 from pytgcalls import GroupCall
 from Python_ARQ import ARQ
-from config import *
-from functions import *
-from misc import * 
+from config import (
+        api_id,
+        api_hash,
+        sudo_chat_id,
+        owner_id,
+        ARQ_API
+        )
+from functions import (
+        transcode,
+        download_and_transcode_song,
+        convert_seconds,
+        time_to_seconds,
+        generate_cover,
+        generate_cover_square)
+from misc import (
+        HELP_TEXT,
+        USERBOT_ONLINE_TEXT,
+        START_TEXT,
+        REPO_TEXT
+        ) 
 
 
 
@@ -39,6 +56,12 @@ async def help(_, message):
 @app.on_message(filters.command("repo") & filters.chat(sudo_chat_id))
 async def repo(_, message):
     await send(REPO_TEXT)
+
+
+@app.on_message(filters.command("ping"))
+async def alive(_, message):
+    await send("I'm Alive")
+
 
 
 @app.on_message(filters.command("joinvc") & filters.user(owner_id) & filters.chat(sudo_chat_id))
