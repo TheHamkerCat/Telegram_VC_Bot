@@ -1,17 +1,16 @@
-HELP_TEXT = """**Currently These Commands Are Supported.**
-/start To Start The bot.
-/help To Show This Message.
-/skip To Skip The Current Playing Music.
-/play youtube/saavn/deezer [song_name]
-/joinvc [CHAT_ID] To Join A Voice Chat.
-/leavevc [CHAT_ID] To Leave A Voice Chat.
-/telegram While Taging a Song To Play From Telegram File.
+HELP_TEXT = """__**I Can Play Music In The Voice Chat**__
 
-NOTE: Do Not Assign These Commands To Bot Via BotFather"""
+**/start** __To Start The bot.__
+**/help** __To Show This Message.__
+**/skip** __To Skip The Current Playing Music.__
+**/play** __<youtube/saavn/deezer> <Song_Name>__
+**/joinvc** __To Join A Voice Chat.__
+**/leavevc** __To Leave A Voice Chat.__
+**/telegram** __To Play From Telegram Audio.__
 
-USERBOT_ONLINE_TEXT = "**Userbot Online!, Use /joinvc To Join Voice Chat.**"
+__**NOTE: Do Not Assign These Commands To Bot Via BotFather.**__"""
 
-START_TEXT = "Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support."
+START_TEXT = "__**Hi I'm Telegram Voice Chat Bot. Join @PatheticProgrammers For Support.**__"
 
 REPO_TEXT = "[Github](https://github.com/thehamkercat/Telegram_vc_bot)" \
             + " | [Group](t.me/PatheticProgrammers)"

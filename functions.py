@@ -20,8 +20,7 @@ async def download_and_transcode_song(url):
                 f = await aiofiles.open('song.mp3', mode='wb')
                 await f.write(await resp.read())
                 await f.close()
-    ffmpeg.input('song.mp3').output("input.raw", format='s16le', acodec='pcm_s16le', ac=2, ar='48k').overwrite_output().run() 
-    os.remove('song.mp3')
+    transcode("song.mp3") 
 
 
 # Convert seconds to mm:ss
