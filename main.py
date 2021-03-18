@@ -6,21 +6,21 @@ import os
 from pyrogram import Client, filters
 from pytgcalls import GroupCall
 from Python_ARQ import ARQ
-from config import api_id, api_hash, sudo_chat_id,owner_id, ARQ_API
+from config import api_id, api_hash, sudo_chat_id, owner_id, ARQ_API
 from misc import HELP_TEXT, START_TEXT, REPO_TEXT
 from functions import (
-        transcode,
-        download_and_transcode_song,
-        convert_seconds,
-        time_to_seconds,
-        generate_cover,
-        generate_cover_square
-        )
+    transcode,
+    download_and_transcode_song,
+    convert_seconds,
+    time_to_seconds,
+    generate_cover,
+    generate_cover_square
+)
 
 
 queue = []  # This is where the whole song queue is stored
-playing = False # Tells if something is playing or not
-chat_joined = False # Tell if chat is joined or not
+playing = False  # Tells if something is playing or not
+chat_joined = False  # Tell if chat is joined or not
 
 # Pyrogram Client
 app = Client("tgvc", api_id=api_id, api_hash=api_hash)
@@ -95,11 +95,14 @@ async def queuer(_, message):
         return
     if len(queue) > 0:
         await send("__**Added To Queue.__**")
-        queue.append({"service": service, "song": song_name, "requested_by": requested_by})
+        queue.append({"service": service, "song": song_name,
+                      "requested_by": requested_by})
         await play()
         return
-    queue.append({"service": service, "song": song_name, "requested_by": requested_by})
+    queue.append({"service": service, "song": song_name,
+                  "requested_by": requested_by})
     await play()
+
 
 @app.on_message(filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited)
 async def skip(_, message):
