@@ -15,17 +15,17 @@
         "description": "Get this value from https://my.telegram.org",
         "value": ""
         },
-    "Api_hash": {
-      "description": "Get this value from https://my.telegram.org",
-      "value": ""
+      "Api_hash": {
+        "description": "Get this value from https://my.telegram.org",
+        "value": ""
         },
-    "Sudo_chat_id": {
-      "description": "add @WilliamButcherBot in your group and do /id to get Chat ID",
-      "value": ""
+      "Sudo_chat_id": {
+        "description": "add @WilliamButcherBot in your group and do /id to get Chat ID",
+        "value": ""
         },
-    "Owner_id ": {
-      "description": "PM @WilliamButcherBot and do /id to get your ID",
-      "value": ""
+      "Owner_id ": {
+        "description": "PM @WilliamButcherBot and do /id to get your ID",
+        "value": ""
         }
     },
     "buildpacks": [
