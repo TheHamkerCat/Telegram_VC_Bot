@@ -28,6 +28,9 @@ Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In You
 8. Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
 
+## Deploy button
+[<img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku" height="40"/>](https://heroku.com/deploy?template=https://github.com/thehamkercat/Telegram_VC_Bot "Heroku")
+
 
 ## Commands
 Command | Description
