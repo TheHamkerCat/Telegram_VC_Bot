@@ -11,19 +11,19 @@
     "website": "https://hamker.me",
     "repository": "https://github.com/thehamkercat/Telegram_VC_Bot",
     "env": {
-      "api_id": {
+      "Api_id": {
         "description": "Get this value from https://my.telegram.org",
         "value": ""
       },
-    "api_hash": {
+    "Api_hash": {
       "description": "Get this value from https://my.telegram.org",
       "value": ""
     },
-    "sudo_chat_id": {
+    "Sudo_chat_id": {
       "description": "add @WilliamButcherBot in your group and do /id to get Chat ID",
       "value": ""
     },
-    "owner_id ": {
+    "Owner_id ": {
       "description": "PM @WilliamButcherBot and do /id to get your ID",
       "value": ""
     }
