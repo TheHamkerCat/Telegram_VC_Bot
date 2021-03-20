@@ -1,9 +1,9 @@
 
 class Config(object):
-  api_id = int(os.getenv("Api ID"))
-  api_hash = os.getenv("Api Hash")
-  sudo_chat_id = int(os.getenv("Chat ID"))
-  owner_id = int(os.getenv("Owner ID"))
+  Api_id = int(os.getenv("Api ID"))
+  Api_hash = os.getenv("Api Hash")
+  Sudo_chat_id = int(os.getenv("Chat ID"))
+  Owner_id = int(os.getenv("Owner ID"))
 
 
 # Arq Api, don't make changes here
