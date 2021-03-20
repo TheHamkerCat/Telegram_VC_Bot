@@ -1,0 +1,45 @@
+{
+    "name": "Telegram_VC_Bot",
+    "description": "Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In Your Group.",
+    "keywords": [
+      "telegram",
+      "pyrogram",
+      "music",
+      "vcbot",
+      "voicechat"
+    ],
+    "website": "https://hamker.me",
+    "repository": "https://github.com/thehamkercat/Telegram_VC_Bot",
+    "env": {
+      "api_id": {
+        "description": "Get this value from https://my.telegram.org",
+        "value": ""
+      },
+    "api_hash": {
+      "description": "Get this value from https://my.telegram.org",
+      "value": ""
+    },
+    "sudo_chat_id": {
+      "description": "add @WilliamButcherBot in your group and do /id to get Chat ID",
+      "value": ""
+    },
+    "owner_id ": {
+      "description": "PM @WilliamButcherBot and do /id to get your ID",
+      "value": ""
+    }
+    },
+    "buildpacks": [
+        {
+            "url": "heroku/python"
+        },
+      {
+            "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+        }
+    ],
+    "formation": {
+      "worker": {
+        "quantity": 1,
+        "size": "free"
+      }
+    }
+  }
