@@ -17,14 +17,14 @@ from functions import (
     generate_cover_square
 )
 
-sudo_chat_id= Config.Sudo_chat_id
-owner_id= Config.Owner_id
+sudo_chat_id= Config.SUDO_CHAT_ID
+owner_id= Config.OWNER_ID
 queue = []  # This is where the whole song queue is stored
 playing = False  # Tells if something is playing or not
 chat_joined = False  # Tell if chat is joined or not
 
 # Pyrogram Client
-app = Client("tgvc", api_id=Config.Api_id, api_hash=Config.Api_hash)
+app = Client("tgvc", api_id=Config.API_ID, api_hash=Config.API_HASH)
 
 # Pytgcalls Client
 vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
