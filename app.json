@@ -23,7 +23,7 @@
         "description": "add @WilliamButcherBot in your group and do /id to get Chat ID",
         "value": ""
       },
-      "OWNER_ID ": {
+      "OWNER_ID": {
         "description": "PM @WilliamButcherBot and do /id to get your ID",
         "value": ""
       }
