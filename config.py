@@ -1,4 +1,4 @@
-
+import os
 class Config(object):
   API_ID = int(os.getenv("Api ID"))
   API_HASH = os.getenv("Api Hash")
