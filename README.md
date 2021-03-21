@@ -12,7 +12,7 @@ Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In You
 
 ## Requirements
 
-- Python 3.6 or higher 
+- Python 3.7 or higher 
 - Userbot Needs To Be Admin In The Chat
 - Install `ffmpeg` with
 `pkg install ffmpeg` - for Android,  `sudo apt-get install ffmpeg` - for ubuntu, `sudo pacman -S ffmpeg `  - for ArchLinux, I use arch btw
