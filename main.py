@@ -6,7 +6,6 @@ import os
 from pyrogram import Client, filters
 from pytgcalls import GroupCall
 from Python_ARQ import ARQ
-from config import api_id, api_hash, sudo_chat_id, owner_id, ARQ_API
 from misc import HELP_TEXT, START_TEXT, REPO_TEXT
 from functions import (
     transcode,
@@ -17,13 +16,38 @@ from functions import (
     generate_cover_square
 )
 
+# TODO Make it look less messed up
+is_config = os.path.exists("config.py")
+
+if is_config:
+    from config import (
+        API_ID as api_id, API_HASH as api_hash,
+        SUDO_CHAT_ID as sudo_chat_id,
+        OWNER_ID as owner_id, ARQ_API, HEROKU
+    )
+elif not is_config:
+    from sample_config import (
+        API_ID as api_id, API_HASH as api_hash,
+        SUDO_CHAT_ID as sudo_chat_id,
+        OWNER_ID as owner_id, ARQ_API, HEROKU
+    )
+
+if HEROKU:
+    if is_config:
+        from config import STRING_SESSION
+    elif not is_config:
+        from sample_config import STRING_SESSION
+
 
 queue = []  # This is where the whole song queue is stored
 playing = False  # Tells if something is playing or not
 chat_joined = False  # Tell if chat is joined or not
 
 # Pyrogram Client
-app = Client("tgvc", api_id=api_id, api_hash=api_hash)
+if not HEROKU:
+    app = Client("tgvc", api_id=api_id, api_hash=api_hash)
+else:
+    app = Client(STRING_SESSION, api_id=api_id, api_hash=api_hash)
 
 # Pytgcalls Client
 vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
