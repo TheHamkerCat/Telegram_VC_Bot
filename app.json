@@ -1,0 +1,42 @@
+{
+  "name": "Telegram Voice Chat Bot",
+  "description": "Telegram Voice-Chat Bot Written In Python Using Pytgcalls & Pyrogram.",
+  "repository": "https://github.com/thehamkercat/Telegram_VC_Bot",
+  "logo": "https://i.imgur.com/8S8NVy0.png",
+  "keywords": [
+    "python",
+    "telegram",
+    "bot",
+    "voicechat",
+    "youtube",
+    "telegram-bot",
+    "pyrogram",
+    "pytgcalls",
+    "tgcalls",
+    "jiosaavn",
+    "telegram-vcbot",
+    "telegram-musicbot"
+  ],
+  "stack": "container",
+  "env": {
+    "API_ID": {
+            "description": "API_ID of your Telegram Account my.telegram.org/apps",
+            "required": true
+    },
+    "API_HASH": {
+            "description": "API_HASH of your Telegram Account my.telegram.org/apps",
+            "required": true
+    },
+    "SESSION_STRING": {
+            "description": "Session string, Check the readme if you don't know how to get this.",
+            "required": true
+    },
+    "SUDO_CHAT_ID": {
+	    "description": "ID of your chat in which you want the bot to play music, Ex- -1001485393652",
+	    "required": true
+    },
+    "OWNER_ID": {
+	    "description": "ID of your owner account",
+	    "required": true
+    }
+}}
