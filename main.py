@@ -34,9 +34,9 @@ elif not is_config:
 
 if HEROKU:
     if is_config:
-        from config import STRING_SESSION
+        from config import SESSION_STRING
     elif not is_config:
-        from sample_config import STRING_SESSION
+        from sample_config import SESSION_STRING
 
 
 queue = []  # This is where the whole song queue is stored
@@ -47,7 +47,7 @@ chat_joined = False  # Tell if chat is joined or not
 if not HEROKU:
     app = Client("tgvc", api_id=api_id, api_hash=api_hash)
 else:
-    app = Client(STRING_SESSION, api_id=api_id, api_hash=api_hash)
+    app = Client(SESSION_STRING, api_id=api_id, api_hash=api_hash)
 
 # Pytgcalls Client
 vc = GroupCall(app, input_filename="input.raw", play_on_repeat=True)
