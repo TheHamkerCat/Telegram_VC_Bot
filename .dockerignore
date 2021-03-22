@@ -11,11 +11,11 @@ final.png
 background.png
 temp.png
 # python
-/venv/
+venv/
 __pycache__/
 # tgbot
-/config.py
-/*.session
-/*.session-journal
+config.py
+*.session
+*.session-journal
 input.raw
 group_call.log
