@@ -1,1 +1,1 @@
-worker: & apt install -y ffmpeg && python3 main.py
+worker: python3 main.py
