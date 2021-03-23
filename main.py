@@ -16,27 +16,14 @@ from functions import (
     generate_cover_square
 )
 
-# TODO Make it look less messed up
-is_config = os.path.exists("config.py")
-
-if is_config:
-    from config import (
-        API_ID as api_id, API_HASH as api_hash,
-        SUDO_CHAT_ID as sudo_chat_id,
-        OWNER_ID as owner_id, ARQ_API, HEROKU
-    )
-elif not is_config:
-    from sample_config import (
-        API_ID as api_id, API_HASH as api_hash,
-        SUDO_CHAT_ID as sudo_chat_id,
-        OWNER_ID as owner_id, ARQ_API, HEROKU
-    )
+from config import (
+    API_ID as api_id, API_HASH as api_hash,
+    SUDO_CHAT_ID as sudo_chat_id,
+    OWNER_ID as owner_id, ARQ_API, HEROKU
+)
 
 if HEROKU:
-    if is_config:
-        from config import SESSION_STRING
-    elif not is_config:
-        from sample_config import SESSION_STRING
+    from config import SESSION_STRING
 
 
 queue = []  # This is where the whole song queue is stored
