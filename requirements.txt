@@ -1,7 +1,6 @@
 Pillow
 pytgcalls
 ffmpeg-python
-ffmpeg
 python-arq
 Pyrogram
 TgCrypto
