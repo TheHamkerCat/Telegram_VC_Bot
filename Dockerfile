@@ -1,21 +1,18 @@
-FROM python:3.9.2-slim-buster
+FROM ubuntu:latest
 
-WORKDIR /app
+WORKDIR /usr/src/app
+RUN chmod 777 /usr/src/app
 
-ENV PIP_NO_CACHE_DIR 1
+#Installing Dependencies
+RUN apt-get -qq update        
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -qq install -y ffmpeg opus-tools bpm-tools python3 python3-pip
+RUN pip3 install -U pip
 
-RUN pip3 install --upgrade pip setuptools
-
+#Installing Requirements
 COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
-
-RUN apt-get update \
- && apt-get install -y ffmpeg \
- && apt-get clean
-
+#Copying all source
 COPY . .
 
-RUN cp sample_config.py config.py
-
-CMD ["python3", "main.py"]
+CMD ["python3","main.py"]
