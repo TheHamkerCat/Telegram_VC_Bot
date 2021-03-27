@@ -10,7 +10,7 @@ RUN pip3 install -U pip
 
 #Installing Requirements
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -U -r requirements.txt
 
 #Copying all source
 COPY . .
