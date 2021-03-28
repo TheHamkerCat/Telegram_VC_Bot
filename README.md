@@ -45,10 +45,10 @@ Download this file [generate_string_session.py](https://raw.githubusercontent.co
 $ pip3 install pyrogram TgCrypto
 $ python3 generate_string_session.py
 ```
-You will get a session string, copy it, then press heroku deploy button.
+You will get a session string, copy it, Then use heroku commands to push to heroku, DON'T ASK HEROKU SUPPORT IN GROUP FFS. 
 
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/thehamkercat/Telegram_VC_Bot/tree/master)
+
 
 Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
