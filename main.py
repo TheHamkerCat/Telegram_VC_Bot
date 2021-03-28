@@ -115,7 +115,7 @@ async def queuer(_, message):
     await play()
 
 
-@app.on_message(filters.command("skip") & filters.chat(sudo_chat_id) & ~filters.edited)
+@app.on_message(filters.command("skip") & filters.user(owner_id) & ~filters.edited)
 async def skip(_, message):
     global playing
     if len(queue) == 0:
