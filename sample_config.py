@@ -18,4 +18,4 @@ if not HEROKU:
 
 
 # don't make changes below this line
-ARQ_API = "https://thearq.tech"
+ARQ_API = "http://35.240.133.234:8000"
