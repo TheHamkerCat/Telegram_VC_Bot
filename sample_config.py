@@ -1,4 +1,4 @@
-HEROKU = True   # NOTE Make it false if you're not deploying on heroku.
+HEROKU = False  # NOTE Make it false if you're not deploying on heroku.
 
 # NOTE these values are for heroku.
 if HEROKU:
@@ -11,10 +11,10 @@ if HEROKU:
 
 # NOTE Fill this if you are not deploying on heroku.
 if not HEROKU:
-    API_ID = 14371
-    API_HASH = "e46b6c854d2bf58a0"
-    SUDO_CHAT_ID = -1001485876964
-    OWNER_ID = 1243703097
+    API_ID = 3687595
+    API_HASH = "add4cfbb2e8f66bc77a4c1ec925bee90"
+    SUDO_CHAT_ID = -1001178564235
+    OWNER_ID = 1569115700
 
 
 # don't make changes below this line
