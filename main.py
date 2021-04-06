@@ -92,25 +92,21 @@ async def killbot(_, message):
 
 @app.on_message(filters.command("play") & filters.chat(sudo_chat_id))
 async def queuer(_, message):
-    usage = "**Usage:**\n__**/play youtube/saavn/deezer Song_Name**__"
+    usage = "**Usage:**\n__**/play Song_Name**__"
     if len(message.command) < 3:
         await send(usage)
         return
     text = message.text.split(None, 2)[1:]
     service = text[0]
     song_name = text[1]
-    requested_by = message.from_user.first_name
-    services = ["youtube", "deezer", "saavn"]
-    if service not in services:
-        await send(usage)
-        return
+    requested_by = message.from_user.first_name       
     if len(queue) > 0:
         await send("__**Added To Queue.__**")
-        queue.append({"service": service, "song": song_name,
+        queue.append({"service": youtube, "song": song_name,
                       "requested_by": requested_by})
         await play()
         return
-    queue.append({"service": service, "song": song_name,
+    queue.append({"service": youtube, "song": song_name,
                   "requested_by": requested_by})
     await play()
 
@@ -136,7 +132,7 @@ async def queue_list(_, message):
             i += 1
         m = await send(text)
     else:
-        m = await send("__**Queue Is Empty, Just Like Your Life.**__")
+        m = await send("__**NO song in Queue, just like no girl in your life.**__")
 
 
 # Queue handler
@@ -160,97 +156,7 @@ async def play():
                     await send(str(e))
                     playing = False
                     pass
-            elif service == "saavn":
-                playing = True
-                del queue[0]
-                try:
-                    await jiosaavn(requested_by, song)
-                except Exception as e:
-                    print(str(e))
-                    await send(str(e))
-                    playing = False
-                    pass
-            elif service == "deezer":
-                playing = True
-                del queue[0]
-                try:
-                    await deezer(requested_by, song)
-                except Exception as e:
-                    print(str(e))
-                    await send(str(e))
-                    playing = False
-                    pass
-
-
-# Deezer----------------------------------------------------------------------------------------
-
-
-async def deezer(requested_by, query):
-    global playing
-    m = await send(f"__**Searching for {query} on Deezer.**__")
-    try:
-        songs = await arq.deezer(query, 1)
-        title = songs[0].title
-        duration = convert_seconds(int(songs[0].duration))
-        thumbnail = songs[0].thumbnail
-        artist = songs[0].artist
-        url = songs[0].url
-    except:
-        await m.edit("__**Found No Song Matching Your Query.**__")
-        playing = False
-        return
-    await m.edit("__**Generating Thumbnail.**__")
-    await generate_cover_square(requested_by, title, artist, duration, thumbnail)
-    await m.edit("__**Downloading And Transcoding.**__")
-    await download_and_transcode_song(url)
-    await m.delete()
-    m = await app.send_photo(
-        chat_id=sudo_chat_id,
-        photo="final.png",
-        caption=f"**Playing** __**[{title}]({url})**__ **Via Deezer.**",
-    )
-    os.remove("final.png")
-    await asyncio.sleep(int(songs[0]["duration"]))
-    await m.delete()
-    playing = False
-
-
-# Jiosaavn--------------------------------------------------------------------------------------
-
-
-async def jiosaavn(requested_by, query):
-    global playing
-    m = await send(f"__**Searching for {query} on JioSaavn.**__")
-    try:
-        songs = await arq.saavn(query)
-        sname = songs[0].song
-        slink = songs[0].media_url
-        ssingers = songs[0].singers
-        sthumb = songs[0].image
-        sduration = songs[0].duration
-        sduration_converted = convert_seconds(int(sduration))
-    except Exception as e:
-        await m.edit("__**Found No Song Matching Your Query.**__")
-        print(str(e))
-        playing = False
-        return
-    await m.edit("__**Processing Thumbnail.**__")
-    await generate_cover_square(
-        requested_by, sname, ssingers, sduration_converted, sthumb
-    )
-    await m.edit("__**Downloading And Transcoding.**__")
-    await download_and_transcode_song(slink)
-    await m.delete()
-    m = await app.send_photo(
-        chat_id=sudo_chat_id,
-        caption=f"**Playing** __**{sname}**__ **Via Jiosaavn.**",
-        photo="final.png",
-    )
-    os.remove("final.png")
-    await asyncio.sleep(int(sduration))
-    await m.delete()
-    playing = False
-
+           
 
 # Youtube Play-----------------------------------------------------------------------------------
 
