@@ -50,6 +50,7 @@ Command | Description
 /queue | Check Queue Status.
 /joinvc | Join Voice Chat.
 /leavevc | Leave Voice Chat.
+/volume [1-200] | Change Volume.
 /pause | Pause Music.
 /resume | Resume Music.
 /unmute | Unmute The Bot.
