@@ -125,7 +125,11 @@ async def volume_bot(_, message):
     if (volume < 1) or (volume > 200):
         await send(usage)
         return
-    await vc.set_my_volume(volume=volume)
+    try:
+        await vc.set_my_volume(volume=volume)
+    except ValueError:
+        await send(usage)
+        return
     await send(f"**Volume Set To {volume}**")
 
 
@@ -186,7 +190,7 @@ async def queue_list(_, message):
         text = ""
         for song in queue:
             text += f"**{i}. Platform:** __**{song['service']}**__ " \
-                + "| **Song:** __**{song['song']}**__\n"
+                     + f"| **Song:** __**{song['song']}**__\n"
             i += 1
         m = await send(text)
         await delete(message)
