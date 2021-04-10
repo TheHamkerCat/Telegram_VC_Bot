@@ -266,7 +266,7 @@ async def deezer(requested_by, query):
     await download_and_transcode_song(url)
     await m.delete()
     caption = f"**Name:** [{title[:15]}]({url})\n**Duration:** {duration}\n" \
-             + "**Requested By:** {requested_by}\n**Platform:** __Deezer__"
+               + "**Requested By:** {requested_by}\n**Platform:** __Deezer__"
     m = await app.send_photo(
         chat_id=SUDO_CHAT_ID,
         photo="final.png",
@@ -305,7 +305,7 @@ async def jiosaavn(requested_by, query):
     await download_and_transcode_song(slink)
     await m.delete()
     caption = f"**Name:** {sname[:15]}\n**Duration:** {sduration_converted}\n" \
-             + "**Requested By:** {requested_by}\n**Platform:** __JioSaavn__"
+               + f"**Requested By:** {requested_by}\n**Platform:** __JioSaavn__"
     m = await app.send_photo(
         chat_id=SUDO_CHAT_ID,
         caption=caption,
@@ -352,7 +352,7 @@ async def ytplay(requested_by, query):
     transcode("audio.webm")
     await m.delete()
     caption = f"**Name:** [{title[:15]}]({link})\n**Duration:** {duration}\n" \
-             + "**Requested By:** {requested_by}\n**Platform:** __YouTube__"
+               + f"**Requested By:** {requested_by}\n**Platform:** __YouTube__"
     m = await app.send_photo(
         chat_id=SUDO_CHAT_ID,
         caption=caption,
