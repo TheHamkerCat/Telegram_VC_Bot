@@ -2,7 +2,7 @@
 
 Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In Your Group.
 
-<img src="https://hamker.me/e9uazpo.png" width="630" height="500">
+<img src="https://hamker.me/wl9twld.png" width="600" height="400">
 
 
 # Support
@@ -36,7 +36,7 @@ $ python3 main.py
 ```
 
 
-Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
+Send [commands](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
 
 
@@ -45,12 +45,12 @@ Command | Description
 :--- | :---
 /help | Show Help Message.
 /skip | Skip Any Playing Music.
-/play youtube/saavn/deezer [song_name] | To Play A Song.
+/play youtube/saavn/deezer [SONG_NAME] | To Play A Song.
 /telegram | Play A Song Directly From Telegram File.
 /queue | Check Queue Status.
 /joinvc | Join Voice Chat.
 /leavevc | Leave Voice Chat.
-/volume [1-200] | Change Volume.
+/volume [1-200] | Adjust Volume.
 /pause | Pause Music.
 /resume | Resume Music.
 /unmute | Unmute The Bot.
@@ -58,7 +58,7 @@ Command | Description
 
 ## Note
 
-1. If you want any help you can ask [here](https://t.me/PatheticProgrammers)
+1. If you want any help you can ask [here](https://t.me/tgvcsupport)
 
 ## Credits
 
