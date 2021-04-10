@@ -24,6 +24,7 @@ Follow this if you are not running on heroku
 ```sh
 $ git clone https://github.com/thehamkercat/Telegram_VC_Bot
 $ cd Telegram_VC_Bot
+$ sudo apt-get install ffmpeg
 $ pip3 install -U pip
 $ pip3 install -U -r requirements.txt
 $ cp sample_config.py config.py
@@ -34,21 +35,6 @@ Edit **config.py** with your own values.
 $ python3 main.py
 ```
 
-## Heroku
-
-#### Generate String session [IMPORTANT]
-
-Download this file [generate_string_session.py](https://raw.githubusercontent.com/thehamkercat/Telegram_VC_Bot/master/generate_string_session.py)
-
-
-```sh
-$ pip3 install pyrogram TgCrypto
-$ python3 generate_string_session.py
-```
-You will get a session string, copy it, Then use heroku commands to push to heroku, DON'T ASK HEROKU SUPPORT IN GROUP FFS. 
-
-
-
 
 Send [commads](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
@@ -57,15 +43,17 @@ play music.
 ## Commands
 Command | Description
 :--- | :---
-/start | To Start The bot.
-/help | To Show This Message.
-/ping | To Ping All Datacenters Of Telegram.
-/skip | To Skip Any Playing Music.
+/help | Show Help Message.
+/skip | Skip Any Playing Music.
 /play youtube/saavn/deezer [song_name] | To Play A Song.
-/telegram | To Play A Song Directly From Telegram File.
-/queue | To Check Queue Status.
-/joinvc | To Join Voice Chat.
-/leavevc | To Leave Voice Chat.
+/telegram | Play A Song Directly From Telegram File.
+/queue | Check Queue Status.
+/joinvc | Join Voice Chat.
+/leavevc | Leave Voice Chat.
+/pause | Pause Music.
+/resume | Resume Music.
+/unmute | Unmute The Bot.
+/update | Update & Restart.
 
 ## Note
 
