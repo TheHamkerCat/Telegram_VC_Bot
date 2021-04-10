@@ -33,7 +33,7 @@ app = Client("tgvc", api_id=API_ID, api_hash=API_HASH)
 vc = GroupCall(
     client=app,
     input_filename="input.raw",
-    play_on_repeat=False,
+    play_on_repeat=True,
     enable_logs_to_console=False)
 
 # Arq Client
