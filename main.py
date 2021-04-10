@@ -90,13 +90,19 @@ async def update_restart(_, message):
 
 @app.on_message(filters.command("pause") & filters.user(SUDOERS))
 async def pause_song(_, message):
-    await vc.pause_playout()
+    try:
+        await vc.pause_playout()
+    except Exception:
+        pass
     await send("**Paused The Music, Send /resume To Resume.**")
 
 
 @app.on_message(filters.command("resume") & filters.user(SUDOERS))
 async def resume_song(_, message):
-    await vc.resume_playout()
+    try:
+        await vc.resume_playout()
+    except Exception:
+        pass
     await send("**Resumed, Send /pause To Pause The Music.**")
 
 

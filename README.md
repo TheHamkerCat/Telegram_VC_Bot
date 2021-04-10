@@ -24,6 +24,7 @@ Follow this if you are not running on heroku
 ```sh
 $ git clone https://github.com/thehamkercat/Telegram_VC_Bot
 $ cd Telegram_VC_Bot
+$ sudo apt-get install ffmpeg
 $ pip3 install -U pip
 $ pip3 install -U -r requirements.txt
 $ cp sample_config.py config.py
