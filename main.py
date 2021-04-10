@@ -100,12 +100,6 @@ async def resume_song(_, message):
     await send("**Resumed, Send /pause To Pause The Music.**")
 
 
-@app.on_message(filters.command("mute") & filters.user(SUDOERS))
-async def mute_bot(_, message):
-    vc.set_is_mute(is_muted=True)
-    await send("**Muted!, Send /unmute To Unmute The Bot.**")
-
-
 @app.on_message(filters.command("unmute") & filters.user(SUDOERS))
 async def unmute_bot(_, message):
     vc.set_is_mute(is_muted=False)

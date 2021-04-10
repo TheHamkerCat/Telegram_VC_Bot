@@ -43,16 +43,17 @@ play music.
 ## Commands
 Command | Description
 :--- | :---
-/start | To Start The bot.
-/help | To Show This Message.
-/ping | To Ping All Datacenters Of Telegram.
-/skip | To Skip Any Playing Music.
+/help | Show Help Message.
+/skip | Skip Any Playing Music.
 /play youtube/saavn/deezer [song_name] | To Play A Song.
-/telegram | To Play A Song Directly From Telegram File.
-/queue | To Check Queue Status.
-/joinvc | To Join Voice Chat.
-/leavevc | To Leave Voice Chat.
-
+/telegram | Play A Song Directly From Telegram File.
+/queue | Check Queue Status.
+/joinvc | Join Voice Chat.
+/leavevc | Leave Voice Chat.
+/pause | Pause Music.
+/resume | Resume Music.
+/unmute | Unmute The Bot.
+/update | Update & Restart.
 
 ## Note
 
