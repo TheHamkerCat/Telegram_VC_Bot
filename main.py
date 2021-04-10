@@ -106,6 +106,32 @@ async def resume_song(_, message):
     await send("**Resumed, Send /pause To Pause The Music.**")
 
 
+@app.on_message(filters.command("mute") & filters.user(SUDOERS))
+async def mute_bot(_, message):
+    await vc.set_is_mute(is_muted=True)
+    await send("**Muted!, Send /unmute To Unmute The Bot.**")
+
+
+@app.on_message(filters.command("unmute") & filters.user(SUDOERS))
+async def unmute_bot(_, message):
+    await vc.set_is_mute(is_muted=False)
+    await send("**Unmuted!, Send /mute To Mute The Bot.**")
+
+
+@app.on_message(filters.command("volume") & filters.user(SUDOERS))
+async def volume_bot(_, message):
+    usage = "**Usage:**\n/volume [1-200]"
+    if len(message.command) != 2:
+        await send(usage)
+        return
+    volume = int(message.text.split(None, 1)[1])
+    if (volume < 1) or (volume > 200):
+        await send(usage)
+        return
+    await vc.set_my_volume(volume=volume)
+    await send(f"**Volume Set To {volume}**")
+
+
 @app.on_message(filters.command("play") & filters.chat(SUDO_CHAT_ID))
 async def queuer(_, message):
     usage = "**Usage:**\n__**/play youtube/saavn/deezer Song_Name**__"
