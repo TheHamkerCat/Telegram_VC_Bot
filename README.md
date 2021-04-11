@@ -19,7 +19,6 @@ Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In You
 
 ## Run
 
-Follow this if you are not running on heroku
 
 ```sh
 $ git clone https://github.com/thehamkercat/Telegram_VC_Bot
@@ -53,7 +52,6 @@ Command | Description
 /volume [1-200] | Adjust Volume.
 /pause | Pause Music.
 /resume | Resume Music.
-/unmute | Unmute The Bot.
 /update | Update & Restart.
 
 ## Note
