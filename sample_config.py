@@ -4,4 +4,4 @@ SUDO_CHAT_ID = -1001485876964  # Chat where the bot will play the music.
 SUDOERS = [1243703097, 13216546] # Users which have special control over the bot.
 
 # don't make changes below this line
-ARQ_API = "http://35.240.133.234:8000"
+ARQ_API = "https://thearq.tech"
