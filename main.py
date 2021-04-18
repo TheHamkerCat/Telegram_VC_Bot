@@ -323,7 +323,7 @@ async def ytplay(requested_by, query):
     ydl_opts = {"format": "bestaudio"}
     m = await send(f"__**Searching for {query} on YouTube.**__")
     try:
-        results = await arq.youtube(query, 1)
+        results = await arq.youtube(query)
         link = f"https://youtube.com{results[0].url_suffix}"
         title = results[0].title
         thumbnail = results[0].thumbnails[0]
