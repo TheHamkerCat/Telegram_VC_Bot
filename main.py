@@ -72,6 +72,20 @@ async def joinvc(_, message):
         await send(str(e))
 
 
+@app.on_message(filters.command("rejoinvc") & filters.user(SUDOERS))
+async def joinvc(_, message):
+    try:
+        if vc.is_connected:
+            await send("__**Bot Is Already In Voice Chat.**__")
+            return
+        chat_id = message.chat.id
+        await vc.reconnect()
+        await send("__**Joined The Voice Chat.**__")
+    except Exception as e:
+        print(str(e))
+        await send(str(e))
+
+
 @app.on_message(filters.command("leavevc") & filters.user(SUDOERS))
 async def leavevc(_, message):
     if not vc.is_connected:
