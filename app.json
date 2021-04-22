@@ -43,8 +43,8 @@
 	    "description": "ID of your chat in which you want the bot to play music, Ex- -1001485393652",
 	    "required": true
     },
-    "OWNER_ID": {
-	    "description": "ID of your owner account",
+    "SUDOERS": {
+	    "description": "Users which have special control over the bot.",
 	    "required": true
     }
 }}
