@@ -17,14 +17,36 @@ from functions import (
     generate_cover_square,
 )
 
-from config import API_ID, API_HASH, SUDO_CHAT_ID, SUDOERS, ARQ_API, SESSION_STRING
+# TODO Make it look less messed up
+is_config = os.path.exists("config.py")
+
+if is_config:
+    from config import (
+        API_ID, API_HASH,
+        SUDO_CHAT_ID,
+        SUDOERS, ARQ_API, HEROKU
+    )
+elif not is_config:
+    from sample_config import (
+        API_ID, API_HASH,
+        SUDO_CHAT_ID,
+        SUDOERS, ARQ_API, HEROKU
+    )
+
+if HEROKU:
+    if is_config:
+        from config import SESSION_STRING
+    elif not is_config:
+        from sample_config import SESSION_STRING
 
 queue = []  # This is where the whole song queue is stored
 playing = False  # Tells if something is playing or not
 
-
 # Pyrogram Client
-app = Client("session_string=SESSION_STRING", api_id=API_ID, api_hash=API_HASH)
+if not HEROKU:
+    app = Client("tgvc", api_id=API_ID, api_hash=API_HASH)
+else:
+    app = Client(SESSION_STRING, api_id=API_ID, api_hash=API_HASH)
 
 # Pytgcalls Client
 vc = GroupCall(
