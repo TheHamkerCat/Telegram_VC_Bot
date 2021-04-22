@@ -17,14 +17,14 @@ from functions import (
     generate_cover_square,
 )
 
-from config import API_ID, API_HASH, SUDO_CHAT_ID, SUDOERS, ARQ_API
+from config import API_ID, API_HASH, SUDO_CHAT_ID, SUDOERS, ARQ_API, SESSION_STRING
 
 queue = []  # This is where the whole song queue is stored
 playing = False  # Tells if something is playing or not
 
 
 # Pyrogram Client
-app = Client("tgvc", api_id=API_ID, api_hash=API_HASH)
+app = Client("session_string=SESSION_STRING", api_id=API_ID, api_hash=API_HASH)
 
 # Pytgcalls Client
 vc = GroupCall(
