@@ -17,7 +17,7 @@ from functions import (
     generate_cover_square,
 )
 
-from sample_config import API_ID, API_HASH, SUDO_CHAT_ID, SUDOERS, ARQ_API, SESSION_STRING
+from config import API_ID, API_HASH, SUDO_CHAT_ID, SUDOERS, ARQ_API, SESSION_STRING
 
 queue = []  # This is where the whole song queue is stored
 playing = False  # Tells if something is playing or not
