@@ -34,6 +34,22 @@ Edit **config.py** with your own values.
 $ python3 main.py
 ```
 
+## Heroku
+
+#### Generate String session [IMPORTANT]
+
+Download this file [generate_string_session.py](https://raw.githubusercontent.com/thehamkercat/Telegram_VC_Bot/master/generate_string_session.py)
+
+
+```sh
+$ pip3 install pyrogram TgCrypto
+$ python3 generate_string_session.py
+```
+Fork this repository and change name of `sample_config.py` to `config.py`
+Then you will need get a session string, copy it, then press heroku deploy button.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/Tejas61900/Telegram_VC_Bot/tree/master)
+
 
 Send [commands](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
 play music.
