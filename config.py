@@ -1,6 +1,6 @@
 HEROKU = True   # NOTE Make it false if you're not deploying on heroku.
 
-# NOTE these values are for heroku.
+# NOTE these values are for herok.
 if HEROKU:
     from os import environ
     API_ID = int(environ["API_ID"])
