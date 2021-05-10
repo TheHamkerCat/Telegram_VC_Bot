@@ -64,7 +64,6 @@ Command | Description
 /telegram | Play A Song Directly From Telegram File.
 /queue | Check Queue Status.
 /joinvc | Join Voice Chat.
-/rejoinvc | Rejoin Voice Chat.
 /leavevc | Leave Voice Chat.
 /volume [1-200] | Adjust Volume.
 /pause | Pause Music.
