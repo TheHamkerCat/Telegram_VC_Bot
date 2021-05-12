@@ -46,5 +46,10 @@
     "SUDOERS": {
 	    "description": "Users which have special control over the bot, Separated by space.",
 	    "required": true
-    }
+    },
+    "formation": {
+      "worker": {
+        "quantity": 1
+      }
+  }
 }}
