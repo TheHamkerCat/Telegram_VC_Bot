@@ -47,6 +47,10 @@
 	    "description": "Users which have special control over the bot, Separated by space.",
 	    "required": true
     },
+    "ARQ_API_KEY": {
+	    "description": "Get this from @ARQRobot.",
+	    "required": true
+    },
     "formation": {
       "worker": {
         "quantity": 1

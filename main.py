@@ -22,15 +22,9 @@ from functions import (
 is_config = os.path.exists("config.py")
 
 if is_config:
-    from config import (
-        API_ID, API_HASH, SUDO_CHAT_ID,
-        SUDOERS, ARQ_API, HEROKU
-    )
+    from config import *
 else:
-    from sample_config import (
-        API_ID, API_HASH, SUDO_CHAT_ID,
-        SUDOERS, ARQ_API, HEROKU
-    )
+    from sample_config import *
 
 if HEROKU:
     if is_config:
@@ -52,7 +46,7 @@ else:
 
 
 # Arq Client
-arq = ARQ(ARQ_API)
+arq = ARQ(ARQ_API, ARQ_API_KEY)
 
 async def delete(message):
     await asyncio.sleep(10)
@@ -329,6 +323,10 @@ async def deezer(requested_by, query, message):
     )
     try:
         songs = await arq.deezer(query, 1)
+        if not songs.ok:
+            await message.reply_text(songs.result)
+            return
+        songs = songs.result
         title = songs[0].title
         duration = convert_seconds(int(songs[0].duration))
         thumbnail = songs[0].thumbnail
@@ -368,6 +366,10 @@ async def jiosaavn(requested_by, query, message):
     )
     try:
         songs = await arq.saavn(query)
+        if not songs.ok:
+            await message.reply_text(songs.result)
+            return
+        songs = songs.result
         sname = songs[0].song
         slink = songs[0].media_url
         ssingers = songs[0].singers
@@ -410,6 +412,10 @@ async def ytplay(requested_by, query, message):
     )
     try:
         results = await arq.youtube(query)
+        if not results.ok:
+            await message.reply_text(results.result)
+            return
+        results = results.result
         link = f"https://youtube.com{results[0].url_suffix}"
         title = results[0].title
         thumbnail = results[0].thumbnails[0]
