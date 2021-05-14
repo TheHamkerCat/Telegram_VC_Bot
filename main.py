@@ -1,22 +1,20 @@
 from __future__ import unicode_literals
-import os
+
 import asyncio
+import os
 import subprocess
-import youtube_dl
 import traceback
-from Python_ARQ import ARQ
-from pytgcalls import GroupCall
 from sys import version as pyver
+
+import youtube_dl
 from pyrogram import Client, filters, idle
-from misc import HELP_TEXT, START_TEXT, REPO_TEXT
-from functions import (
-    transcode,
-    download_and_transcode_song,
-    convert_seconds,
-    time_to_seconds,
-    generate_cover,
-    generate_cover_square,
-)
+from pytgcalls import GroupCall
+from Python_ARQ import ARQ
+
+from functions import (convert_seconds, download_and_transcode_song,
+                       generate_cover, generate_cover_square, time_to_seconds,
+                       transcode)
+from misc import HELP_TEXT, REPO_TEXT, START_TEXT
 
 # TODO Make it look less messed up
 is_config = os.path.exists("config.py")
@@ -47,6 +45,7 @@ else:
 
 # Arq Client
 arq = ARQ(ARQ_API, ARQ_API_KEY)
+
 
 async def delete(message):
     await asyncio.sleep(10)
@@ -106,18 +105,13 @@ async def joinvc(_, message):
         print(str(e))
 
 
-@app.on_message(
-    filters.command("leavevc")
-    & filters.user(SUDOERS)
-    & ~filters.private
-)
+@app.on_message(filters.command("leavevc") & filters.user(SUDOERS) & ~filters.private)
 async def leavevc(_, message):
     vc = call[str(message.chat.id)]
     await vc.leave_current_group_call()
     await vc.stop()
     await message.reply_text(
-        "__**Left The Voice Chat, Restarting Client....**__",
-        quote=False
+        "__**Left The Voice Chat, Restarting Client....**__", quote=False
     )
     os.execvp(
         f"python{str(pyver.split(' ')[0])[:3]}",
@@ -125,15 +119,10 @@ async def leavevc(_, message):
     )
 
 
-@app.on_message(
-    filters.command("update")
-    & filters.user(SUDOERS)
-    & ~filters.private
-)
+@app.on_message(filters.command("update") & filters.user(SUDOERS) & ~filters.private)
 async def update_restart(_, message):
     await message.reply_text(
-        f'```{subprocess.check_output(["git", "pull"]).decode("UTF-8")}```',
-        quote=False
+        f'```{subprocess.check_output(["git", "pull"]).decode("UTF-8")}```', quote=False
     )
     os.execvp(
         f"python{str(pyver.split(' ')[0])[:3]}",
@@ -150,8 +139,7 @@ async def pause_song(_, message):
     vc = call[str(message.chat.id)]
     vc.pause_playout()
     await message.reply_text(
-        "**Paused The Music, Send `/resume` To Resume.**",
-        quote=False
+        "**Paused The Music, Send `/resume` To Resume.**", quote=False
     )
 
 
@@ -164,8 +152,7 @@ async def resume_song(_, message):
     vc = call[str(message.chat.id)]
     vc.resume_playout()
     await message.reply_text(
-        "**Resumed, Send `/pause` To Pause The Music.**",
-        quote=False
+        "**Resumed, Send `/pause` To Pause The Music.**", quote=False
     )
 
 
@@ -220,7 +207,7 @@ async def queuer(_, message):
                 "service": service,
                 "song": song_name,
                 "requested_by": requested_by,
-                "message": message
+                "message": message,
             }
         )
         await play()
@@ -230,15 +217,13 @@ async def queuer(_, message):
         await message.reply_text(str(e), quote=False)
 
 
-@app.on_message(
-    filters.command("skip")
-    & ~filters.private
-    & filters.user(SUDOERS)
-)
+@app.on_message(filters.command("skip") & ~filters.private & filters.user(SUDOERS))
 async def skip(_, message):
     global playing
     if len(queue) == 0:
-        await message.reply_text("__**Queue Is Empty, Just Like Your Life.**__", quote=False)
+        await message.reply_text(
+            "__**Queue Is Empty, Just Like Your Life.**__", quote=False
+        )
         return
     playing = False
     await message.reply_text("__**Skipped!**__", quote=False)
@@ -255,8 +240,10 @@ async def queue_list(_, message):
         i = 1
         text = ""
         for song in queue:
-            text += f"**{i}. Platform:** __**{song['service']}**__ " \
+            text += (
+                f"**{i}. Platform:** __**{song['service']}**__ "
                 + f"| **Song:** __**{song['song']}**__\n"
+            )
             i += 1
         m = await message.reply_text(text, quote=False)
         await delete(message)
@@ -264,8 +251,7 @@ async def queue_list(_, message):
 
     else:
         m = await message.reply_text(
-            "__**Queue Is Empty, Just Like Your Life.**__",
-            quote=False
+            "__**Queue Is Empty, Just Like Your Life.**__", quote=False
         )
         await delete(message)
         await m.delete()
@@ -282,7 +268,7 @@ async def play():
             service = queue[0]["service"]
             song = queue[0]["song"]
             requested_by = queue[0]["requested_by"]
-            message = queue[0]['message']
+            message = queue[0]["message"]
             if service == "youtube":
                 playing = True
                 del queue[0]
@@ -318,8 +304,7 @@ async def play():
 async def deezer(requested_by, query, message):
     global playing
     m = await message.reply_text(
-        f"__**Searching for {query} on Deezer.**__",
-        quote=False
+        f"__**Searching for {query} on Deezer.**__", quote=False
     )
     try:
         songs = await arq.deezer(query, 1)
@@ -337,14 +322,14 @@ async def deezer(requested_by, query, message):
         playing = False
         return
     await m.edit("__**Generating Thumbnail.**__")
-    await generate_cover_square(
-        requested_by, title, artist, duration, thumbnail
-    )
+    await generate_cover_square(requested_by, title, artist, duration, thumbnail)
     await m.edit("__**Downloading And Transcoding.**__")
     await download_and_transcode_song(url)
     await m.delete()
-    caption = f"🏷 **Name:** [{title[:35]}]({url})\n⏳ **Duration:** {duration}\n" \
+    caption = (
+        f"🏷 **Name:** [{title[:35]}]({url})\n⏳ **Duration:** {duration}\n"
         + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** Deezer"
+    )
     m = await message.reply_photo(
         photo="final.png",
         caption=caption,
@@ -361,8 +346,7 @@ async def deezer(requested_by, query, message):
 async def jiosaavn(requested_by, query, message):
     global playing
     m = await message.reply_text(
-        f"__**Searching for {query} on JioSaavn.**__",
-        quote=False
+        f"__**Searching for {query} on JioSaavn.**__", quote=False
     )
     try:
         songs = await arq.saavn(query)
@@ -388,8 +372,10 @@ async def jiosaavn(requested_by, query, message):
     await m.edit("__**Downloading And Transcoding.**__")
     await download_and_transcode_song(slink)
     await m.delete()
-    caption = f"🏷 **Name:** {sname[:35]}\n⏳ **Duration:** {sduration_converted}\n" \
+    caption = (
+        f"🏷 **Name:** {sname[:35]}\n⏳ **Duration:** {sduration_converted}\n"
         + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** JioSaavn"
+    )
     m = await message.reply_photo(
         photo="final.png",
         caption=caption,
@@ -407,8 +393,7 @@ async def ytplay(requested_by, query, message):
     global playing
     ydl_opts = {"format": "bestaudio"}
     m = await message.reply_text(
-        f"__**Searching for {query} on YouTube.**__",
-        quote=False
+        f"__**Searching for {query} on YouTube.**__", quote=False
     )
     try:
         results = await arq.youtube(query)
@@ -441,8 +426,10 @@ async def ytplay(requested_by, query, message):
     os.rename(audio_file, "audio.webm")
     transcode("audio.webm")
     await m.delete()
-    caption = f"🏷 **Name:** [{title[:35]}]({link})\n⏳ **Duration:** {duration}\n" \
+    caption = (
+        f"🏷 **Name:** [{title[:35]}]({link})\n⏳ **Duration:** {duration}\n"
         + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** YouTube"
+    )
     m = await message.reply_photo(
         photo="final.png",
         caption=caption,
@@ -465,7 +452,7 @@ async def tgplay(_, message):
         await message.reply_text(
             "__**You Can Only Play Telegram Files After The Queue Gets "
             + "Finished.**__",
-            quote=False
+            quote=False,
         )
         return
     if not message.reply_to_message:
@@ -474,22 +461,17 @@ async def tgplay(_, message):
     if message.reply_to_message.audio:
         if int(message.reply_to_message.audio.file_size) >= 104857600:
             await message.reply_text(
-                "__**Bruh! Only songs within 100 MB.**__",
-                quote=False
+                "__**Bruh! Only songs within 100 MB.**__", quote=False
             )
             playing = False
             return
         duration = message.reply_to_message.audio.duration
         if not duration:
             await message.reply_text(
-                "__**Only Songs With Duration Are Supported.**__",
-                quote=False
+                "__**Only Songs With Duration Are Supported.**__", quote=False
             )
             return
-        m = await message.reply_text(
-            "__**Downloading.**__",
-            quote=False
-        )
+        m = await message.reply_text("__**Downloading.**__", quote=False)
         song = await message.reply_to_message.download()
         await m.edit("__**Transcoding.**__")
         transcode(song)
@@ -498,9 +480,9 @@ async def tgplay(_, message):
         playing = False
         return
     await message.reply_text(
-        "__**Only Audio Files (Not Document) Are Supported.**__",
-        quote=False
+        "__**Only Audio Files (Not Document) Are Supported.**__", quote=False
     )
+
 
 app.start()
 print("\nBot Starting...\nFor Support Join https://t.me/TGVCSUPPORT\n")
