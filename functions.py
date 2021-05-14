@@ -1,28 +1,32 @@
 import os
-import aiohttp
+
 import aiofiles
+import aiohttp
 import ffmpeg
-from PIL import Image
-from PIL import ImageFont
-from PIL import ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 
 def transcode(filename):
     ffmpeg.input(filename).output(
-            "input.raw", format='s16le', acodec='pcm_s16le',
-            ac=2, ar='48k', loglevel='error').overwrite_output().run() 
+        "input.raw",
+        format="s16le",
+        acodec="pcm_s16le",
+        ac=2,
+        ar="48k",
+        loglevel="error",
+    ).overwrite_output().run()
     os.remove(filename)
 
 
-#Download song
+# Download song
 async def download_and_transcode_song(url):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             if resp.status == 200:
-                f = await aiofiles.open('song.mp3', mode='wb')
+                f = await aiofiles.open("song.mp3", mode="wb")
                 await f.write(await resp.read())
                 await f.close()
-    transcode("song.mp3") 
+    transcode("song.mp3")
 
 
 # Convert seconds to mm:ss
@@ -37,7 +41,7 @@ def convert_seconds(seconds):
 # Convert hh:mm:ss to seconds
 def time_to_seconds(time):
     stringt = str(time)
-    return sum(int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(':'))))
+    return sum(int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(":"))))
 
 
 # Change image size
@@ -90,6 +94,7 @@ async def generate_cover_square(requested_by, title, artist, duration, thumbnail
 
 # Generate cover for youtube
 
+
 async def generate_cover(requested_by, title, views, duration, thumbnail):
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
@@ -109,11 +114,10 @@ async def generate_cover(requested_by, title, views, duration, thumbnail):
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/font.otf", 32)
     draw.text((190, 550), f"Title: {title}", (255, 255, 255), font=font)
-    draw.text(
-        (190, 590), f"Duration: {duration}", (255, 255, 255), font=font
-    )
+    draw.text((190, 590), f"Duration: {duration}", (255, 255, 255), font=font)
     draw.text((190, 630), f"Views: {views}", (255, 255, 255), font=font)
-    draw.text((190, 670),
+    draw.text(
+        (190, 670),
         f"Played By: {requested_by}",
         (255, 255, 255),
         font=font,
