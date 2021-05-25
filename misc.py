@@ -11,7 +11,9 @@ HELP_TEXT = """__**I Can Play Music In The Voice Chat**__
 **/resume** __Resume Music.__
 **/update** __Update & Restart.__"""
 
-START_TEXT = "__**Hi I'm Telegram Voice Chat Bot. Join @TGVCSUPPORT For Support.**__"
+START_TEXT = (
+    "__**Hi I'm Telegram Voice Chat Bot. Join @TGVCSUPPORT For Support.**__"
+)
 
 REPO_TEXT = (
     "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"

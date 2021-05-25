@@ -41,7 +41,9 @@ def convert_seconds(seconds):
 # Convert hh:mm:ss to seconds
 def time_to_seconds(time):
     stringt = str(time)
-    return sum(int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(":"))))
+    return sum(
+        int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(":")))
+    )
 
 
 # Change image size
@@ -55,7 +57,9 @@ def changeImageSize(maxWidth, maxHeight, image):
 
 
 # Generate cover for jiosaavn and deezer
-async def generate_cover_square(requested_by, title, artist, duration, thumbnail):
+async def generate_cover_square(
+    requested_by, title, artist, duration, thumbnail
+):
     async with aiohttp.ClientSession() as session:
         async with session.get(thumbnail) as resp:
             if resp.status == 200:

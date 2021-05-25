@@ -89,7 +89,9 @@ async def joinvc(_, message):
     chat_id = message.chat.id
     try:
         if str(chat_id) in call.keys():
-            await message.reply_text("__**Bot Is Already In The VC**__", quote=False)
+            await message.reply_text(
+                "__**Bot Is Already In The VC**__", quote=False
+            )
             return
         vc = GroupCall(
             client=app,
@@ -105,7 +107,9 @@ async def joinvc(_, message):
         print(str(e))
 
 
-@app.on_message(filters.command("leavevc") & filters.user(SUDOERS) & ~filters.private)
+@app.on_message(
+    filters.command("leavevc") & filters.user(SUDOERS) & ~filters.private
+)
 async def leavevc(_, message):
     vc = call[str(message.chat.id)]
     await vc.leave_current_group_call()
@@ -119,10 +123,13 @@ async def leavevc(_, message):
     )
 
 
-@app.on_message(filters.command("update") & filters.user(SUDOERS) & ~filters.private)
+@app.on_message(
+    filters.command("update") & filters.user(SUDOERS) & ~filters.private
+)
 async def update_restart(_, message):
     await message.reply_text(
-        f'```{subprocess.check_output(["git", "pull"]).decode("UTF-8")}```', quote=False
+        f'```{subprocess.check_output(["git", "pull"]).decode("UTF-8")}```',
+        quote=False,
     )
     os.execvp(
         f"python{str(pyver.split(' ')[0])[:3]}",
@@ -217,7 +224,9 @@ async def queuer(_, message):
         await message.reply_text(str(e), quote=False)
 
 
-@app.on_message(filters.command("skip") & ~filters.private & filters.user(SUDOERS))
+@app.on_message(
+    filters.command("skip") & ~filters.private & filters.user(SUDOERS)
+)
 async def skip(_, message):
     global playing
     if len(queue) == 0:
@@ -322,7 +331,9 @@ async def deezer(requested_by, query, message):
         playing = False
         return
     await m.edit("__**Generating Thumbnail.**__")
-    await generate_cover_square(requested_by, title, artist, duration, thumbnail)
+    await generate_cover_square(
+        requested_by, title, artist, duration, thumbnail
+    )
     await m.edit("__**Downloading And Transcoding.**__")
     await download_and_transcode_song(url)
     await m.delete()

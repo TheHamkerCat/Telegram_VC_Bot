@@ -6,3 +6,4 @@ Pyrogram
 TgCrypto
 youtube_dl
 aiofiles
+aiohttp
