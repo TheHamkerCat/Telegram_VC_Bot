@@ -1,9 +1,10 @@
-import os
 import asyncio
+import os
+
 import aiofiles
-from aiohttp import ClientSession
 import ffmpeg
 import youtube_dl
+from aiohttp import ClientSession
 from PIL import Image, ImageDraw, ImageFont
 from Python_ARQ import ARQ
 
@@ -73,13 +74,19 @@ def changeImageSize(maxWidth, maxHeight, image):
 # Generate cover for youtube
 
 
-async def generate_cover(requested_by, title, views_or_artist, duration, thumbnail):
+async def generate_cover(
+    requested_by, title, views_or_artist, duration, thumbnail
+):
     async with session.get(thumbnail) as resp:
         if resp.status == 200:
             f = await aiofiles.open("background.png", mode="wb")
             await f.write(await resp.read())
             await f.close()
-    theme = "foreground_green.png" if COVER_THEME == "green" else "foreground_red.png"
+    theme = (
+        "foreground_green.png"
+        if COVER_THEME == "green"
+        else "foreground_red.png"
+    )
     image1 = Image.open("./background.png")
     image2 = Image.open(f"etc/{theme}")
     image3 = changeImageSize(1280, 720, image1)
@@ -92,13 +99,19 @@ async def generate_cover(requested_by, title, views_or_artist, duration, thumbna
     font = ImageFont.truetype("etc/font.otf", 32)
     draw.text((190, 550), f"Title: {title}", (255, 255, 255), font=font)
     draw.text((190, 590), f"Duration: {duration}", (255, 255, 255), font=font)
-    draw.text((190, 630), f"Views/Artist: {views_or_artist}", (255, 255, 255), font=font)
-    draw.text((190, 670), f"Requested By: {requested_by}", (255, 255, 255), font=font)
+    draw.text(
+        (190, 630),
+        f"Views/Artist: {views_or_artist}",
+        (255, 255, 255),
+        font=font,
+    )
+    draw.text(
+        (190, 670), f"Requested By: {requested_by}", (255, 255, 255), font=font
+    )
     img.save("final.png")
     os.remove("temp.png")
     os.remove("background.png")
     return "final.png"
-
 
 
 # Deezer----------------------------------------------------------------------------------------
@@ -119,11 +132,9 @@ async def deezer(requested_by, query, message):
     url = songs[0].url
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
-        generate_cover(
-            requested_by, title, artist, duration, thumbnail
-            ),
-        download_and_transcode_song(url)
-        )
+        generate_cover(requested_by, title, artist, duration, thumbnail),
+        download_and_transcode_song(url),
+    )
     await m.delete()
     caption = (
         f"🏷 **Name:** [{title[:45]}]({url})\n⏳ **Duration:** {duration}\n"
@@ -157,11 +168,11 @@ async def saavn(requested_by, query, message):
     sduration_converted = convert_seconds(int(sduration))
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
-            generate_cover(
-                requested_by, sname, ssingers, sduration_converted, sthumb
-                ),
-            download_and_transcode_song(slink)
-            )
+        generate_cover(
+            requested_by, sname, ssingers, sduration_converted, sthumb
+        ),
+        download_and_transcode_song(slink),
+    )
     await m.delete()
     caption = (
         f"🏷 **Name:** {sname[:45]}\n⏳ **Duration:** {sduration_converted}\n"
@@ -196,7 +207,9 @@ async def youtube(requested_by, query, message):
     if time_to_seconds(duration) >= 1800:
         return await m.edit("__**Bruh! Only songs within 30 Mins.**__")
     await m.edit("__**Processing Thumbnail.**__")
-    cover = await generate_cover(requested_by, title, views, duration, thumbnail)
+    cover = await generate_cover(
+        requested_by, title, views, duration, thumbnail
+    )
     await m.edit("__**Downloading Music.**__")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=False)

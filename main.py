@@ -4,14 +4,12 @@ import asyncio
 import os
 import subprocess
 import traceback
-
 from sys import version as pyver
-
 
 from pyrogram import Client, filters, idle
 from pytgcalls import GroupCall
-from functions import deezer, saavn, youtube
 
+from functions import deezer, saavn, youtube
 from misc import HELP_TEXT, REPO_TEXT, START_TEXT
 
 is_config = os.path.exists("config.py")
@@ -40,7 +38,6 @@ queue: asyncio.Queue = asyncio.Queue()
 
 
 call = {}  # This is where calls will be stored
-
 
 
 @app.on_message(
@@ -146,7 +143,9 @@ async def volume_bot(_, message):
         return
     await message.reply_text(f"**Volume Set To {volume}**", quote=False)
 
+
 running = False
+
 
 @app.on_message(
     filters.command("play")
@@ -173,7 +172,11 @@ async def queuer(_, message):
             await message.reply_text("__**Added To Queue.__**", quote=False)
         await queue.put(
             {
-                "service": deezer if service == "deezer" else saavn if service == "saavn" else youtube,
+                "service": deezer
+                if service == "deezer"
+                else saavn
+                if service == "saavn"
+                else youtube,
                 "requested_by": requested_by,
                 "query": song_name,
                 "message": message,
@@ -207,8 +210,9 @@ async def queue_list(_, message):
 async def start_queue():
     while True:
         data = await queue.get()
-        service = data['service']
-        await service(data['requested_by'], data['query'], data['message'])
+        service = data["service"]
+        await service(data["requested_by"], data["query"], data["message"])
+
 
 # Telegram Audio [Other players are in functions.py]
 
@@ -229,8 +233,9 @@ async def tgplay(_, message):
         return
     if not message.reply_to_message.audio:
         return await message.reply_text(
-        "__**Only Audio Files (Not Document) Are Supported.**__", quote=False
-    )
+            "__**Only Audio Files (Not Document) Are Supported.**__",
+            quote=False,
+        )
     if int(message.reply_to_message.audio.file_size) >= 104857600:
         return await message.reply_text(
             "__**Bruh! Only songs within 100 MB.**__", quote=False
