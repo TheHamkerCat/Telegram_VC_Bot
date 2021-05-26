@@ -3,7 +3,7 @@ HEROKU = True  # NOTE Make it false if you're not deploying on heroku.
 # NOTE these values are for heroku.
 if HEROKU:
     from os import environ
-
+    COVER_THEME = environ['COVER_THEME']
     API_ID = int(environ["API_ID"])
     API_HASH = environ["API_HASH"]
     SUDO_CHAT_ID = int(
@@ -17,6 +17,7 @@ if HEROKU:
 
 # NOTE Fill this if you are not deploying on heroku.
 if not HEROKU:
+    COVER_THEME = "red"  # This can be red or green, red by default
     API_ID = 14371
     API_HASH = "e46b6c854d2bf58a0"
     SUDO_CHAT_ID = -1001485876964
