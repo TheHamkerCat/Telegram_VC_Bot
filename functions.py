@@ -114,7 +114,7 @@ async def generate_cover(
     return "final.png"
 
 
-# Deezer----------------------------------------------------------------------------------------
+# Deezer
 
 
 async def deezer(requested_by, query, message):
@@ -149,7 +149,7 @@ async def deezer(requested_by, query, message):
     await m.delete()
 
 
-# saavn--------------------------------------------------------------------------------------
+# saavn
 
 
 async def saavn(requested_by, query, message):
@@ -187,7 +187,7 @@ async def saavn(requested_by, query, message):
     await m.delete()
 
 
-# Youtube Play-----------------------------------------------------
+# Youtube
 
 
 async def youtube(requested_by, query, message):
