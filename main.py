@@ -9,40 +9,19 @@ from sys import version as pyver
 
 # Initialize db
 import db
-db.init()
-from db import db
 
-from pyrogram import Client, filters, idle
+db.init()
+from pyrogram import filters, idle
 from pyrogram.errors.exceptions.bad_request_400 import ChatAdminRequired
 from pyrogram.raw.functions.phone import CreateGroupCall
 from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
 from pytgcalls import GroupCall
 
-from functions import (change_theme, deezer, get_theme, saavn,
-                        themes, transcode, youtube)
+from db import db
+from functions import (change_theme, deezer, get_theme, saavn, themes,
+                       transcode, youtube, app)
 from misc import HELP_TEXT, REPO_TEXT
-
-is_config = os.path.exists("config.py")
-
-if is_config:
-    from config import *
-else:
-    from sample_config import *
-
-if HEROKU:
-    if is_config:
-        from config import SESSION_STRING
-    elif not is_config:
-        from sample_config import SESSION_STRING
-
-
-# Pyrogram Client
-if not HEROKU:
-    app = Client("tgvc", api_id=API_ID, api_hash=API_HASH)
-else:
-    app = Client(SESSION_STRING, api_id=API_ID, api_hash=API_HASH)
-
 
 
 running = False  # Tells if the queue is running or not
@@ -75,12 +54,14 @@ async def joinvc(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
         db[chat_id] = {}
-    
+
     if "call" in db[chat_id]:
         return await message.reply_text(
             "__**Bot Is Already In The VC**__", quote=False
         )
-    os.popen(f"cp etc/sample_input.raw input{chat_id}.raw")  # No security issue here
+    os.popen(
+        f"cp etc/sample_input.raw input{chat_id}.raw"
+    )  # No security issue here
     vc = GroupCall(
         client=app,
         input_filename=f"input{chat_id}.raw",
@@ -105,7 +86,7 @@ async def joinvc(_, message):
             return await message.reply_text(
                 "Make me admin with message delete and vc manage permission"
             )
-    db[chat_id]['call'] = vc
+    db[chat_id]["call"] = vc
     await message.reply_text("__**Joined The Voice Chat.**__", quote=False)
 
 
@@ -114,13 +95,11 @@ async def leavevc(_, message):
     chat_id = message.chat.id
     if chat_id in db:
         if "call" in db[chat_id]:
-            vc = db[chat_id]['call']
-            del db[chat_id]['call']
+            vc = db[chat_id]["call"]
+            del db[chat_id]["call"]
             await vc.leave_current_group_call()
             await vc.stop()
-    await message.reply_text(
-        "__**Left The Voice Chat**__", quote=False
-    )
+    await message.reply_text("__**Left The Voice Chat**__", quote=False)
 
 
 @app.on_message(filters.command("volume") & ~filters.private)
@@ -131,7 +110,7 @@ async def volume_bot(_, message):
         return await message.reply_text("VC isn't started")
     if "call" not in db[chat_id]:
         return await message.reply_text("VC isn't started")
-    vc = db[chat_id]['call']
+    vc = db[chat_id]["call"]
     if len(message.command) != 2:
         return await message.reply_text(usage, quote=False)
     volume = int(message.text.split(None, 1)[1])
@@ -152,10 +131,10 @@ async def pause_song_func(_, message):
     if "call" not in db[chat_id]:
         return await message.reply_text("**VC isn't started**")
     if "paused" in db[chat_id]:
-        if db[chat_id]['paused'] == True:
+        if db[chat_id]["paused"] == True:
             return await message.reply_text("**Already paused**")
-    db[chat_id]['paused'] = True
-    vc = db[chat_id]['call']
+    db[chat_id]["paused"] = True
+    vc = db[chat_id]["call"]
     vc.pause_playout()
     await message.reply_text(
         "**Paused The Music, Send `/resume` To Resume.**", quote=False
@@ -170,10 +149,10 @@ async def resume_song(_, message):
     if "call" not in db[chat_id]:
         return await message.reply_text("**VC isn't started**")
     if "paused" in db[chat_id]:
-        if db[chat_id]['paused'] == False:
+        if db[chat_id]["paused"] == False:
             return await message.reply_text("**Already playing**")
-    db[chat_id]['paused'] = False
-    vc = db[chat_id]['call']
+    db[chat_id]["paused"] = False
+    vc = db[chat_id]["call"]
     vc.resume_playout()
     await message.reply_text(
         "**Resumed, Send `/pause` To Pause The Music.**", quote=False
@@ -187,12 +166,12 @@ async def skip_func(_, message):
         return await message.reply_text("**VC isn't started**")
     if "queue" not in db[chat_id]:
         return await message.reply_text("**VC isn't started**")
-    queue = db[chat_id]['queue']
+    queue = db[chat_id]["queue"]
     if queue.empty():
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
         )
-    db[chat_id]['skipped'] = True
+    db[chat_id]["skipped"] = True
     await message.reply_text("__**Skipped!**__", quote=False)
 
 
@@ -216,10 +195,10 @@ async def queuer(_, message):
             db[chat_id] = {}
 
         if "queue" not in db[chat_id]:
-            db[chat_id]['queue'] = asyncio.Queue()
-        if not db[chat_id]['queue'].empty():
+            db[chat_id]["queue"] = asyncio.Queue()
+        if not db[chat_id]["queue"].empty():
             await message.reply_text("__**Added To Queue.__**", quote=False)
-        await db[chat_id]['queue'].put(
+        await db[chat_id]["queue"].put(
             {
                 "service": deezer
                 if service == "deezer"
@@ -232,9 +211,9 @@ async def queuer(_, message):
             }
         )
         if "running" not in db[chat_id]:
-            db[chat_id]['running'] = False
-        if not db[chat_id]['running']:
-            db[chat_id]['running'] = True
+            db[chat_id]["running"] = False
+        if not db[chat_id]["running"]:
+            db[chat_id]["running"] = True
             await start_queue(chat_id)
     except Exception as e:
         await message.reply_text(str(e), quote=False)
@@ -248,8 +227,8 @@ async def queue_list(_, message):
     if chat_id not in db:
         db[chat_id] = {}
     if "queue" not in db[chat_id]:
-        db[chat_id]['queue'] = asyncio.Queue()
-    queue = db[chat_id]['queue']
+        db[chat_id]["queue"] = asyncio.Queue()
+    queue = db[chat_id]["queue"]
     if queue.empty():
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
@@ -258,16 +237,17 @@ async def queue_list(_, message):
     for count, song in enumerate(queue._queue, 1):
         text += f"**{count}. {song['service'].__name__}** | __{song['query']}__  |  {song['requested_by']}\n"
     if len(text) > 4090:
-        return await message.reply_text(f"**There are {queue.qsize()} songs in queue.**")
+        return await message.reply_text(
+            f"**There are {queue.qsize()} songs in queue.**"
+        )
     await message.reply_text(text)
-
 
 # Queue handler
 
 
 async def start_queue(chat_id):
     while True:
-        data = await db[chat_id]['queue'].get()
+        data = await db[chat_id]["queue"].get()
         service = data["service"]
         await service(data["requested_by"], data["query"], data["message"])
 
@@ -281,8 +261,8 @@ async def tgplay(_, message):
     if chat_id not in db:
         db[chat_id] = {}
     if "queue" not in db[chat_id]:
-        db[chat_id]['queue'] = asyncio.Queue()
-    queue = db[chat_id]['queue']
+        db[chat_id]["queue"] = asyncio.Queue()
+    queue = db[chat_id]["queue"]
     if not queue.empty():
         return await message.reply_text(
             "__**You Can Only Play Telegram Files After The Queue Gets "
@@ -311,7 +291,9 @@ async def tgplay(_, message):
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, functools.partial(transcode, song, chat_id))
+    await loop.run_in_executor(
+        None, functools.partial(transcode, song, chat_id)
+    )
     await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
     await asyncio.sleep(duration)
     os.remove(song)
@@ -334,6 +316,7 @@ async def list_vc(_, message):
             chat_title = "Private"
         text += f"**{count}.** [`{chat_id}`]  **{chat_title}**\n"
     await message.reply_text(text)
+
 
 app.start()
 print("\nBot Starting...\nFor Support Join https://t.me/TGVCSUPPORT\n")

@@ -18,5 +18,5 @@ __pycache__/
 /config.py
 /*.session
 /*.session-journal
-*.raw
+input-*.raw
 group_call.log
