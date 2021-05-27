@@ -3,6 +3,8 @@ import os
 
 import aiofiles
 import ffmpeg
+import functools
+from db import db
 import youtube_dl
 from aiohttp import ClientSession
 from PIL import Image, ImageDraw, ImageFont
@@ -16,53 +18,48 @@ if is_config:
 else:
     from sample_config import *
 
-# Arq Client
 session = ClientSession()
 arq = ARQ(ARQ_API, ARQ_API_KEY, session)
-skipped = False
-paused = False
-
 themes = ["darkred", "lightred", "green", "purple", "skyblue", "dark", "black"]
 
-
-def get_theme() -> str:
-    with open("etc/theme.txt", "r") as theme:
-        theme = theme.read().strip()
+def get_theme(chat_id) -> str:
+    theme = "green"
+    if chat_id not in db:
+        db[chat_id] = {}
+    if "theme" not in db[chat_id]:
+        db[chat_id]['theme'] = "green"
+    theme = db[chat_id]['theme']
     return theme
 
 
-def change_theme(name: str):
-    with open("etc/theme.txt", "w") as theme:
-        theme.write(name)
+def change_theme(name: str, chat_id):
+    if chat_id not in db:
+        db[chat_id] = {}
+    if "theme" not in db[chat_id]:
+        db[chat_id]['theme'] = "green"
+    db[chat_id]['theme'] = name
 
 
-async def pause_skip_watcher(message: Message, duration: int):
-    global skipped, paused
+async def pause_skip_watcher(message: Message, duration: int, chat_id: int):
+    if "skipped" not in db[chat_id]:
+        db[chat_id]['skipped'] = False
+    if "paused" not in db[chat_id]:
+        db[chat_id]['paused'] = False
     for _ in range(duration * 10):
-        if skipped:
-            skipped = False
+        if db[chat_id]['skipped']:
+            db[chat_id]['skipped'] = False
             return await message.delete()
-        if paused:
-            while paused:
+        if db[chat_id]['paused']:
+            while db[chat_id]['paused']:
                 await asyncio.sleep(0.1)
                 continue
         await asyncio.sleep(0.1)
-    skipped = False
+    db[chat_id]['skipped'] = False
 
 
-def skip_song():
-    global skipped
-    skipped = True
-
-
-def pause_song(pause: bool):
-    global paused
-    paused = pause
-
-
-def transcode(filename: str):
+def transcode(filename: str, chat_id: str):
     ffmpeg.input(filename).output(
-        "input.raw",
+        f"input{chat_id}.raw",
         format="s16le",
         acodec="pcm_s16le",
         ac=2,
@@ -73,15 +70,15 @@ def transcode(filename: str):
 
 
 # Download song
-async def download_and_transcode_song(url):
-    song = "song.mp3"
+async def download_and_transcode_song(url, chat_id):
+    song = f"{chat_id}.mp3"
     async with session.get(url) as resp:
         if resp.status == 200:
             f = await aiofiles.open(song, mode="wb")
             await f.write(await resp.read())
             await f.close()
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, transcode, song)
+    await loop.run_in_executor(None, functools.partial(transcode, song, chat_id))
 
 
 # Convert seconds to mm:ss
@@ -115,21 +112,24 @@ def changeImageSize(maxWidth: int, maxHeight: int, image):
 
 
 async def generate_cover(
-    requested_by, title, views_or_artist, duration, thumbnail
-):
+    requested_by, title, views_or_artist, duration, thumbnail, chat_id
+    ):
     async with session.get(thumbnail) as resp:
         if resp.status == 200:
-            f = await aiofiles.open("background.png", mode="wb")
+            f = await aiofiles.open(f"background{chat_id}.png", mode="wb")
             await f.write(await resp.read())
             await f.close()
-    image1 = Image.open("./background.png")
-    image2 = Image.open(f"etc/foreground_{get_theme()}.png")
+    background = f"./background{chat_id}.png"
+    final = f"final{chat_id}.png"
+    temp = f"temp{chat_id}.png"
+    image1 = Image.open(background)
+    image2 = Image.open(f"etc/foreground_{get_theme(chat_id)}.png")
     image3 = changeImageSize(1280, 720, image1)
     image4 = changeImageSize(1280, 720, image2)
     image5 = image3.convert("RGBA")
     image6 = image4.convert("RGBA")
-    Image.alpha_composite(image5, image6).save("temp.png")
-    img = Image.open("temp.png")
+    Image.alpha_composite(image5, image6).save(temp)
+    img = Image.open(temp)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/font.otf", 32)
     draw.text((190, 550), f"Title: {title}", (255, 255, 255), font=font)
@@ -143,10 +143,10 @@ async def generate_cover(
     draw.text(
         (190, 670), f"Requested By: {requested_by}", (255, 255, 255), font=font
     )
-    img.save("final.png")
-    os.remove("temp.png")
-    os.remove("background.png")
-    return "final.png"
+    img.save(final)
+    os.remove(temp)
+    os.remove(background)
+    return final
 
 
 # Deezer
@@ -167,8 +167,8 @@ async def deezer(requested_by, query, message: Message):
     url = songs[0].url
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
-        generate_cover(requested_by, title, artist, duration, thumbnail),
-        download_and_transcode_song(url),
+        generate_cover(requested_by, title, artist, duration, thumbnail, message.chat.id),
+        download_and_transcode_song(url, message.chat.id),
     )
     await m.delete()
     caption = (
@@ -181,7 +181,7 @@ async def deezer(requested_by, query, message: Message):
     )
     os.remove(cover)
     duration = int(songs[0]["duration"])
-    await pause_skip_watcher(m, duration)
+    await pause_skip_watcher(m, duration, message.chat.id)
     await m.delete()
 
 
@@ -205,9 +205,9 @@ async def saavn(requested_by, query, message):
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
         generate_cover(
-            requested_by, sname, ssingers, sduration_converted, sthumb
+            requested_by, sname, ssingers, sduration_converted, sthumb, message.chat.id
         ),
-        download_and_transcode_song(slink),
+        download_and_transcode_song(slink, message.chat.id),
     )
     await m.delete()
     caption = (
@@ -220,7 +220,7 @@ async def saavn(requested_by, query, message):
     )
     os.remove(cover)
     duration = int(sduration)
-    await pause_skip_watcher(m, duration)
+    await pause_skip_watcher(m, duration, message.chat.id)
     await m.delete()
 
 
@@ -245,7 +245,7 @@ async def youtube(requested_by, query, message):
         return await m.edit("__**Bruh! Only songs within 30 Mins.**__")
     await m.edit("__**Processing Thumbnail.**__")
     cover = await generate_cover(
-        requested_by, title, views, duration, thumbnail
+        requested_by, title, views, duration, thumbnail, message.chat.id
     )
     await m.edit("__**Downloading Music.**__")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -253,10 +253,10 @@ async def youtube(requested_by, query, message):
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
     await m.edit("__**Transcoding.**__")
-    song = "audio.webm"
+    song = f"audio{message.chat.id}.webm"
     os.rename(audio_file, song)
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, transcode, song)
+    await loop.run_in_executor(None, functools.partial(transcode, song, message.chat.id))
     await m.delete()
     caption = (
         f"🏷 **Name:** [{title[:45]}]({link})\n⏳ **Duration:** {duration}\n"
@@ -268,8 +268,5 @@ async def youtube(requested_by, query, message):
     )
     os.remove(cover)
     duration = int(time_to_seconds(duration))
-    await pause_skip_watcher(m, duration)
+    await pause_skip_watcher(m, duration, message.chat.id)
     await m.delete()
-
-
-from main import pause_skip_watcher

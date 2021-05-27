@@ -1,10 +1,16 @@
 from __future__ import unicode_literals
 
 import asyncio
+import functools
 import os
 import subprocess
 import traceback
 from sys import version as pyver
+
+# Initialize db
+import db
+db.init()
+from db import db
 
 from pyrogram import Client, filters, idle
 from pyrogram.errors.exceptions.bad_request_400 import ChatAdminRequired
@@ -13,8 +19,8 @@ from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
 from pytgcalls import GroupCall
 
-from functions import (change_theme, deezer, get_theme, pause_song, saavn,
-                       skip_song, themes, transcode, youtube)
+from functions import (change_theme, deezer, get_theme, saavn,
+                        themes, transcode, youtube)
 from misc import HELP_TEXT, REPO_TEXT
 
 is_config = os.path.exists("config.py")
@@ -38,19 +44,8 @@ else:
     app = Client(SESSION_STRING, api_id=API_ID, api_hash=API_HASH)
 
 
-# This is where queue info and functions will be stored
-queue: asyncio.Queue = asyncio.Queue()
+
 running = False  # Tells if the queue is running or not
-call = {}  # This is where calls will be stored
-
-
-@app.on_message(
-    filters.command("start")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
-async def start(_, message):
-    await message.reply_text(START_TEXT, quote=False)
 
 
 @app.on_message(
@@ -83,7 +78,7 @@ async def theme_func(_, message):
     theme = message.text.split(None, 1)[1].strip()
     if theme not in themes:
         return await message.reply_text(usage)
-    change_theme(theme)
+    change_theme(theme, message.chat.id)
     await message.reply_text(f"Changed theme to {theme}")
 
 
@@ -93,15 +88,17 @@ async def theme_func(_, message):
     & ~filters.private
 )
 async def joinvc(_, message):
-    global call
     chat_id = message.chat.id
-    if str(chat_id) in call.keys():
+    if chat_id not in db:
+        db[chat_id] = {}
+    
+    if "call" in db[chat_id]:
         return await message.reply_text(
             "__**Bot Is Already In The VC**__", quote=False
         )
     vc = GroupCall(
         client=app,
-        input_filename=f"input.raw",
+        input_filename=f"input{chat_id}.raw",
         play_on_repeat=True,
         enable_logs_to_console=False,
     )
@@ -123,7 +120,7 @@ async def joinvc(_, message):
             return await message.reply_text(
                 "Make me admin with message delete and vc manage permission"
             )
-    call[str(chat_id)] = vc
+    db[chat_id]['call'] = vc
     await message.reply_text("__**Joined The Voice Chat.**__", quote=False)
 
 
@@ -131,9 +128,12 @@ async def joinvc(_, message):
     filters.command("leavevc") & filters.user(SUDOERS) & ~filters.private
 )
 async def leavevc(_, message):
-    vc = call[str(message.chat.id)]
-    await vc.leave_current_group_call()
-    await vc.stop()
+    chat_id = message.chat.id
+    if chat_id in db:
+        if "call" in db[chat_id]:
+            vc = db[chat_id]['call']
+            await vc.leave_current_group_call()
+            await vc.stop()
     await message.reply_text(
         "__**Left The Voice Chat, Restarting Client....**__", quote=False
     )
@@ -163,8 +163,13 @@ async def update_restart(_, message):
     & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
 )
 async def volume_bot(_, message):
-    vc = call[str(message.chat.id)]
     usage = "**Usage:**\n/volume [1-200]"
+    chat_id = message.chat.id
+    if chat_id not in db:
+        return await message.reply_text("VC isn't started")
+    if "call" not in db[chat_id]:
+        return await message.reply_text("VC isn't started")
+    vc = db[chat_id]['call']
     if len(message.command) != 2:
         return await message.reply_text(usage, quote=False)
     volume = int(message.text.split(None, 1)[1])
@@ -183,8 +188,16 @@ async def volume_bot(_, message):
     & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
 )
 async def pause_song_func(_, message):
-    pause_song(True)
-    vc = call[str(message.chat.id)]
+    chat_id = message.chat.id
+    if chat_id not in db:
+        return await message.reply_text("**VC isn't started**")
+    if "call" not in db[chat_id]:
+        return await message.reply_text("**VC isn't started**")
+    if "paused" in db[chat_id]:
+        if db[chat_id]['paused'] == True:
+            return await message.reply_text("**Already paused**")
+    db[chat_id]['paused'] = True
+    vc = db[chat_id]['call']
     vc.pause_playout()
     await message.reply_text(
         "**Paused The Music, Send `/resume` To Resume.**", quote=False
@@ -197,8 +210,16 @@ async def pause_song_func(_, message):
     & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
 )
 async def resume_song(_, message):
-    pause_song(False)
-    vc = call[str(message.chat.id)]
+    chat_id = message.chat.id
+    if chat_id not in db:
+        return await message.reply_text("**VC isn't started**")
+    if "call" not in db[chat_id]:
+        return await message.reply_text("**VC isn't started**")
+    if "paused" in db[chat_id]:
+        if db[chat_id]['paused'] == False:
+            return await message.reply_text("**Already playing**")
+    db[chat_id]['paused'] = False
+    vc = db[chat_id]['call']
     vc.resume_playout()
     await message.reply_text(
         "**Resumed, Send `/pause` To Pause The Music.**", quote=False
@@ -209,11 +230,17 @@ async def resume_song(_, message):
     filters.command("skip") & ~filters.private & filters.user(SUDOERS)
 )
 async def skip_func(_, message):
+    chat_id = message.chat.id
+    if chat_id not in db:
+        return await message.reply_text("**VC isn't started**")
+    if "queue" not in db[chat_id]:
+        return await message.reply_text("**VC isn't started**")
+    queue = db[chat_id]['queue']
     if queue.empty():
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
         )
-    skip_song()
+    db[chat_id]['skipped'] = True
     await message.reply_text("__**Skipped!**__", quote=False)
 
 
@@ -236,9 +263,15 @@ async def queuer(_, message):
         if service not in services:
             return await message.reply_text(usage, quote=False)
         await message.delete()
-        if not queue.empty():
+        chat_id = message.chat.id
+        if chat_id not in db:
+            db[chat_id] = {}
+
+        if "queue" not in db[chat_id]:
+            db[chat_id]['queue'] = asyncio.Queue()
+        if not db[chat_id]['queue'].empty():
             await message.reply_text("__**Added To Queue.__**", quote=False)
-        await queue.put(
+        await db[chat_id]['queue'].put(
             {
                 "service": deezer
                 if service == "deezer"
@@ -250,9 +283,11 @@ async def queuer(_, message):
                 "message": message,
             }
         )
-        if not running:
-            running = True
-            await start_queue()
+        if "running" not in db[chat_id]:
+            db[chat_id]['running'] = False
+        if not db[chat_id]['running']:
+            db[chat_id]['running'] = True
+            await start_queue(chat_id)
     except Exception as e:
         await message.reply_text(str(e), quote=False)
         e = traceback.format_exc()
@@ -265,6 +300,12 @@ async def queuer(_, message):
     & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
 )
 async def queue_list(_, message):
+    chat_id = message.chat.id
+    if chat_id not in db:
+        db[chat_id] = {}
+    if "queue" not in db[chat_id]:
+        db[chat_id]['queue'] = asyncio.Queue()
+    queue = db[chat_id]['queue']
     if queue.empty():
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
@@ -275,9 +316,9 @@ async def queue_list(_, message):
 # Queue handler
 
 
-async def start_queue():
+async def start_queue(chat_id):
     while True:
-        data = await queue.get()
+        data = await db[chat_id]['queue'].get()
         service = data["service"]
         await service(data["requested_by"], data["query"], data["message"])
 
@@ -289,7 +330,13 @@ async def start_queue():
     filters.command("telegram") & filters.chat(SUDO_CHAT_ID) & ~filters.edited
 )
 async def tgplay(_, message):
-    if len(queue) != 0:
+    chat_id = message.chat.id
+    if chat_id not in db:
+        db[chat_id] = {}
+    if "queue" not in db[chat_id]:
+        db[chat_id]['queue'] = asyncio.Queue()
+    queue = db[chat_id]['queue']
+    if not queue.empty():
         return await message.reply_text(
             "__**You Can Only Play Telegram Files After The Queue Gets "
             + "Finished.**__",
@@ -317,7 +364,7 @@ async def tgplay(_, message):
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, transcode, song)
+    await loop.run_in_executor(None, functools.partial(transcode, song, chat_id))
     await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
     await asyncio.sleep(duration)
     os.remove(song)
