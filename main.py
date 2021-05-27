@@ -9,8 +9,8 @@ from sys import version as pyver
 
 # Initialize db
 import db
-
 db.init()
+
 from pyrogram import filters, idle
 from pyrogram.errors.exceptions.bad_request_400 import ChatAdminRequired
 from pyrogram.raw.functions.phone import CreateGroupCall
