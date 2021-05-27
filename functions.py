@@ -170,7 +170,11 @@ async def generate_cover(
     img.save(final)
     os.remove(temp)
     os.remove(background)
-    await change_vc_title(title, chat_id)
+    try:
+        await change_vc_title(title, chat_id)
+    except Exception:
+        await message.reply_text("[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
+        pass
     return final
 
 
