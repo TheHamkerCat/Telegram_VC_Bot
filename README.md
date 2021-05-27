@@ -65,6 +65,7 @@ Command | Description
 /queue | Check Queue Status.
 /joinvc | Join Voice Chat.
 /leavevc | Leave Voice Chat.
+/listvc | List Active Voice Chats.
 /volume [1-200] | Adjust Volume.
 /pause | Pause Music.
 /resume | Resume Music.

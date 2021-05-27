@@ -48,29 +48,17 @@ else:
 running = False  # Tells if the queue is running or not
 
 
-@app.on_message(
-    filters.command("help")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("help") & ~filters.private)
 async def help(_, message):
     await message.reply_text(HELP_TEXT, quote=False)
 
 
-@app.on_message(
-    filters.command("repo")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("repo") & ~filters.private)
 async def repo(_, message):
     await message.reply_text(REPO_TEXT, quote=False)
 
 
-@app.on_message(
-    filters.command("theme")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("theme") & ~filters.private)
 async def theme_func(_, message):
     usage = f"Wrong theme, select one from below\n{' | '.join(themes)}"
     if len(message.command) != 2:
@@ -82,11 +70,7 @@ async def theme_func(_, message):
     await message.reply_text(f"Changed theme to {theme}")
 
 
-@app.on_message(
-    filters.command("joinvc")
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-    & ~filters.private
-)
+@app.on_message(filters.command("joinvc") & ~filters.private)
 async def joinvc(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
@@ -96,6 +80,7 @@ async def joinvc(_, message):
         return await message.reply_text(
             "__**Bot Is Already In The VC**__", quote=False
         )
+    os.popen(f"cp etc/sample_input.raw input{chat_id}.raw")  # No security issue here
     vc = GroupCall(
         client=app,
         input_filename=f"input{chat_id}.raw",
@@ -124,44 +109,21 @@ async def joinvc(_, message):
     await message.reply_text("__**Joined The Voice Chat.**__", quote=False)
 
 
-@app.on_message(
-    filters.command("leavevc") & filters.user(SUDOERS) & ~filters.private
-)
+@app.on_message(filters.command("leavevc") & ~filters.private)
 async def leavevc(_, message):
     chat_id = message.chat.id
     if chat_id in db:
         if "call" in db[chat_id]:
             vc = db[chat_id]['call']
+            del db[chat_id]['call']
             await vc.leave_current_group_call()
             await vc.stop()
     await message.reply_text(
-        "__**Left The Voice Chat, Restarting Client....**__", quote=False
-    )
-    os.execvp(
-        f"python{str(pyver.split(' ')[0])[:3]}",
-        [f"python{str(pyver.split(' ')[0])[:3]}", "main.py"],
+        "__**Left The Voice Chat**__", quote=False
     )
 
 
-@app.on_message(
-    filters.command("update") & filters.user(SUDOERS) & ~filters.private
-)
-async def update_restart(_, message):
-    await message.reply_text(
-        f'```{subprocess.check_output(["git", "pull"]).decode("UTF-8")}```',
-        quote=False,
-    )
-    os.execvp(
-        f"python{str(pyver.split(' ')[0])[:3]}",
-        [f"python{str(pyver.split(' ')[0])[:3]}", "main.py"],
-    )
-
-
-@app.on_message(
-    filters.command("volume")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("volume") & ~filters.private)
 async def volume_bot(_, message):
     usage = "**Usage:**\n/volume [1-200]"
     chat_id = message.chat.id
@@ -182,11 +144,7 @@ async def volume_bot(_, message):
     await message.reply_text(f"**Volume Set To {volume}**", quote=False)
 
 
-@app.on_message(
-    filters.command("pause")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("pause") & ~filters.private)
 async def pause_song_func(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
@@ -204,11 +162,7 @@ async def pause_song_func(_, message):
     )
 
 
-@app.on_message(
-    filters.command("resume")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("resume") & ~filters.private)
 async def resume_song(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
@@ -226,9 +180,7 @@ async def resume_song(_, message):
     )
 
 
-@app.on_message(
-    filters.command("skip") & ~filters.private & filters.user(SUDOERS)
-)
+@app.on_message(filters.command("skip") & ~filters.private)
 async def skip_func(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
@@ -244,11 +196,7 @@ async def skip_func(_, message):
     await message.reply_text("__**Skipped!**__", quote=False)
 
 
-@app.on_message(
-    filters.command("play")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("play") & ~filters.private)
 async def queuer(_, message):
     global running
     try:
@@ -294,11 +242,7 @@ async def queuer(_, message):
         print(e)
 
 
-@app.on_message(
-    filters.command("queue")
-    & ~filters.private
-    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
-)
+@app.on_message(filters.command("queue") & ~filters.private)
 async def queue_list(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
@@ -326,9 +270,7 @@ async def start_queue(chat_id):
 # Telegram Audio [Other players are in functions.py]
 
 
-@app.on_message(
-    filters.command("telegram") & filters.chat(SUDO_CHAT_ID) & ~filters.edited
-)
+@app.on_message(filters.command("telegram") & ~filters.private)
 async def tgplay(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
@@ -369,6 +311,24 @@ async def tgplay(_, message):
     await asyncio.sleep(duration)
     os.remove(song)
 
+
+@app.on_message(filters.command("listvc") & ~filters.private)
+async def list_vc(_, message):
+    if len(db) == 0:
+        return await message.reply_text("There are no active voice chats")
+    chats = []
+    for chat in db:
+        if "call" in db[chat]:
+            chats.append(int(chat))
+    text = ""
+    for count, chat_id in enumerate(chats, 1):
+        try:
+            chat = await app.get_chat(chat_id)
+            chat_title = chat.title
+        except Exception:
+            chat_title = "Private"
+        text += f"**{count}.** [`{chat_id}`]  **{chat_title}**\n"
+    await message.reply_text(text)
 
 app.start()
 print("\nBot Starting...\nFor Support Join https://t.me/TGVCSUPPORT\n")

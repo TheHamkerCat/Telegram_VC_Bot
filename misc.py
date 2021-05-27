@@ -5,6 +5,7 @@ HELP_TEXT = """__**I Can Play Music In The Voice Chat**__
 **/telegram** __Play From Telegram Audio.__
 **/joinvc** __Join Voice Chat.__
 **/leavevc** __Leave Voice Chat.__
+**/listvc** __List Joined Voice Chats.__
 **/volume [1-200]** __Adjust Volume.__
 **/pause** __Pause Music.__
 **/resume** __Resume Music.__
