@@ -254,7 +254,12 @@ async def queue_list(_, message):
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
         )
-    await message.reply_text(f"**There are {queue.qsize()} songs in queue.**")
+    text = ""
+    for count, song in enumerate(queue._queue, 1):
+        text += f"**{count}. {song['service'].__name__}** | __{song['query']}__  |  {song['requested_by']}\n"
+    if len(text) > 4090:
+        return await message.reply_text(f"**There are {queue.qsize()} songs in queue.**")
+    await message.reply_text(text)
 
 
 # Queue handler
