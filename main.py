@@ -10,7 +10,7 @@ import youtube_dl
 from pyrogram import Client, filters, idle
 from pytgcalls import GroupCall
 from Python_ARQ import ARQ
-
+from aiohttp import ClientSession
 from functions import (convert_seconds, download_and_transcode_song,
                        generate_cover, generate_cover_square, time_to_seconds,
                        transcode)
@@ -44,7 +44,8 @@ else:
 
 
 # Arq Client
-arq = ARQ(ARQ_API, ARQ_API_KEY)
+session = ClientSession()
+arq = ARQ(ARQ_API, ARQ_API_KEY, session)
 
 
 async def delete(message):
