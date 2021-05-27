@@ -27,10 +27,6 @@
     }
   ],
   "env": {
-    "COVER_THEME": {
-            "description": "Color theme of current playing cover, fill red or green, fill red in my opinion lol.",
-            "required": true
-    },
     "API_ID": {
             "description": "API_ID of your Telegram Account my.telegram.org/apps",
             "required": true

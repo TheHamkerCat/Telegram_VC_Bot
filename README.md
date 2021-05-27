@@ -68,6 +68,7 @@ Command | Description
 /volume [1-200] | Adjust Volume.
 /pause | Pause Music.
 /resume | Resume Music.
+/theme [Theme Name] | Change 'Currently Playing' Theme.
 /update | Update & Restart.
 
 ## Note

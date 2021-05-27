@@ -6,6 +6,7 @@ import ffmpeg
 import youtube_dl
 from aiohttp import ClientSession
 from PIL import Image, ImageDraw, ImageFont
+from pyrogram.types import Message
 from Python_ARQ import ARQ
 
 is_config = os.path.exists("config.py")
@@ -18,9 +19,48 @@ else:
 # Arq Client
 session = ClientSession()
 arq = ARQ(ARQ_API, ARQ_API_KEY, session)
+skipped = False
+paused = False
+
+themes = ["darkred", "lightred", "green", "purple", "skyblue", "dark", "black"]
 
 
-def transcode(filename):
+def get_theme() -> str:
+    with open("etc/theme.txt", "r") as theme:
+        theme = theme.read().strip()
+    return theme
+
+
+def change_theme(name: str):
+    with open("etc/theme.txt", "w") as theme:
+        theme.write(name)
+
+
+async def pause_skip_watcher(message: Message, duration: int):
+    global skipped, paused
+    for _ in range(duration * 10):
+        if skipped:
+            skipped = False
+            return await message.delete()
+        if paused:
+            while paused:
+                await asyncio.sleep(0.1)
+                continue
+        await asyncio.sleep(0.1)
+    skipped = False
+
+
+def skip_song():
+    global skipped
+    skipped = True
+
+
+def pause_song(pause: bool):
+    global paused
+    paused = pause
+
+
+def transcode(filename: str):
     ffmpeg.input(filename).output(
         "input.raw",
         format="s16le",
@@ -45,7 +85,7 @@ async def download_and_transcode_song(url):
 
 
 # Convert seconds to mm:ss
-def convert_seconds(seconds):
+def convert_seconds(seconds: int):
     seconds = seconds % (24 * 3600)
     seconds %= 3600
     minutes = seconds // 60
@@ -62,7 +102,7 @@ def time_to_seconds(time):
 
 
 # Change image size
-def changeImageSize(maxWidth, maxHeight, image):
+def changeImageSize(maxWidth: int, maxHeight: int, image):
     widthRatio = maxWidth / image.size[0]
     heightRatio = maxHeight / image.size[1]
     newWidth = int(widthRatio * image.size[0])
@@ -82,13 +122,8 @@ async def generate_cover(
             f = await aiofiles.open("background.png", mode="wb")
             await f.write(await resp.read())
             await f.close()
-    theme = (
-        "foreground_green.png"
-        if COVER_THEME == "green"
-        else "foreground_red.png"
-    )
     image1 = Image.open("./background.png")
-    image2 = Image.open(f"etc/{theme}")
+    image2 = Image.open(f"etc/foreground_{get_theme()}.png")
     image3 = changeImageSize(1280, 720, image1)
     image4 = changeImageSize(1280, 720, image2)
     image5 = image3.convert("RGBA")
@@ -117,7 +152,7 @@ async def generate_cover(
 # Deezer
 
 
-async def deezer(requested_by, query, message):
+async def deezer(requested_by, query, message: Message):
     m = await message.reply_text(
         f"__**Searching for {query} on Deezer.**__", quote=False
     )
@@ -145,7 +180,8 @@ async def deezer(requested_by, query, message):
         caption=caption,
     )
     os.remove(cover)
-    await asyncio.sleep(int(songs[0]["duration"]))
+    duration = int(songs[0]["duration"])
+    await pause_skip_watcher(m, duration)
     await m.delete()
 
 
@@ -183,7 +219,8 @@ async def saavn(requested_by, query, message):
         caption=caption,
     )
     os.remove(cover)
-    await asyncio.sleep(int(sduration))
+    duration = int(sduration)
+    await pause_skip_watcher(m, duration)
     await m.delete()
 
 
@@ -191,7 +228,7 @@ async def saavn(requested_by, query, message):
 
 
 async def youtube(requested_by, query, message):
-    ydl_opts = {"format": "bestaudio"}
+    ydl_opts = {"format": "bestaudio", "quiet": True}
     m = await message.reply_text(
         f"__**Searching for {query} on YouTube.**__", quote=False
     )
@@ -230,5 +267,9 @@ async def youtube(requested_by, query, message):
         caption=caption,
     )
     os.remove(cover)
-    await asyncio.sleep(int(time_to_seconds(duration)))
+    duration = int(time_to_seconds(duration))
+    await pause_skip_watcher(m, duration)
     await m.delete()
+
+
+from main import pause_skip_watcher

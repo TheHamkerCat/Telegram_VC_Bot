@@ -7,10 +7,15 @@ import traceback
 from sys import version as pyver
 
 from pyrogram import Client, filters, idle
+from pyrogram.errors.exceptions.bad_request_400 import ChatAdminRequired
+from pyrogram.raw.functions.phone import CreateGroupCall
+from pyrogram.raw.types import InputPeerChannel
+from pyrogram.types import Message
 from pytgcalls import GroupCall
 
-from functions import deezer, saavn, youtube
-from misc import HELP_TEXT, REPO_TEXT, START_TEXT
+from functions import (change_theme, deezer, get_theme, pause_song, saavn,
+                       skip_song, themes, transcode, youtube)
+from misc import HELP_TEXT, REPO_TEXT
 
 is_config = os.path.exists("config.py")
 
@@ -35,8 +40,7 @@ else:
 
 # This is where queue info and functions will be stored
 queue: asyncio.Queue = asyncio.Queue()
-
-
+running = False  # Tells if the queue is running or not
 call = {}  # This is where calls will be stored
 
 
@@ -68,6 +72,22 @@ async def repo(_, message):
 
 
 @app.on_message(
+    filters.command("theme")
+    & ~filters.private
+    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
+)
+async def theme_func(_, message):
+    usage = f"Wrong theme, select one from below\n{' | '.join(themes)}"
+    if len(message.command) != 2:
+        return await message.reply_text(usage)
+    theme = message.text.split(None, 1)[1].strip()
+    if theme not in themes:
+        return await message.reply_text(usage)
+    change_theme(theme)
+    await message.reply_text(f"Changed theme to {theme}")
+
+
+@app.on_message(
     filters.command("joinvc")
     & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
     & ~filters.private
@@ -76,17 +96,33 @@ async def joinvc(_, message):
     global call
     chat_id = message.chat.id
     if str(chat_id) in call.keys():
-        await message.reply_text(
+        return await message.reply_text(
             "__**Bot Is Already In The VC**__", quote=False
         )
-        return
     vc = GroupCall(
         client=app,
         input_filename=f"input.raw",
         play_on_repeat=True,
         enable_logs_to_console=False,
     )
-    await vc.start(chat_id)
+    try:
+        await vc.start(chat_id)
+    except RuntimeError:
+        peer = await app.resolve_peer(chat_id)
+        startVC = CreateGroupCall(
+            peer=InputPeerChannel(
+                channel_id=peer.channel_id,
+                access_hash=peer.access_hash,
+            ),
+            random_id=app.rnd_id() // 9000000000,
+        )
+        try:
+            await app.send(startVC)
+            await joinvc(_, message)
+        except ChatAdminRequired:
+            return await message.reply_text(
+                "Make me admin with message delete and vc manage permission"
+            )
     call[str(chat_id)] = vc
     await message.reply_text("__**Joined The Voice Chat.**__", quote=False)
 
@@ -130,21 +166,55 @@ async def volume_bot(_, message):
     vc = call[str(message.chat.id)]
     usage = "**Usage:**\n/volume [1-200]"
     if len(message.command) != 2:
-        await message.reply_text(usage, quote=False)
-        return
+        return await message.reply_text(usage, quote=False)
     volume = int(message.text.split(None, 1)[1])
     if (volume < 1) or (volume > 200):
-        await message.reply_text(usage, quote=False)
-        return
+        return await message.reply_text(usage, quote=False)
     try:
         await vc.set_my_volume(volume=volume)
     except ValueError:
-        await message.reply_text(usage, quote=False)
-        return
+        return await message.reply_text(usage, quote=False)
     await message.reply_text(f"**Volume Set To {volume}**", quote=False)
 
 
-running = False
+@app.on_message(
+    filters.command("pause")
+    & ~filters.private
+    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
+)
+async def pause_song_func(_, message):
+    pause_song(True)
+    vc = call[str(message.chat.id)]
+    vc.pause_playout()
+    await message.reply_text(
+        "**Paused The Music, Send `/resume` To Resume.**", quote=False
+    )
+
+
+@app.on_message(
+    filters.command("resume")
+    & ~filters.private
+    & (filters.user(SUDOERS) | filters.chat(SUDO_CHAT_ID))
+)
+async def resume_song(_, message):
+    pause_song(False)
+    vc = call[str(message.chat.id)]
+    vc.resume_playout()
+    await message.reply_text(
+        "**Resumed, Send `/pause` To Pause The Music.**", quote=False
+    )
+
+
+@app.on_message(
+    filters.command("skip") & ~filters.private & filters.user(SUDOERS)
+)
+async def skip_func(_, message):
+    if queue.empty():
+        return await message.reply_text(
+            "__**Queue Is Empty, Just Like Your Life.**__", quote=False
+        )
+    skip_song()
+    await message.reply_text("__**Skipped!**__", quote=False)
 
 
 @app.on_message(
@@ -157,16 +227,14 @@ async def queuer(_, message):
     try:
         usage = "**Usage:**\n__**/play youtube/saavn/deezer Song_Name**__"
         if len(message.command) < 3:
-            await message.reply_text(usage, quote=False)
-            return
+            return await message.reply_text(usage, quote=False)
         text = message.text.split(None, 2)[1:]
         service = text[0].lower()
         song_name = text[1]
         requested_by = message.from_user.first_name
         services = ["youtube", "deezer", "saavn"]
         if service not in services:
-            await message.reply_text(usage, quote=False)
-            return
+            return await message.reply_text(usage, quote=False)
         await message.delete()
         if not queue.empty():
             await message.reply_text("__**Added To Queue.__**", quote=False)
@@ -222,15 +290,15 @@ async def start_queue():
 )
 async def tgplay(_, message):
     if len(queue) != 0:
-        await message.reply_text(
+        return await message.reply_text(
             "__**You Can Only Play Telegram Files After The Queue Gets "
             + "Finished.**__",
             quote=False,
         )
-        return
     if not message.reply_to_message:
-        await message.reply_text("__**Reply to an audio.**__", quote=False)
-        return
+        return await message.reply_text(
+            "__**Reply to an audio.**__", quote=False
+        )
     if not message.reply_to_message.audio:
         return await message.reply_text(
             "__**Only Audio Files (Not Document) Are Supported.**__",

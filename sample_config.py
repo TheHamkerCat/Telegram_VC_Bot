@@ -4,7 +4,6 @@ HEROKU = True  # NOTE Make it false if you're not deploying on heroku.
 if HEROKU:
     from os import environ
 
-    COVER_THEME = environ["COVER_THEME"]
     API_ID = int(environ["API_ID"])
     API_HASH = environ["API_HASH"]
     SUDO_CHAT_ID = int(
