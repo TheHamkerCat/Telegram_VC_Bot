@@ -42,11 +42,11 @@
     "ARQ_API_KEY": {
 	    "description": "Get this from @ARQRobot.",
 	    "required": true
-    },
+    }},
     "formation": {
       "worker": {
         "quantity": 1,
         "size": "free"
       }
   }
-}}
+}
