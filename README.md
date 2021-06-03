@@ -55,6 +55,21 @@ Send [commands](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/READ
 play music.
 
 
+## Docker
+
+```sh
+$ git clone https://github.com/thehamkercat/Telegram_VC_Bot && cd Telegram_VC_Bot
+$ cp sample.env .env
+```
+Edit **.env** with your own values.
+
+```sh
+$ sudo docker build . -t tgvc-bot
+$ sudo docker run tgvc-bot
+```
+To stop use `CTRL+C`
+
+
 ## Commands
 Command | Description
 :--- | :---
