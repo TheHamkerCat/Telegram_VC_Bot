@@ -7,3 +7,4 @@ TgCrypto
 youtube_dl
 aiofiles
 aiohttp
+python-dotenv
