@@ -55,6 +55,14 @@ Send [commands](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/READ
 play music.
 
 
+## Docker
+
+```sh
+$ sudo docker build . -t tgvc-bot
+$ sudo docker run tgvc-bot
+```
+
+
 ## Commands
 Command | Description
 :--- | :---
