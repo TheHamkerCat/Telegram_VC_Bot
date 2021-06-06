@@ -255,7 +255,7 @@ async def start_queue(chat_id):
 # Telegram Audio [Other players are in functions.py]
 
 
-@app.on_message(filters.command("telegram") & ~filters.private)
+@app.on_message(filters.command("upload") & ~filters.private)
 async def tgplay(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
