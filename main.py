@@ -319,5 +319,5 @@ async def list_vc(_, message):
 
 
 app.start()
-print("\nBot Starting...\nFor Support Join https://t.me/TGVCSUPPORT\n")
+print("\nBot Starting...\n🤖 For Support Join https://t.me/TGVCSUPPORT\n")
 idle()
