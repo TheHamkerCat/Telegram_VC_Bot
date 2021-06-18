@@ -75,7 +75,8 @@ Command | Description
 :--- | :---
 /help | Show Help Message.
 /skip | Skip Any Playing Music.
-/play youtube/saavn/deezer [SONG_NAME] | To Play A Song.
+/play [SONG_NAME] | To Play A Song Using YouTube.<br>Service used can be changed in config (`DEFAULT_SERVICE`).
+/play youtube/saavn/deezer [SONG_NAME] | To Play A Song Using Specific Service.
 /telegram | Play A Song Directly From Telegram File.
 /queue | Check Queue Status.
 /joinvc | Join Voice Chat.
