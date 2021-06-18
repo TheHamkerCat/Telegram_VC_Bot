@@ -10,11 +10,14 @@ if HEROKU:
     API_HASH = environ["API_HASH"]
     SESSION_STRING = environ["SESSION_STRING"]  # Check Readme for session
     ARQ_API_KEY = environ["ARQ_API_KEY"]
+    DEFAULT_SERVICE = environ["DEFAULT_SERVICE"] if "DEFAULT_SERVICE" in environ else "youtube"
 
 # NOTE Fill this if you are not deploying on heroku.
 if not HEROKU:
     API_ID = 14371
     API_HASH = "e46b6c854d2bf58a0"
     ARQ_API_KEY = "Get this from @ARQRobot"
+    DEFAULT_SERVICE = "youtube"     # Must be one of "youtube"/"deezer"/"saavn"
+
 # don't make changes below this line
 ARQ_API = "https://thearq.tech"

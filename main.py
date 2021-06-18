@@ -20,7 +20,7 @@ from pytgcalls import GroupCall
 
 from db import db
 from functions import (change_theme, deezer, get_theme, saavn, themes,
-                       transcode, youtube, app)
+                       transcode, youtube, app, get_default_service)
 from misc import HELP_TEXT, REPO_TEXT
 
 
@@ -179,16 +179,18 @@ async def skip_func(_, message):
 async def queuer(_, message):
     global running
     try:
-        usage = "**Usage:**\n__**/play youtube/saavn/deezer Song_Name**__"
-        if len(message.command) < 3:
+        usage = "**Usage:**\n__**/play Song_Name**__ (uses default service)\n__**/play youtube/saavn/deezer Song_Name**__"
+        if len(message.command) < 2:
             return await message.reply_text(usage, quote=False)
         text = message.text.split(None, 2)[1:]
         service = text[0].lower()
-        song_name = text[1]
-        requested_by = message.from_user.first_name
         services = ["youtube", "deezer", "saavn"]
-        if service not in services:
-            return await message.reply_text(usage, quote=False)
+        if service in services:
+            song_name = text[1]
+        else:
+            service = get_default_service()
+            song_name = " ".join(text)
+        requested_by = message.from_user.first_name
         await message.delete()
         chat_id = message.chat.id
         if chat_id not in db:

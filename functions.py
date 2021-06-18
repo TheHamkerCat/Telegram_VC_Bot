@@ -55,6 +55,19 @@ def change_theme(name: str, chat_id):
     db[chat_id]["theme"] = name
 
 
+# Get default service from config
+def get_default_service() -> str:
+    services = ["youtube", "deezer", "saavn"]
+    try:
+        config_service = DEFAULT_SERVICE.lower()
+        if config_service in services:
+            return config_service
+        else:           # Invalid DEFAULT_SERVICE
+            return "youtube"
+    except NameError:   # DEFAULT_SERVICE not defined
+        return "youtube"
+
+
 async def pause_skip_watcher(message: Message, duration: int, chat_id: int):
     if "skipped" not in db[chat_id]:
         db[chat_id]["skipped"] = False
