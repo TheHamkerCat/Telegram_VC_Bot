@@ -191,7 +191,8 @@ async def queuer(_, message):
             service = "telegram"
             song_name = message.reply_to_message.audio.title
         else:
-            text = message.text.split(None, 2)[1:]
+            text = message.text.split("\n")[0]
+            text = text.split(None, 2)[1:]
             service = text[0].lower()
             services = ["youtube", "deezer", "saavn"]
             if service in services:
