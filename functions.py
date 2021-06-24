@@ -253,6 +253,11 @@ async def deezer(requested_by, query, message: Message):
     await m.delete()
 
 
+async def get_lyric(query):
+    res = await arq.lyrics(query)
+    return res.result
+
+
 # saavn
 
 
