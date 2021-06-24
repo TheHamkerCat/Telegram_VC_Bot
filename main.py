@@ -441,7 +441,7 @@ async def lyrics(_, message):
     msg = await message.reply_text("**__Getting Lyric__**")
     query = db[chat_id]["currently"]
     lyric = await get_lyric(query)
-    await msg.edit_text(lyric.result, parse_mode=None)
+    await msg.edit_text(lyric, parse_mode=None)
 
 
 app.start()
