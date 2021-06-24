@@ -281,6 +281,7 @@ async def start_queue(chat_id, message=None):
                 await playlist(app, message, redirected=True)
         data = await db[chat_id]["queue"].get()
         service = data["service"]
+        db[chat_id]["currently"] = data["query"]
         await service(data["requested_by"], data["query"], data["message"])
 
 
@@ -427,6 +428,20 @@ async def playlist(_, message: Message, redirected = False):
             "**Playlist Started.**"
         )
         await start_queue(chat_id, message=message)
+
+
+@app.on_message(filters.command("lyric") & ~filters.private)
+async def lyrics(_, message):
+    global db
+    chat_id = message.chat.id
+    if chat_id not in db or "call" not in db[chat_id]:
+        return await message.reply_text("**VC isn't started**")
+    if "currently" not in db[chat_id]:
+        return await message.reply_text("**No Song is Playing**")
+    msg = await message.reply_text("**__Getting Lyric__**")
+    query = db[chat_id]["currently"]
+    lyric = await get_lyric(query)
+    await msg.edit_text(lyric.result, parse_mode=None)
 
 
 app.start()
