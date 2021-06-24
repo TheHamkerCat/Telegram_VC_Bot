@@ -14,7 +14,8 @@ HELP_TEXT = """__**I Can Play Music In The Voice Chat**__
 **/theme** __Change Curently Playing Theme.__
 **/queue plformat/Nothing** __Shows Queue List. If you send plformat with command you will get it in playlist format.__
 **/delqueue** __Deletes Queue List and Playlist.__
-**/playlist** __Start Playing Playlist__"""
+**/playlist** __Start Playing Playlist.__
+**/lyric** __Get Lyric of Currently Playing Music.__"""
 
 REPO_TEXT = (
     "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
