@@ -69,20 +69,44 @@ def get_default_service() -> str:
 
 
 async def pause_skip_watcher(message: Message, duration: int, chat_id: int):
-    if "skipped" not in db[chat_id]:
-        db[chat_id]["skipped"] = False
-    if "paused" not in db[chat_id]:
-        db[chat_id]["paused"] = False
-    for _ in range(duration * 10):
-        if db[chat_id]["skipped"]:
+    try:
+        chat_id = message.chat.id
+        db[chat_id]["call"].set_is_mute(False)
+        if "skipped" not in db[chat_id]:
             db[chat_id]["skipped"] = False
-            return await message.delete()
-        if db[chat_id]["paused"]:
-            while db[chat_id]["paused"]:
+        if "paused" not in db[chat_id]:
+            db[chat_id]["paused"] = False
+        if "stopped" not in db[chat_id]:
+            db[chat_id]["stopped"] = False
+        if "replayed" not in db[chat_id]:
+            db[chat_id]["replayed"] = False
+        restart_while = False
+        while True:
+            for _ in range(duration * 10):
+                if db[chat_id]["skipped"]:
+                    db[chat_id]["skipped"] = False
+                    return await message.delete()
+                if db[chat_id]["paused"]:
+                    while db[chat_id]["paused"]:
+                        await asyncio.sleep(0.1)
+                        continue
+                if db[chat_id]["stopped"]:
+                    restart_while=True
+                    break
+                if db[chat_id]["replayed"]:
+                    restart_while = True
+                    db[chat_id]["replayed"] = False
+                    break
+                if "queue_breaker" in db[chat_id] and db[chat_id]["queue_breaker"] != 0:
+                    break
                 await asyncio.sleep(0.1)
-                continue
-        await asyncio.sleep(0.1)
-    db[chat_id]["skipped"] = False
+            if not restart_while:
+                break
+            restart_while = False
+            await asyncio.sleep(0.1)
+        db[chat_id]["skipped"] = False
+    except:
+        pass
 
 
 async def change_vc_title(title: str, chat_id):
@@ -206,6 +230,7 @@ async def deezer(requested_by, query, message: Message):
     duration = convert_seconds(int(songs[0].duration))
     thumbnail = songs[0].thumbnail
     artist = songs[0].artist
+    db[chat_id]["currently"] = {"artist": artist, "song": title, "query": query}
     url = songs[0].url
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
@@ -229,6 +254,19 @@ async def deezer(requested_by, query, message: Message):
     await m.delete()
 
 
+async def get_lyric(query: str, artist, song):
+    if song and artist:
+        q = song + artist
+    elif song:
+        q = song
+    else:
+        q = artist
+    res = await arq.lyrics(q)
+    if res.result == "Couldn't find any lyrics for that song!":
+        res = await arq.lyrics(query)
+    return res.result
+
+
 # saavn
 
 
@@ -243,6 +281,7 @@ async def saavn(requested_by, query, message):
     sname = songs[0].song
     slink = songs[0].media_url
     ssingers = songs[0].singers
+    db[chat_id]["currently"] = {"artist": ssingers[0] if type(ssingers) == list else ssingers, "song": sname, "query": query}
     sthumb = songs[0].image
     sduration = songs[0].duration
     sduration_converted = convert_seconds(int(sduration))
@@ -287,6 +326,7 @@ async def youtube(requested_by, query, message):
     results = results.result
     link = f"https://youtube.com{results[0].url_suffix}"
     title = results[0].title
+    db[chat_id]["currently"] = {"artist": None, "song": title, "query": query}
     thumbnail = results[0].thumbnails[0]
     duration = results[0].duration
     views = results[0].views
@@ -321,3 +361,56 @@ async def youtube(requested_by, query, message):
     duration = int(time_to_seconds(duration))
     await pause_skip_watcher(m, duration, message.chat.id)
     await m.delete()
+
+
+# Telegram
+
+
+async def telegram(_, __, message):
+    global db
+    chat_id = message.chat.id
+    if chat_id not in db:
+        db[chat_id] = {}
+    if not message.reply_to_message:
+        return await message.reply_text(
+            "__**Reply to an audio.**__", quote=False
+        )
+    if not message.reply_to_message.audio:
+        return await message.reply_text(
+            "__**Only Audio Files (Not Document) Are Supported.**__",
+            quote=False,
+        )
+    if int(message.reply_to_message.audio.file_size) >= 104857600:
+        return await message.reply_text(
+            "__**Bruh! Only songs within 100 MB.**__", quote=False
+        )
+    duration = message.reply_to_message.audio.duration
+    if not duration:
+        return await message.reply_text(
+            "__**Only Songs With Duration Are Supported.**__", quote=False
+        )
+    m = await message.reply_text("__**Downloading.**__", quote=False)
+    title = message.reply_to_message.audio.title
+    performer = message.reply_to_message.audio.performer
+    db[chat_id]["currently"] = {"artist": performer, "song": title, "query": None}
+    song = await message.reply_to_message.download()
+    await m.edit("__**Transcoding.**__")
+    try:
+        if message.reply_to_message.audio.title:
+            title = message.reply_to_message.audio.title
+        else:
+            title = message.reply_to_message.audio.performer
+        await change_vc_title(title, chat_id)
+    except Exception:
+        await app.send_message(chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
+        pass
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(
+        None, functools.partial(transcode, song, chat_id)
+    )
+    await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
+    await pause_skip_watcher(m, duration, message.chat.id)
+    try:
+        os.remove(song)
+    except:
+        pass
