@@ -69,20 +69,44 @@ def get_default_service() -> str:
 
 
 async def pause_skip_watcher(message: Message, duration: int, chat_id: int):
-    if "skipped" not in db[chat_id]:
-        db[chat_id]["skipped"] = False
-    if "paused" not in db[chat_id]:
-        db[chat_id]["paused"] = False
-    for _ in range(duration * 10):
-        if db[chat_id]["skipped"]:
+    try:
+        chat_id = message.chat.id
+        db[chat_id]["call"].set_is_mute(False)
+        if "skipped" not in db[chat_id]:
             db[chat_id]["skipped"] = False
-            return await message.delete()
-        if db[chat_id]["paused"]:
-            while db[chat_id]["paused"]:
+        if "paused" not in db[chat_id]:
+            db[chat_id]["paused"] = False
+        if "stopped" not in db[chat_id]:
+            db[chat_id]["stopped"] = False
+        if "replayed" not in db[chat_id]:
+            db[chat_id]["replayed"] = False
+        restart_while = False
+        while True:
+            for _ in range(duration * 10):
+                if db[chat_id]["skipped"]:
+                    db[chat_id]["skipped"] = False
+                    return await message.delete()
+                if db[chat_id]["paused"]:
+                    while db[chat_id]["paused"]:
+                        await asyncio.sleep(0.1)
+                        continue
+                if db[chat_id]["stopped"]:
+                    restart_while=True
+                    break
+                if db[chat_id]["replayed"]:
+                    restart_while = True
+                    db[chat_id]["replayed"] = False
+                    break
+                if "queue_breaker" in db[chat_id] and db[chat_id]["queue_breaker"] != 0:
+                    break
                 await asyncio.sleep(0.1)
-                continue
-        await asyncio.sleep(0.1)
-    db[chat_id]["skipped"] = False
+            if not restart_while:
+                break
+            restart_while = False
+            await asyncio.sleep(0.1)
+        db[chat_id]["skipped"] = False
+    except:
+        pass
 
 
 async def change_vc_title(title: str, chat_id):
@@ -321,3 +345,53 @@ async def youtube(requested_by, query, message):
     duration = int(time_to_seconds(duration))
     await pause_skip_watcher(m, duration, message.chat.id)
     await m.delete()
+
+
+# Telegram
+
+
+async def telegram(_, __, message):
+    global db
+    chat_id = message.chat.id
+    if chat_id not in db:
+        db[chat_id] = {}
+    if not message.reply_to_message:
+        return await message.reply_text(
+            "__**Reply to an audio.**__", quote=False
+        )
+    if not message.reply_to_message.audio:
+        return await message.reply_text(
+            "__**Only Audio Files (Not Document) Are Supported.**__",
+            quote=False,
+        )
+    if int(message.reply_to_message.audio.file_size) >= 104857600:
+        return await message.reply_text(
+            "__**Bruh! Only songs within 100 MB.**__", quote=False
+        )
+    duration = message.reply_to_message.audio.duration
+    if not duration:
+        return await message.reply_text(
+            "__**Only Songs With Duration Are Supported.**__", quote=False
+        )
+    m = await message.reply_text("__**Downloading.**__", quote=False)
+    song = await message.reply_to_message.download()
+    await m.edit("__**Transcoding.**__")
+    try:
+        if message.reply_to_message.audio.title:
+            title = message.reply_to_message.audio.title
+        else:
+            title = message.reply_to_message.audio.performer
+        await change_vc_title(title, chat_id)
+    except Exception:
+        await app.send_message(chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
+        pass
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(
+        None, functools.partial(transcode, song, chat_id)
+    )
+    await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
+    await pause_skip_watcher(m, duration, message.chat.id)
+    try:
+        os.remove(song)
+    except:
+        pass
