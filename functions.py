@@ -230,6 +230,7 @@ async def deezer(requested_by, query, message: Message):
     duration = convert_seconds(int(songs[0].duration))
     thumbnail = songs[0].thumbnail
     artist = songs[0].artist
+    db[chat_id]["currently"] = {"artist": artist, "song": title, "query": query}
     url = songs[0].url
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
@@ -253,8 +254,16 @@ async def deezer(requested_by, query, message: Message):
     await m.delete()
 
 
-async def get_lyric(query):
-    res = await arq.lyrics(query)
+async def get_lyric(query: str, artist, song):
+    if song and artist:
+        q = song + artist
+    elif song:
+        q = song
+    else:
+        q = artist
+    res = await arq.lyrics(q)
+    if res.result == "Couldn't find any lyrics for that song!":
+        res = await arq.lyrics(query)
     return res.result
 
 
@@ -272,6 +281,7 @@ async def saavn(requested_by, query, message):
     sname = songs[0].song
     slink = songs[0].media_url
     ssingers = songs[0].singers
+    db[chat_id]["currently"] = {"artist": ssingers[0] if type(ssingers) == list else ssingers, "song": sname, "query": query}
     sthumb = songs[0].image
     sduration = songs[0].duration
     sduration_converted = convert_seconds(int(sduration))
@@ -316,6 +326,7 @@ async def youtube(requested_by, query, message):
     results = results.result
     link = f"https://youtube.com{results[0].url_suffix}"
     title = results[0].title
+    db[chat_id]["currently"] = {"artist": None, "song": title, "query": query}
     thumbnail = results[0].thumbnails[0]
     duration = results[0].duration
     views = results[0].views
@@ -379,6 +390,9 @@ async def telegram(_, __, message):
             "__**Only Songs With Duration Are Supported.**__", quote=False
         )
     m = await message.reply_text("__**Downloading.**__", quote=False)
+    title = message.reply_to_message.audio.title
+    performer = message.reply_to_message.audio.performer
+    db[chat_id]["currently"] = {"artist": performer, "song": title, "query": None}
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
     try:
