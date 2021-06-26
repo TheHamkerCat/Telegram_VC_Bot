@@ -77,14 +77,19 @@ Command | Description
 /skip | Skip Any Playing Music.
 /play [SONG_NAME] | To Play A Song Using YouTube.<br>Service used can be changed in config (`DEFAULT_SERVICE`).
 /play youtube/saavn/deezer [SONG_NAME] | To Play A Song Using Specific Service.
+/play [with reply to an audio file] | To Play A Song With TG Audio File.
 /telegram | Play A Song Directly From Telegram File.
 /queue | Check Queue Status.
+/delqueue | Deletes Queue List and Playlist.
+/playlist [songs name separated by line] | Start Playing Playlist.
 /joinvc | Join Voice Chat.
 /leavevc | Leave Voice Chat.
 /listvc | List Active Voice Chats.
 /volume [1-200] | Adjust Volume.
 /pause | Pause Music.
 /resume | Resume Music.
+/stop | Stop Music.
+/start | Start Music. [From beginning, unlike "/resume"]
 /theme [Theme Name] | Change 'Currently Playing' Theme.
 /update | Update & Restart.
 
@@ -95,4 +100,4 @@ Command | Description
 ## Credits
 
 1. @MarshalX [For TgCalls]
-2. Everyone who contributed to the project.
+2. Thanks to everyone who contributed to the project.
