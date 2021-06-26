@@ -8,10 +8,10 @@ import youtube_dl
 from aiohttp import ClientSession
 from PIL import Image, ImageDraw, ImageFont
 from pyrogram import Client
-from pyrogram.types import Message
-from pyrogram.raw.types import InputGroupCall
 from pyrogram.raw.functions.channels import GetFullChannel
 from pyrogram.raw.functions.phone import EditGroupCallTitle
+from pyrogram.raw.types import InputGroupCall
+from pyrogram.types import Message
 from Python_ARQ import ARQ
 
 from db import db
@@ -62,9 +62,9 @@ def get_default_service() -> str:
         config_service = DEFAULT_SERVICE.lower()
         if config_service in services:
             return config_service
-        else:           # Invalid DEFAULT_SERVICE
+        else:  # Invalid DEFAULT_SERVICE
             return "youtube"
-    except NameError:   # DEFAULT_SERVICE not defined
+    except NameError:  # DEFAULT_SERVICE not defined
         return "youtube"
 
 
@@ -91,21 +91,22 @@ async def pause_skip_watcher(message: Message, duration: int, chat_id: int):
                         await asyncio.sleep(0.1)
                         continue
                 if db[chat_id]["stopped"]:
-                    restart_while=True
+                    restart_while = True
                     break
                 if db[chat_id]["replayed"]:
                     restart_while = True
                     db[chat_id]["replayed"] = False
                     break
-                if "queue_breaker" in db[chat_id] and db[chat_id]["queue_breaker"] != 0:
-                    break
+                if "queue_breaker" in db[chat_id]:
+                    if db[chat_id]["queue_breaker"] != 0:
+                        break
                 await asyncio.sleep(0.1)
             if not restart_while:
                 break
             restart_while = False
             await asyncio.sleep(0.1)
         db[chat_id]["skipped"] = False
-    except:
+    except Exception:
         pass
 
 
@@ -210,7 +211,9 @@ async def generate_cover(
     try:
         await change_vc_title(title, chat_id)
     except Exception:
-        await app.send_message(chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
+        await app.send_message(
+            chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN."
+        )
         pass
     return final
 
@@ -230,14 +233,19 @@ async def deezer(requested_by, query, message: Message):
     duration = convert_seconds(int(songs[0].duration))
     thumbnail = songs[0].thumbnail
     artist = songs[0].artist
-    db[chat_id]["currently"] = {"artist": artist, "song": title, "query": query}
+    chat_id = message.chat.id
+    db[chat_id]["currently"] = {
+        "artist": artist,
+        "song": title,
+        "query": query,
+    }
     url = songs[0].url
     await m.edit("__**Downloading And Transcoding.**__")
     cover, _ = await asyncio.gather(
         generate_cover(
-            requested_by, title, artist, duration, thumbnail, message.chat.id
+            requested_by, title, artist, duration, thumbnail, chat_id
         ),
-        download_and_transcode_song(url, message.chat.id),
+        download_and_transcode_song(url, chat_id),
     )
     await m.delete()
     caption = (
@@ -250,7 +258,7 @@ async def deezer(requested_by, query, message: Message):
     )
     os.remove(cover)
     duration = int(songs[0]["duration"])
-    await pause_skip_watcher(m, duration, message.chat.id)
+    await pause_skip_watcher(m, duration, chat_id)
     await m.delete()
 
 
@@ -281,7 +289,12 @@ async def saavn(requested_by, query, message):
     sname = songs[0].song
     slink = songs[0].media_url
     ssingers = songs[0].singers
-    db[chat_id]["currently"] = {"artist": ssingers[0] if type(ssingers) == list else ssingers, "song": sname, "query": query}
+    chat_id = message.chat.id
+    db[chat_id]["currently"] = {
+        "artist": ssingers[0] if type(ssingers) == list else ssingers,
+        "song": sname,
+        "query": query,
+    }
     sthumb = songs[0].image
     sduration = songs[0].duration
     sduration_converted = convert_seconds(int(sduration))
@@ -293,9 +306,9 @@ async def saavn(requested_by, query, message):
             ssingers,
             sduration_converted,
             sthumb,
-            message.chat.id,
+            chat_id,
         ),
-        download_and_transcode_song(slink, message.chat.id),
+        download_and_transcode_song(slink, chat_id),
     )
     await m.delete()
     caption = (
@@ -308,7 +321,7 @@ async def saavn(requested_by, query, message):
     )
     os.remove(cover)
     duration = int(sduration)
-    await pause_skip_watcher(m, duration, message.chat.id)
+    await pause_skip_watcher(m, duration, chat_id)
     await m.delete()
 
 
@@ -326,6 +339,7 @@ async def youtube(requested_by, query, message):
     results = results.result
     link = f"https://youtube.com{results[0].url_suffix}"
     title = results[0].title
+    chat_id = message.chat.id
     db[chat_id]["currently"] = {"artist": None, "song": title, "query": query}
     thumbnail = results[0].thumbnails[0]
     duration = results[0].duration
@@ -334,7 +348,7 @@ async def youtube(requested_by, query, message):
         return await m.edit("__**Bruh! Only songs within 30 Mins.**__")
     await m.edit("__**Processing Thumbnail.**__")
     cover = await generate_cover(
-        requested_by, title, views, duration, thumbnail, message.chat.id
+        requested_by, title, views, duration, thumbnail, chat_id
     )
     await m.edit("__**Downloading Music.**__")
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -342,11 +356,11 @@ async def youtube(requested_by, query, message):
         audio_file = ydl.prepare_filename(info_dict)
         ydl.process_info(info_dict)
     await m.edit("__**Transcoding.**__")
-    song = f"audio{message.chat.id}.webm"
+    song = f"audio{chat_id}.webm"
     os.rename(audio_file, song)
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(
-        None, functools.partial(transcode, song, message.chat.id)
+        None, functools.partial(transcode, song, chat_id)
     )
     await m.delete()
     caption = (
@@ -359,7 +373,7 @@ async def youtube(requested_by, query, message):
     )
     os.remove(cover)
     duration = int(time_to_seconds(duration))
-    await pause_skip_watcher(m, duration, message.chat.id)
+    await pause_skip_watcher(m, duration, chat_id)
     await m.delete()
 
 
@@ -392,7 +406,11 @@ async def telegram(_, __, message):
     m = await message.reply_text("__**Downloading.**__", quote=False)
     title = message.reply_to_message.audio.title
     performer = message.reply_to_message.audio.performer
-    db[chat_id]["currently"] = {"artist": performer, "song": title, "query": None}
+    db[chat_id]["currently"] = {
+        "artist": performer,
+        "song": title,
+        "query": None,
+    }
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
     try:
@@ -402,15 +420,15 @@ async def telegram(_, __, message):
             title = message.reply_to_message.audio.performer
         await change_vc_title(title, chat_id)
     except Exception:
-        await app.send_message(chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
+        await app.send_message(
+            chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN."
+        )
         pass
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(
         None, functools.partial(transcode, song, chat_id)
     )
     await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
-    await pause_skip_watcher(m, duration, message.chat.id)
-    try:
+    await pause_skip_watcher(m, duration, chat_id)
+    if os.path.exists(song):
         os.remove(song)
-    except:
-        pass

@@ -9,6 +9,7 @@ from sys import version as pyver
 
 # Initialize db
 import db
+
 db.init()
 
 from pyrogram import filters, idle
@@ -19,10 +20,10 @@ from pyrogram.types import Message
 from pytgcalls import GroupCall
 
 from db import db
-from functions import (change_theme, deezer, get_theme, saavn, themes,
-                       transcode, youtube, app, get_default_service, telegram, session)
+from functions import (app, change_theme, deezer, get_default_service,
+                       get_lyric, get_theme, saavn, session, telegram, themes,
+                       transcode, youtube)
 from misc import HELP_TEXT, REPO_TEXT
-
 
 running = False  # Tells if the queue is running or not
 
@@ -54,23 +55,18 @@ async def joinvc(_, message):
     chat_id = message.chat.id
     if chat_id not in db:
         db[chat_id] = {}
-    
+
     if "call" in db[chat_id]:
         return await message.reply_text("__**Bot Is Already In The VC**__")
-    os.popen(
-        f"cp etc/sample_input.raw input{chat_id}.raw"
-    )
+    os.popen(f"cp etc/sample_input.raw input{chat_id}.raw")
 
-    vc = GroupCall(
-        app,
-        f"input{chat_id}.raw"
-    )
+    vc = GroupCall(app, f"input{chat_id}.raw")
 
     db[chat_id]["call"] = vc
 
     try:
         await db[chat_id]["call"].start(chat_id)
-    except:
+    except Exception:
         peer = await app.resolve_peer(chat_id)
         startVC = CreateGroupCall(
             peer=InputPeerChannel(
@@ -167,7 +163,9 @@ async def skip_func(_, message):
     if "queue" not in db[chat_id]:
         return await message.reply_text("**VC isn't started**")
     queue = db[chat_id]["queue"]
-    if queue.empty() and ("playlist" not in db[chat_id] or not db[chat_id]["playlist"]):
+    if queue.empty() and (
+        "playlist" not in db[chat_id] or not db[chat_id]["playlist"]
+    ):
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
         )
@@ -180,16 +178,28 @@ async def queuer(_, message):
     global running
     chat_id = message.chat.id
     try:
-        usage = "**Usage:**\n__**/play Song_Name**__ (uses youtube service)\n__**/play youtube/saavn/deezer Song_Name**__\n__**/play Reply_On_Audio**__"
-        if len(message.command) < 2 and (not message.reply_to_message or not message.reply_to_message.audio):
+        usage = """
+**Usage:**
+__**/play Song_Name**__ (uses youtube service)
+__**/play youtube/saavn/deezer Song_Name**__
+__**/play Reply_On_Audio**__"""
+
+        if len(message.command) < 2 and (
+            not message.reply_to_message or not message.reply_to_message.audio
+        ):
             return await message.reply_text(usage, quote=False)
         if chat_id not in db:
             db[chat_id] = {}
         if "call" not in db[chat_id]:
             return await message.reply_text("**Use /joinvc First!**")
-        if message.reply_to_message and message.reply_to_message.audio:
-            service = "telegram"
-            song_name = message.reply_to_message.audio.title
+        if message.reply_to_message:
+            if message.reply_to_message.audio:
+                service = "telegram"
+                song_name = message.reply_to_message.audio.title
+            else:
+                return await message.reply_text(
+                    "**Reply to a telegram audio file**"
+                )
         else:
             text = message.text.split("\n")[0]
             text = text.split(None, 2)[1:]
@@ -205,9 +215,11 @@ async def queuer(_, message):
             db[chat_id] = {}
         if "queue" not in db[chat_id]:
             db[chat_id]["queue"] = asyncio.Queue()
-        if not db[chat_id]["queue"].empty() or ("running" in db[chat_id] and db[chat_id]["running"]):
+        if not db[chat_id]["queue"].empty() or (
+            "running" in db[chat_id] and db[chat_id]["running"]
+        ):
             await message.reply_text("__**Added To Queue.__**", quote=False)
-        
+
         await db[chat_id]["queue"].put(
             {
                 "service": deezer
@@ -245,7 +257,10 @@ async def queue_list(_, message):
         return await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__", quote=False
         )
-    if len(message.text.split()) > 1 and message.text.split()[1].lower() == "plformat":
+    if (
+        len(message.text.split()) > 1
+        and message.text.split()[1].lower() == "plformat"
+    ):
         pl_format = True
     else:
         pl_format = False
@@ -261,13 +276,17 @@ async def queue_list(_, message):
         )
     await message.reply_text(text)
 
+
 # Queue handler
 
 
 async def start_queue(chat_id, message=None):
     while True:
         db[chat_id]["call"].set_is_mute(True)
-        if "queue_breaker" in db[chat_id] and db[chat_id]["queue_breaker"] != 0:
+        if (
+            "queue_breaker" in db[chat_id]
+            and db[chat_id]["queue_breaker"] != 0
+        ):
             db[chat_id]["queue_breaker"] -= 1
             if db[chat_id]["queue_breaker"] == 0:
                 del db[chat_id]["queue_breaker"]
@@ -318,9 +337,7 @@ async def stop_vc(_, message):
     if "stopped" not in db[chat_id]:
         db[chat_id]["stopped"] = False
     db[chat_id]["stopped"] = True
-    await message.reply_text(
-        "**Stopped, Send /start To Start.**", quote=False
-    )
+    await message.reply_text("**Stopped, Send /start To Start.**", quote=False)
 
 
 @app.on_message(filters.command("start") & ~filters.private)
@@ -336,9 +353,7 @@ async def start_vc(_, message):
     if "stopped" not in db[chat_id]:
         db[chat_id]["stopped"] = False
     db[chat_id]["stopped"] = False
-    await message.reply_text(
-        "**Started, Send /stop To Stop.**", quote=False
-    )
+    await message.reply_text("**Started, Send /stop To Stop.**", quote=False)
 
 
 @app.on_message(filters.command("replay") & ~filters.private)
@@ -355,9 +370,7 @@ async def replay_vc(_, message):
     if "replayed" not in db[chat_id]:
         db[chat_id]["replayed"] = False
     db[chat_id]["replayed"] = True
-    await message.reply_text(
-        "**The Music Replayed**", quote=False
-    )
+    await message.reply_text("**The Music Replayed**", quote=False)
 
 
 @app.on_message(filters.command("delqueue") & ~filters.private)
@@ -368,25 +381,30 @@ async def clear_queue(_, message):
         return await message.reply_text("**VC isn't started**")
     if "call" not in db[chat_id]:
         return await message.reply_text("**VC isn't started**")
-    if ("queue" not in db[chat_id] or db[chat_id]["queue"].empty()) and ("playlist" not in db[chat_id] or not db[chat_id]["playlist"]):
+    if ("queue" not in db[chat_id] or db[chat_id]["queue"].empty()) and (
+        "playlist" not in db[chat_id] or not db[chat_id]["playlist"]
+    ):
         return await message.reply_text("**Queue Already is Empty**")
     db[chat_id]["playlist"] = False
     db[chat_id]["queue"] = asyncio.Queue()
-    await message.reply_text(
-        "**Successfully Cleared the Queue**",
-        quote=False
-    )
+    await message.reply_text("**Successfully Cleared the Queue**", quote=False)
 
 
 @app.on_message(filters.command("playlist") & ~filters.private)
-async def playlist(_, message: Message, redirected = False):
+async def playlist(_, message: Message, redirected=False):
     chat_id = message.chat.id
     if message.reply_to_message:
         raw_playlist = message.reply_to_message.text
     elif len(message.text) > 9:
         raw_playlist = message.text[10:]
     else:
-        usage = "**Usage: Same as /play\n\nExample:\n__**/playlist song_name1\nsong_name2\nyoutube song_name3**__"
+        usage = """
+**Usage: Same as /play
+Example:
+    __**/playlist song_name1
+    song_name2
+    youtube song_name3**__"""
+
         return await message.reply_text(usage, quote=False)
     if chat_id not in db:
         db[chat_id] = {}
@@ -423,9 +441,7 @@ async def playlist(_, message: Message, redirected = False):
         )
     if not redirected:
         db[chat_id]["running"] = True
-        await message.reply_text(
-            "**Playlist Started.**"
-        )
+        await message.reply_text("**Playlist Started.**")
         await start_queue(chat_id, message=message)
 
 
@@ -450,8 +466,12 @@ for x in os.listdir():
     if x.endswith(".raw") or x.endswith(".mp3"):
         os.remove(x)
 print("Turning Off...")
+
+
 async def closeSession(session):
     await session.close()
+
+
 m_loop = asyncio.get_event_loop()
 m_loop.run_until_complete(closeSession(session))
 db.clear()
