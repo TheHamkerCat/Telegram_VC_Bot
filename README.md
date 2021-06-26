@@ -5,17 +5,17 @@ Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In You
 <img src="https://hamker.me/wl9twld.png" width="600" height="400">
 
 
-# Support
-
-1. All linux based os.
-
-
 ## Requirements
+### Account requirements
+- A Telegram account to use as the music bot. **You cannot use regular bot accounts, as they cannot join voice chats. *It must be a user account.***
+- API_ID and API_HASH for that account.
+- The account must be an admin of the chat, with _Manage Voice Chats_ and _Delete Messages_ permissions.
 
-- Telegram API_ID and API_HASH
-- Python 3.7 or higher 
-- Userbot Needs To Be Admin In The Chat
-- Install **ffmpeg**
+### Environment requirements
+- Linux-based OS. **You cannot run this on Windows natively.**
+- Python 3.9 or later.
+- Install ffmpeg.
+
 
 ## Run
 
@@ -77,14 +77,19 @@ Command | Description
 /skip | Skip Any Playing Music.
 /play [SONG_NAME] | To Play A Song Using YouTube.<br>Service used can be changed in config (`DEFAULT_SERVICE`).
 /play youtube/saavn/deezer [SONG_NAME] | To Play A Song Using Specific Service.
+/play [with reply to an audio file] | To Play A Song With TG Audio File.
 /telegram | Play A Song Directly From Telegram File.
 /queue | Check Queue Status.
+/delqueue | Deletes Queue List and Playlist.
+/playlist [songs name separated by line] | Start Playing Playlist.
 /joinvc | Join Voice Chat.
 /leavevc | Leave Voice Chat.
 /listvc | List Active Voice Chats.
 /volume [1-200] | Adjust Volume.
 /pause | Pause Music.
 /resume | Resume Music.
+/stop | Stop Music.
+/start | Start Music. [From beginning, unlike "/resume"]
 /theme [Theme Name] | Change 'Currently Playing' Theme.
 /update | Update & Restart.
 
@@ -95,4 +100,4 @@ Command | Description
 ## Credits
 
 1. @MarshalX [For TgCalls]
-2. Everyone who contributed to the project.
+2. Thanks to everyone who contributed to the project.
