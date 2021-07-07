@@ -17,15 +17,7 @@
     "telegram-vcbot",
     "telegram-musicbot"
   ],
-  "stack": "heroku-20",
-  "buildpacks": [
-    {
-      "url": "heroku/python"
-    },
-    {
-      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
-    }
-  ],
+  "stack": "container",
   "env": {
     "API_ID": {
             "description": "API_ID of your Telegram Account my.telegram.org/apps",
