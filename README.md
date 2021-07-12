@@ -48,10 +48,10 @@ $ python3 generate_string_session.py
 Fork this repository and change name of `sample_config.py` to `config.py`
 Then you will need get a session string, copy it, then press heroku deploy button.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://github.com/Arseno25/Telegram_VC_Bot-1/tree/master)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://github.com/Arseno25/Telegram_VC_Bot-1/tree/main)
 
 
-Send [commands](https://github.com/thehamkercat/Telegram_VC_Bot/blob/master/README.md#commands) to bot to 
+Send [commands](https://github.com/Arseno25/Telegram_VC_Bot/main/README.md#commands) to bot to 
 play music.
 
 
