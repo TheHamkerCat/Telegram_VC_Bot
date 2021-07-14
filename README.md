@@ -2,22 +2,24 @@
 
 Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In Your Group.
 
-<img src="https://hamker.me/wl9twld.png" width="600" height="400">
+<img src="https://hamker.me/wl9twld.png" width="690" height="400">
 
 
 ## Requirements
+
 ### Account requirements
-- A Telegram account to use as the music bot. **You cannot use regular bot accounts, as they cannot join voice chats. *It must be a user account.***
+- A Telegram account to use as the music bot, **You cannot use regular bot accounts, as they cannot join voice chats. *It must be a user account.***
 - API_ID and API_HASH for that account.
 - The account must be an admin of the chat, with _Manage Voice Chats_ and _Delete Messages_ permissions.
 
 ### Environment requirements
-- Linux-based OS. **You cannot run this on Windows natively.**
+- Linux-based OS. **You cannot run this on Windows natively, Use WSL**
 - Python 3.9 or later.
-- Install ffmpeg.
+- ffmpeg package, look below for instructions.
 
 
-## Run
+## Run (Assuming you have a debian-based distro)
+
 
 
 ```sh
@@ -91,7 +93,7 @@ Command | Description
 /stop | Stop Music.
 /start | Start Music. [From beginning, unlike "/resume"]
 /theme [Theme Name] | Change 'Currently Playing' Theme.
-/update | Update & Restart.
+
 
 ## Note
 
