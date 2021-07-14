@@ -1,6 +1,7 @@
 import asyncio
 import functools
 import os
+import traceback
 
 import aiofiles
 import ffmpeg
@@ -10,7 +11,6 @@ from PIL import Image, ImageDraw, ImageFont
 from pyrogram import Client
 from pyrogram.raw.functions.channels import GetFullChannel
 from pyrogram.raw.functions.phone import EditGroupCallTitle
-from pyrogram.raw.types import InputGroupCall
 from pyrogram.types import Message
 from Python_ARQ import ARQ
 
@@ -34,25 +34,7 @@ app = Client(
 )
 session = ClientSession()
 arq = ARQ(ARQ_API, ARQ_API_KEY, session)
-themes = ["darkred", "lightred", "green", "purple", "skyblue", "dark", "black"]
-
-
-def get_theme(chat_id) -> str:
-    theme = "purple"
-    if chat_id not in db:
-        db[chat_id] = {}
-    if "theme" not in db[chat_id]:
-        db[chat_id]["theme"] = theme
-    theme = db[chat_id]["theme"]
-    return theme
-
-
-def change_theme(name: str, chat_id):
-    if chat_id not in db:
-        db[chat_id] = {}
-    if "theme" not in db[chat_id]:
-        db[chat_id]["theme"] = "green"
-    db[chat_id]["theme"] = name
+ydl_opts = {"format": "bestaudio", "quiet": True}
 
 
 # Get default service from config
@@ -68,58 +50,59 @@ def get_default_service() -> str:
         return "youtube"
 
 
-async def pause_skip_watcher(message: Message, duration: int, chat_id: int):
+async def pause_skip_watcher(message: Message, duration: int):
     try:
-        chat_id = message.chat.id
-        db[chat_id]["call"].set_is_mute(False)
-        if "skipped" not in db[chat_id]:
-            db[chat_id]["skipped"] = False
-        if "paused" not in db[chat_id]:
-            db[chat_id]["paused"] = False
-        if "stopped" not in db[chat_id]:
-            db[chat_id]["stopped"] = False
-        if "replayed" not in db[chat_id]:
-            db[chat_id]["replayed"] = False
+        db["call"].set_is_mute(False)
+        if "skipped" not in db:
+            db["skipped"] = False
+        if "paused" not in db:
+            db["paused"] = False
+        if "stopped" not in db:
+            db["stopped"] = False
+        if "replayed" not in db:
+            db["replayed"] = False
         restart_while = False
         while True:
             for _ in range(duration * 10):
-                if db[chat_id]["skipped"]:
-                    db[chat_id]["skipped"] = False
+                if db["skipped"]:
+                    db["skipped"] = False
                     return await message.delete()
-                if db[chat_id]["paused"]:
-                    while db[chat_id]["paused"]:
+                if db["paused"]:
+                    while db["paused"]:
                         await asyncio.sleep(0.1)
                         continue
-                if db[chat_id]["stopped"]:
+                if db["stopped"]:
                     restart_while = True
                     break
-                if db[chat_id]["replayed"]:
+                if db["replayed"]:
                     restart_while = True
-                    db[chat_id]["replayed"] = False
+                    db["replayed"] = False
                     break
-                if "queue_breaker" in db[chat_id]:
-                    if db[chat_id]["queue_breaker"] != 0:
+                if "queue_breaker" in db:
+                    if db["queue_breaker"] != 0:
                         break
                 await asyncio.sleep(0.1)
             if not restart_while:
                 break
             restart_while = False
             await asyncio.sleep(0.1)
-        db[chat_id]["skipped"] = False
-    except Exception:
+        db["skipped"] = False
+    except Exception as e:
+        e = traceback.format_exc()
+        print(str(e))
         pass
 
 
-async def change_vc_title(title: str, chat_id):
-    peer = await app.resolve_peer(chat_id)
+async def change_vc_title(title: str):
+    peer = await app.resolve_peer(CHAT_ID)
     chat = await app.send(GetFullChannel(channel=peer))
     data = EditGroupCallTitle(call=chat.full_chat.call, title=title)
     await app.send(data)
 
 
-def transcode(filename: str, chat_id: str):
+def transcode(filename: str):
     ffmpeg.input(filename).output(
-        f"input{chat_id}.raw",
+        "input.raw",
         format="s16le",
         acodec="pcm_s16le",
         ac=2,
@@ -130,17 +113,14 @@ def transcode(filename: str, chat_id: str):
 
 
 # Download song
-async def download_and_transcode_song(url, chat_id):
-    song = f"{chat_id}.mp3"
+async def download_and_transcode_song(url):
+    song = "temp.mp3"
     async with session.get(url) as resp:
         if resp.status == 200:
             f = await aiofiles.open(song, mode="wb")
             await f.write(await resp.read())
             await f.close()
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(
-        None, functools.partial(transcode, song, chat_id)
-    )
+    await run_async(transcode, song)
 
 
 # Convert seconds to mm:ss
@@ -170,22 +150,24 @@ def changeImageSize(maxWidth: int, maxHeight: int, image):
     return newImage
 
 
+async def send(*args, **kwargs):
+    await app.send_message(CHAT_ID, *args, **kwargs)
+
+
 # Generate cover for youtube
 
 
-async def generate_cover(
-    requested_by, title, views_or_artist, duration, thumbnail, chat_id
-):
+async def generate_cover(requested_by, title, artist, duration, thumbnail):
     async with session.get(thumbnail) as resp:
         if resp.status == 200:
-            f = await aiofiles.open(f"background{chat_id}.png", mode="wb")
+            f = await aiofiles.open("background.png", mode="wb")
             await f.write(await resp.read())
             await f.close()
-    background = f"./background{chat_id}.png"
-    final = f"final{chat_id}.png"
-    temp = f"temp{chat_id}.png"
+    background = "./background.png"
+    final = "final.png"
+    temp = "temp.png"
     image1 = Image.open(background)
-    image2 = Image.open(f"etc/foreground_{get_theme(chat_id)}.png")
+    image2 = Image.open("etc/foreground.png")
     image3 = changeImageSize(1280, 720, image1)
     image4 = changeImageSize(1280, 720, image2)
     image5 = image3.convert("RGBA")
@@ -198,7 +180,7 @@ async def generate_cover(
     draw.text((190, 590), f"Duration: {duration}", (255, 255, 255), font=font)
     draw.text(
         (190, 630),
-        f"Views/Artist: {views_or_artist}",
+        f"Artist: {artist}",
         (255, 255, 255),
         font=font,
     )
@@ -209,226 +191,155 @@ async def generate_cover(
     os.remove(temp)
     os.remove(background)
     try:
-        await change_vc_title(title, chat_id)
+        await change_vc_title(title)
     except Exception:
-        await app.send_message(
-            chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN."
-        )
+        await send(text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
         pass
     return final
 
 
-# Deezer
+async def run_async(func, *args, **kwargs):
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, func, *args, **kwargs)
 
 
-async def deezer(requested_by, query, message: Message):
-    m = await message.reply_text(
-        f"__**Searching for {query} on Deezer.**__", quote=False
-    )
-    songs = await arq.deezer(query, 1)
-    if not songs.ok:
-        return await m.edit(songs.result)
-    songs = songs.result
-    title = songs[0].title
-    duration = convert_seconds(int(songs[0].duration))
-    thumbnail = songs[0].thumbnail
-    artist = songs[0].artist
-    chat_id = message.chat.id
-    db[chat_id]["currently"] = {
-        "artist": artist,
-        "song": title,
-        "query": query,
-    }
-    url = songs[0].url
-    await m.edit("__**Downloading And Transcoding.**__")
-    cover, _ = await asyncio.gather(
-        generate_cover(
-            requested_by, title, artist, duration, thumbnail, chat_id
-        ),
-        download_and_transcode_song(url, chat_id),
-    )
-    await m.delete()
-    caption = (
-        f"🏷 **Name:** [{title[:45]}]({url})\n⏳ **Duration:** {duration}\n"
-        + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** Deezer"
-    )
-    m = await message.reply_photo(
-        photo=cover,
-        caption=caption,
-    )
-    os.remove(cover)
-    duration = int(songs[0]["duration"])
-    await pause_skip_watcher(m, duration, chat_id)
-    await m.delete()
-
-
-async def get_lyric(query: str, artist, song):
-    if song and artist:
-        q = song + artist
-    elif song:
-        q = song
-    else:
-        q = artist
-    res = await arq.lyrics(q)
-    if res.result == "Couldn't find any lyrics for that song!":
-        res = await arq.lyrics(query)
-    return res.result
-
-
-# saavn
-
-
-async def saavn(requested_by, query, message):
-    m = await message.reply_text(
-        f"__**Searching for {query} on JioSaavn.**__", quote=False
-    )
-    songs = await arq.saavn(query)
-    if not songs.ok:
-        return await m.edit(songs.result)
-    songs = songs.result
-    sname = songs[0].song
-    slink = songs[0].media_url
-    ssingers = songs[0].singers
-    chat_id = message.chat.id
-    db[chat_id]["currently"] = {
-        "artist": ssingers[0] if type(ssingers) == list else ssingers,
-        "song": sname,
-        "query": query,
-    }
-    sthumb = songs[0].image
-    sduration = songs[0].duration
-    sduration_converted = convert_seconds(int(sduration))
-    await m.edit("__**Downloading And Transcoding.**__")
-    cover, _ = await asyncio.gather(
+async def download_transcode_gencover(
+    requested_by, title, artist, duration, thumbnail, url
+):
+    return await asyncio.gather(
         generate_cover(
             requested_by,
-            sname,
-            ssingers,
-            sduration_converted,
-            sthumb,
-            chat_id,
+            title,
+            artist,
+            duration,
+            thumbnail,
         ),
-        download_and_transcode_song(slink, chat_id),
+        download_and_transcode_song(url),
     )
-    await m.delete()
-    caption = (
-        f"🏷 **Name:** {sname[:45]}\n⏳ **Duration:** {sduration_converted}\n"
-        + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** JioSaavn"
-    )
-    m = await message.reply_photo(
-        photo=cover,
-        caption=caption,
-    )
-    os.remove(cover)
-    duration = int(sduration)
-    await pause_skip_watcher(m, duration, chat_id)
-    await m.delete()
 
 
-# Youtube
+async def get_song(query: str, service: str):
+    if service == "deezer":
+        resp = await arq.deezer(query, 1)
+        if not resp.ok:
+            return
+        song = resp.result[0]
+        title = song.title[0:30]
+        duration = int(song.duration)
+        thumbnail = song.thumbnail
+        artist = song.artist
+        url = song.url
+    elif service == "saavn":
+        resp = await arq.saavn(query)
+        if not resp.ok:
+            return
+        song = resp.result[0]
+        title = song.song[0:30]
+        duration = int(song.duration)
+        thumbnail = song.image
+        artist = (
+            song.singers
+            if not isinstance(song.singers, list)
+            else song.singers[0]
+        )
+        url = song.media_url
+    elif service == "youtube":
+        resp = await arq.youtube(query)
+        if not resp.ok:
+            return
+        song = resp.result[0]
+        title = song.title[0:30]
+        duration = time_to_seconds(song.duration)
+        thumbnail = song.thumbnails[0]
+        artist = song.channel
+        url = "https://youtube.com" + song.url_suffix
+    else:
+        return
+
+    return title, duration, thumbnail, artist, url
 
 
-async def youtube(requested_by, query, message):
-    ydl_opts = {"format": "bestaudio", "quiet": True}
+async def play_song(requested_by, query, message, service):
     m = await message.reply_text(
-        f"__**Searching for {query} on YouTube.**__", quote=False
+        f"__**Searching for {query} on {service}.**__", quote=False
     )
-    results = await arq.youtube(query)
-    if not results.ok:
-        return await m.edit(results.result)
-    results = results.result
-    link = f"https://youtube.com{results[0].url_suffix}"
-    title = results[0].title
-    chat_id = message.chat.id
-    db[chat_id]["currently"] = {"artist": None, "song": title, "query": query}
-    thumbnail = results[0].thumbnails[0]
-    duration = results[0].duration
-    views = results[0].views
-    if time_to_seconds(duration) >= 1800:
-        return await m.edit("__**Bruh! Only songs within 30 Mins.**__")
-    await m.edit("__**Processing Thumbnail.**__")
-    cover = await generate_cover(
-        requested_by, title, views, duration, thumbnail, chat_id
-    )
-    await m.edit("__**Downloading Music.**__")
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(link, download=False)
-        audio_file = ydl.prepare_filename(info_dict)
-        ydl.process_info(info_dict)
-    await m.edit("__**Transcoding.**__")
-    song = f"audio{chat_id}.webm"
-    os.rename(audio_file, song)
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(
-        None, functools.partial(transcode, song, chat_id)
-    )
+    # get song title, url etc
+    song = await get_song(query, service)
+    if not song:
+        return await m.edit("There's no such song on " + service)
+
+    title, duration, thumbnail, artist, url = song
+
+    if service == "youtube":
+        if duration >= 1800:
+            return await m.edit("[ERROR]: SONG_TOO_BIG")
+
+        await m.edit("__**Generating thumbnail.**__")
+        cover = await generate_cover(
+            requested_by,
+            title,
+            artist,
+            convert_seconds(duration),
+            thumbnail,
+        )
+        await m.edit("__**Downloading**__")
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=False)
+            audio_file = ydl.prepare_filename(info_dict)
+            ydl.process_info(info_dict)
+        await m.edit("__**Transcoding.**__")
+        song = "audio.webm"
+        os.rename(audio_file, song)
+        await run_async(transcode, song)
+
+    else:
+        await m.edit(
+            "__**Generating thumbnail, Downloading And Transcoding.**__"
+        )
+        cover, _ = await download_transcode_gencover(
+            requested_by,
+            title,
+            artist,
+            convert_seconds(duration),
+            thumbnail,
+            url,
+        )
     await m.delete()
-    caption = (
-        f"🏷 **Name:** [{title[:45]}]({link})\n⏳ **Duration:** {duration}\n"
-        + f"🎧 **Requested By:** {message.from_user.mention}\n📡 **Platform:** YouTube"
-    )
+    caption = f"""
+**Name:** {title[:45]}
+**Duration:** {convert_seconds(duration)}
+**Requested By:** {message.from_user.mention}
+**Platform:** {service}
+"""
+    await m.delete()
     m = await message.reply_photo(
         photo=cover,
         caption=caption,
     )
     os.remove(cover)
-    duration = int(time_to_seconds(duration))
-    await pause_skip_watcher(m, duration, chat_id)
+    await pause_skip_watcher(m, duration)
     await m.delete()
 
 
 # Telegram
 
 
-async def telegram(_, __, message):
-    global db
-    chat_id = message.chat.id
-    if chat_id not in db:
-        db[chat_id] = {}
-    if not message.reply_to_message:
-        return await message.reply_text(
-            "__**Reply to an audio.**__", quote=False
-        )
-    if not message.reply_to_message.audio:
-        return await message.reply_text(
-            "__**Only Audio Files (Not Document) Are Supported.**__",
-            quote=False,
-        )
-    if int(message.reply_to_message.audio.file_size) >= 104857600:
-        return await message.reply_text(
-            "__**Bruh! Only songs within 100 MB.**__", quote=False
-        )
-    duration = message.reply_to_message.audio.duration
-    if not duration:
-        return await message.reply_text(
-            "__**Only Songs With Duration Are Supported.**__", quote=False
-        )
-    m = await message.reply_text("__**Downloading.**__", quote=False)
-    title = message.reply_to_message.audio.title
-    performer = message.reply_to_message.audio.performer
-    db[chat_id]["currently"] = {
-        "artist": performer,
-        "song": title,
-        "query": None,
-    }
+async def telegram(message):
+    err = "__**Can't play that**__"
+    reply = message.reply_to_message
+    if not reply:
+        return await message.reply_text(err)
+    if not reply.audio:
+        return await message.reply_text(err)
+    if not reply.audio.duration:
+        return await message.reply_text(err)
+    if int(reply.audio.file_size) >= 104857600:
+        return await message.reply_text("[ERROR]: SONG_TOO_BIG")
+    m = await message.reply_text("__**Downloading.**__")
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
-    try:
-        if message.reply_to_message.audio.title:
-            title = message.reply_to_message.audio.title
-        else:
-            title = message.reply_to_message.audio.performer
-        await change_vc_title(title, chat_id)
-    except Exception:
-        await app.send_message(
-            chat_id, text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN."
-        )
-        pass
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(
-        None, functools.partial(transcode, song, chat_id)
-    )
-    await m.edit(f"**Playing** __**{message.reply_to_message.link}.**__")
-    await pause_skip_watcher(m, duration, chat_id)
+    await run_async(transcode, song)
+    await m.edit(f"__**Playing {reply.link}**__")
+    await pause_skip_watcher(m, reply.audio.duration)
     if os.path.exists(song):
         os.remove(song)
