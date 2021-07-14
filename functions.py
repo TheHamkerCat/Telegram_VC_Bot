@@ -1,6 +1,7 @@
 import asyncio
 import functools
 import os
+import traceback
 
 import aiofiles
 import ffmpeg
@@ -86,7 +87,9 @@ async def pause_skip_watcher(message: Message, duration: int):
             restart_while = False
             await asyncio.sleep(0.1)
         db["skipped"] = False
-    except Exception:
+    except Exception as e:
+        e = traceback.format_exc()
+        print(str(e))
         pass
 
 
@@ -117,8 +120,7 @@ async def download_and_transcode_song(url):
             f = await aiofiles.open(song, mode="wb")
             await f.write(await resp.read())
             await f.close()
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, functools.partial(transcode, song))
+    await run_async(transcode, song)
 
 
 # Convert seconds to mm:ss
@@ -206,16 +208,15 @@ async def run_async(func, *args, **kwargs):
 async def download_transcode_gencover(
     requested_by, title, artist, duration, thumbnail, url
 ):
-    return asyncio.gather(
-        run_async(
-            generate_cover,
+    return await asyncio.gather(
+            generate_cover(
             requested_by,
             title,
             artist,
             duration,
             thumbnail,
         ),
-        run_async(download_and_transcode_song, url),
+        download_and_transcode_song(url)
     )
 
 
@@ -225,8 +226,8 @@ async def get_song(query: str, service: str):
         if not resp.ok:
             return
         song = resp.result[0]
-        title = song.title
-        duration = convert_seconds(int(song.duration))
+        title = song.title[0:30]
+        duration = int(song.duration)
         thumbnail = song.thumbnail
         artist = song.artist
         url = song.url
@@ -235,11 +236,11 @@ async def get_song(query: str, service: str):
         if not resp.ok:
             return
         song = resp.result[0]
-        title = song.song
-        duration = convert_seconds(int(song.duration))
+        title = song.song[0:30]
+        duration = int(song.duration)
         thumbnail = song.image
         artist = (
-            song.singers if not isinstance(singers, list) else song.singers[0]
+            song.singers if not isinstance(song.singers, list) else song.singers[0]
         )
         url = song.media_url
     elif service == "youtube":
@@ -247,9 +248,9 @@ async def get_song(query: str, service: str):
         if not resp.ok:
             return
         song = resp.result[0]
-        title = song.title
+        title = song.title[0:30]
         duration = time_to_seconds(song.duration)
-        thumbnail = song.image
+        thumbnail = song.thumbnails[0]
         artist = song.channel
         url = "https://youtube.com" + song.url_suffix
     else:
@@ -274,8 +275,7 @@ async def play_song(requested_by, query, message, service):
             return await m.edit("[ERROR]: SONG_TOO_BIG")
 
         await m.edit("__**Generating thumbnail.**__")
-        cover = await run_async(
-            generate_cover,
+        cover = await generate_cover(
             requested_by,
             title,
             artist,
@@ -284,7 +284,7 @@ async def play_song(requested_by, query, message, service):
         )
         await m.edit("__**Downloading**__")
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(link, download=False)
+            info_dict = ydl.extract_info(url, download=False)
             audio_file = ydl.prepare_filename(info_dict)
             ydl.process_info(info_dict)
         await m.edit("__**Transcoding.**__")
@@ -296,18 +296,18 @@ async def play_song(requested_by, query, message, service):
         await m.edit(
             "__**Generating thumbnail, Downloading And Transcoding.**__"
         )
-        (cover,) = await download_transcode_gencover(
+        cover, _ = await download_transcode_gencover(
             requested_by,
             title,
             artist,
-            duration,
+            convert_seconds(duration),
             thumbnail,
             url,
         )
     await m.delete()
     caption = f"""
 **Name:** {title[:45]}
-**Duration:** {duration}
+**Duration:** {convert_seconds(duration)}
 **Requested By:** {message.from_user.mention}
 **Platform:** {service}
 """
@@ -324,7 +324,7 @@ async def play_song(requested_by, query, message, service):
 # Telegram
 
 
-async def telegram(_, __, message):
+async def telegram(message):
     err = "__**Can't play that**__"
     reply = message.reply_to_message
     if not reply:
@@ -333,7 +333,7 @@ async def telegram(_, __, message):
         return await message.reply_text(err)
     if not reply.audio.duration:
         return await message.reply_text(err)
-    if not reply.audio.file_size >= 104857600:
+    if int(reply.audio.file_size) >= 104857600:
         return await message.reply_text("[ERROR]: SONG_TOO_BIG")
     m = await message.reply_text("__**Downloading.**__")
     song = await message.reply_to_message.download()

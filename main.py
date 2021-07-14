@@ -37,7 +37,7 @@ async def repo(_, message):
 @app.on_message(
     filters.command("joinvc") & ~filters.private & filters.chat(CHAT_ID)
 )
-async def joinvc(_, message):
+async def joinvc(_, message, manual=False):
     if "call" in db:
         return await message.reply_text("__**Bot Is Already In The VC**__")
     os.popen("cp etc/sample_input.raw input.raw")
@@ -63,7 +63,6 @@ async def joinvc(_, message):
                 "Make me admin with message delete and vc manage permission"
             )
     await message.reply_text("__**Joined The Voice Chat.**__")
-
 
 @app.on_message(
     filters.command("leavevc") & ~filters.private & filters.chat(CHAT_ID)
@@ -219,7 +218,7 @@ async def queue_list(_, message):
     text = ""
     for count, song in enumerate(queue._queue, 1):
         if not pl_format:
-            text += f"**{count}. {song['service'].__name__}** " \
+            text += f"**{count}. {song['service']}** " \
                      + f"| __{song['query']}__  |  {song['requested_by']}\n"
         else:
             text += song['query'] + "\n"
@@ -248,7 +247,10 @@ async def start_queue(message=None):
                 await playlist(app, message, redirected=True)
         data = await db["queue"].get()
         service = data["service"]
-        await play_song(
+        if service == "telegram":
+            await telegram(data["message"])
+        else:
+            await play_song(
             data["requested_by"], data["query"], data["message"], service
         )
 
