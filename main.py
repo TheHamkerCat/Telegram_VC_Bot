@@ -62,7 +62,11 @@ async def joinvc(_, message, manual=False):
             return await message.reply_text(
                 "Make me admin with message delete and vc manage permission"
             )
-    await message.reply_text("__**Joined The Voice Chat.**__")
+    await message.reply_text(
+        "__**Joined The Voice Chat.**__ \n\n**Note:** __If you can't hear anything,"
+        + " Send /leavevc and then /joinvc again.__"
+    )
+
 
 @app.on_message(
     filters.command("leavevc") & ~filters.private & filters.chat(CHAT_ID)
@@ -218,10 +222,12 @@ async def queue_list(_, message):
     text = ""
     for count, song in enumerate(queue._queue, 1):
         if not pl_format:
-            text += f"**{count}. {song['service']}** " \
-                     + f"| __{song['query']}__  |  {song['requested_by']}\n"
+            text += (
+                f"**{count}. {song['service']}** "
+                + f"| __{song['query']}__  |  {song['requested_by']}\n"
+            )
         else:
-            text += song['query'] + "\n"
+            text += song["query"] + "\n"
     if len(text) > 4090:
         return await message.reply_text(
             f"**There are {queue.qsize()} songs in queue.**"
@@ -251,8 +257,8 @@ async def start_queue(message=None):
             await telegram(data["message"])
         else:
             await play_song(
-            data["requested_by"], data["query"], data["message"], service
-        )
+                data["requested_by"], data["query"], data["message"], service
+            )
 
 
 @app.on_message(

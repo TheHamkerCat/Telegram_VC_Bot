@@ -157,9 +157,7 @@ async def send(*args, **kwargs):
 # Generate cover for youtube
 
 
-async def generate_cover(
-    requested_by, title, artist, duration, thumbnail
-):
+async def generate_cover(requested_by, title, artist, duration, thumbnail):
     async with session.get(thumbnail) as resp:
         if resp.status == 200:
             f = await aiofiles.open("background.png", mode="wb")
@@ -209,14 +207,14 @@ async def download_transcode_gencover(
     requested_by, title, artist, duration, thumbnail, url
 ):
     return await asyncio.gather(
-            generate_cover(
+        generate_cover(
             requested_by,
             title,
             artist,
             duration,
             thumbnail,
         ),
-        download_and_transcode_song(url)
+        download_and_transcode_song(url),
     )
 
 
@@ -240,7 +238,9 @@ async def get_song(query: str, service: str):
         duration = int(song.duration)
         thumbnail = song.image
         artist = (
-            song.singers if not isinstance(song.singers, list) else song.singers[0]
+            song.singers
+            if not isinstance(song.singers, list)
+            else song.singers[0]
         )
         url = song.media_url
     elif service == "youtube":
