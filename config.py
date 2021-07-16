@@ -9,17 +9,17 @@ if HEROKU:
     load_dotenv()  # take environment variables from .env.
     API_ID = int(environ["7250088"])
     API_HASH = environ["daff0c3742747fb7c5e4cffe479c05d9"]
-    SESSION_STRING = environ["AQADrxDQYNNwSpfCkidlEMUebbgx6m3KsvPJe9bp0VcSP-EgWo1qtilJj6LwhVihG3n6QxFYCcLhp_6tx-zm4n-athAiuU6ujTr4ffU2q30SY5GdjopVooODYGE_57m50HAY2PHEfbn99ahmAx2qhSxUXxYVXLBzeE4Ou13OiXgY4jc57K1Lu9Y54tBIrMwhB4pwJt8OLVoldJOUg2Gy36OB50ekfQ-jxU8ISY-3udQyrTr3EkbUxfF0-no-zYXurb4z_1rigIyRztdF_HgaJBwohP24TomEpiA9iZ1X-TRzMtxoBF_MKozgDGjtEcb-xfQtbsN6cN02N9-I62bzMdVdZ4BFdQA"]  # Check Readme for session
-    ARQ_API_KEY = environ["RGRPZF-ZKROHH-FXANMN-QMRQQJ-ARQ"]
-    CHAT_ID = int(environ["-1001161933394"])
+    SESSION_STRING = environ["AQALSJNQWcjqLLTD6mHVN7PW6swL_St6C3deplHLUzV2tMdmLiJS5TEyxRnqNdzVVa_WdsmLxBBeBbONrZcy0iClwBIqELvkutsO4K5qE-hihWuE_3r90mAmND1TUGeKsAGgGG0YONL8plic5tMlXeJ8LWT_Hn59eiW8AVzZiYYr-MGf5EQxb2bTHoJqXUpKcvv9Tm9e2zFNWpfa-luBgvfPicIQCZmlZtnOWyXC_mq87LOha9sUrULQ0iASVBAFMvxX9fTIquZdub_MWYnUog3ucXoTB1WT_vgjAsXuz7hRC3qNXZuCEhiK2jhKbyg-B8jyzyKpssjcgVrg0g1Ht2uIc7DHFwA"]  # Check Readme for session
+    ARQ_API_KEY = environ["DQNILI-XLCYOT-MHOOLF-PTXSAZ-ARQ"]
+    CHAT_ID = int(environ["-1001317022158"])
     DEFAULT_SERVICE = environ.get("DEFAULT_SERVICE") or "youtube"
 
 # NOTE Fill this if you are not deploying on heroku.
 if not HEROKU:
     API_ID = 7250088
     API_HASH = "daff0c3742747fb7c5e4cffe479c05d9"
-    ARQ_API_KEY = "RGRPZF-ZKROHH-FXANMN-QMRQQJ-ARQ"
-    CHAT_ID = -1001161933394
+    ARQ_API_KEY = "DQNILI-XLCYOT-MHOOLF-PTXSAZ-ARQ"
+    CHAT_ID = -1001317022158
     DEFAULT_SERVICE = "youtube"  # Must be one of "youtube"/"deezer"/"saavn"
 
 # don't make changes below this line
