@@ -16,4 +16,4 @@ REPO_TEXT = (
     "[Github](https://github.com/thehamkercat/Telegram_vc_bot)"
     + " | [Group](t.me/TGVCSUPPORT)"
 )
-/s
+
