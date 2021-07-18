@@ -30,7 +30,9 @@ if HEROKU:
         from sample_config import SESSION_STRING
 
 app = Client(
-    SESSION_STRING if HEROKU else "tgvc", api_id=API_ID, api_hash=API_HASH
+    SESSION_STRING if HEROKU else "tgvc",
+    api_id=API_ID,
+    api_hash=API_HASH,
 )
 session = ClientSession()
 arq = ARQ(ARQ_API, ARQ_API_KEY, session)
@@ -136,7 +138,8 @@ def convert_seconds(seconds: int):
 def time_to_seconds(time):
     stringt = str(time)
     return sum(
-        int(x) * 60 ** i for i, x in enumerate(reversed(stringt.split(":")))
+        int(x) * 60 ** i
+        for i, x in enumerate(reversed(stringt.split(":")))
     )
 
 
@@ -157,7 +160,9 @@ async def send(*args, **kwargs):
 # Generate cover for youtube
 
 
-async def generate_cover(requested_by, title, artist, duration, thumbnail):
+async def generate_cover(
+    requested_by, title, artist, duration, thumbnail
+):
     async with session.get(thumbnail) as resp:
         if resp.status == 200:
             f = await aiofiles.open("background.png", mode="wb")
@@ -176,8 +181,15 @@ async def generate_cover(requested_by, title, artist, duration, thumbnail):
     img = Image.open(temp)
     draw = ImageDraw.Draw(img)
     font = ImageFont.truetype("etc/font.otf", 32)
-    draw.text((190, 550), f"Title: {title}", (255, 255, 255), font=font)
-    draw.text((190, 590), f"Duration: {duration}", (255, 255, 255), font=font)
+    draw.text(
+        (190, 550), f"Title: {title}", (255, 255, 255), font=font
+    )
+    draw.text(
+        (190, 590),
+        f"Duration: {duration}",
+        (255, 255, 255),
+        font=font,
+    )
     draw.text(
         (190, 630),
         f"Artist: {artist}",
@@ -185,7 +197,10 @@ async def generate_cover(requested_by, title, artist, duration, thumbnail):
         font=font,
     )
     draw.text(
-        (190, 670), f"Requested By: {requested_by}", (255, 255, 255), font=font
+        (190, 670),
+        f"Requested By: {requested_by}",
+        (255, 255, 255),
+        font=font,
     )
     img.save(final)
     os.remove(temp)
@@ -193,7 +208,9 @@ async def generate_cover(requested_by, title, artist, duration, thumbnail):
     try:
         await change_vc_title(title)
     except Exception:
-        await send(text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN.")
+        await send(
+            text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN."
+        )
         pass
     return final
 

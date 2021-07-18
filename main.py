@@ -5,7 +5,8 @@ import os
 import traceback
 
 from pyrogram import filters, idle
-from pyrogram.errors.exceptions.bad_request_400 import ChatAdminRequired
+from pyrogram.errors.exceptions.bad_request_400 import \
+    ChatAdminRequired
 from pyrogram.raw.functions.phone import CreateGroupCall
 from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
@@ -17,8 +18,8 @@ import db
 db.init()
 
 from db import db
-from functions import (CHAT_ID, app, get_default_service, play_song, session,
-                       telegram)
+from functions import (CHAT_ID, app, get_default_service, play_song,
+                       session, telegram)
 from misc import HELP_TEXT, REPO_TEXT
 
 running = False  # Tells if the queue is running or not
@@ -35,11 +36,15 @@ async def repo(_, message):
 
 
 @app.on_message(
-    filters.command("joinvc") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("joinvc")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def joinvc(_, message, manual=False):
     if "call" in db:
-        return await message.reply_text("__**Bot Is Already In The VC**__")
+        return await message.reply_text(
+            "__**Bot Is Already In The VC**__"
+        )
     os.popen("cp etc/sample_input.raw input.raw")
     vc = GroupCall(app, "input.raw")
     db["call"] = vc
@@ -69,7 +74,9 @@ async def joinvc(_, message, manual=False):
 
 
 @app.on_message(
-    filters.command("leavevc") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("leavevc")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def leavevc(_, message):
     if "call" in db:
@@ -80,7 +87,9 @@ async def leavevc(_, message):
 
 
 @app.on_message(
-    filters.command("volume") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("volume")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def volume_bot(_, message):
     usage = "**Usage:**\n/volume [1-200]"
@@ -100,7 +109,9 @@ async def volume_bot(_, message):
 
 
 @app.on_message(
-    filters.command("pause") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("pause")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def pause_song_func(_, message):
     if "call" not in db:
@@ -110,11 +121,15 @@ async def pause_song_func(_, message):
             return await message.reply_text("**Already paused**")
     db["paused"] = True
     db["call"].pause_playout()
-    await message.reply_text("**Paused The Music, Send `/resume` To Resume.**")
+    await message.reply_text(
+        "**Paused The Music, Send `/resume` To Resume.**"
+    )
 
 
 @app.on_message(
-    filters.command("resume") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("resume")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def resume_song(_, message):
     if "call" not in db:
@@ -124,7 +139,9 @@ async def resume_song(_, message):
             return await message.reply_text("**Already playing**")
     db["paused"] = False
     db["call"].resume_playout()
-    await message.reply_text("**Resumed, Send `/pause` To Pause The Music.**")
+    await message.reply_text(
+        "**Resumed, Send `/pause` To Pause The Music.**"
+    )
 
 
 @app.on_message(
@@ -155,7 +172,8 @@ __**/play youtube/saavn/deezer Song_Name**__
 __**/play Reply_On_Audio**__"""
 
         if len(message.command) < 2 and (
-            not message.reply_to_message or not message.reply_to_message.audio
+            not message.reply_to_message
+            or not message.reply_to_message.audio
         ):
             return await message.reply_text(usage)
         if "call" not in db:
@@ -202,7 +220,9 @@ __**/play Reply_On_Audio**__"""
 
 
 @app.on_message(
-    filters.command("queue") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("queue")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def queue_list(_, message):
     if "queue" not in db:
@@ -257,12 +277,17 @@ async def start_queue(message=None):
             await telegram(data["message"])
         else:
             await play_song(
-                data["requested_by"], data["query"], data["message"], service
+                data["requested_by"],
+                data["query"],
+                data["message"],
+                service,
             )
 
 
 @app.on_message(
-    filters.command("delqueue") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("delqueue")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def clear_queue(_, message):
     global db
@@ -278,7 +303,9 @@ async def clear_queue(_, message):
 
 
 @app.on_message(
-    filters.command("playlist") & ~filters.private & filters.chat(CHAT_ID)
+    filters.command("playlist")
+    & ~filters.private
+    & filters.chat(CHAT_ID)
 )
 async def playlist(_, message: Message, redirected=False):
     if message.reply_to_message:
