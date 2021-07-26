@@ -1,7 +1,7 @@
 HELP_TEXT = """__**I Can Play Music In The Voice Chat**__
 
 **/skip** __Skip The Current Playing Music.__
-**/play** __Service_Or_Default (Services: youtube/saavn/deezer, Default: youtube) Song_Name | Reply_To_Audio__
+**/play** __Service_Or_Default (Services: youtube/saavn, Default: youtube) Song_Name | Reply_To_Audio__
 **/joinvc** __Join Voice Chat.__
 **/leavevc** __Leave Voice Chat.__
 **/volume [1-200]** __Adjust Volume.__

@@ -41,7 +41,7 @@ ydl_opts = {"format": "bestaudio", "quiet": True}
 
 # Get default service from config
 def get_default_service() -> str:
-    services = ["youtube", "deezer", "saavn"]
+    services = ["youtube", "saavn"]
     try:
         config_service = DEFAULT_SERVICE.lower()
         if config_service in services:
@@ -236,17 +236,7 @@ async def download_transcode_gencover(
 
 
 async def get_song(query: str, service: str):
-    if service == "deezer":
-        resp = await arq.deezer(query, 1)
-        if not resp.ok:
-            return
-        song = resp.result[0]
-        title = song.title[0:30]
-        duration = int(song.duration)
-        thumbnail = song.thumbnail
-        artist = song.artist
-        url = song.url
-    elif service == "saavn":
+    if service == "saavn":
         resp = await arq.saavn(query)
         if not resp.ok:
             return

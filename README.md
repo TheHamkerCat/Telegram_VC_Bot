@@ -78,7 +78,7 @@ Command | Description
 /help | Show Help Message.
 /skip | Skip Any Playing Music.
 /play [SONG_NAME] | To Play A Song Using YouTube.<br>Service used can be changed in config (`DEFAULT_SERVICE`).
-/play youtube/saavn/deezer [SONG_NAME] | To Play A Song Using Specific Service.
+/play youtube/saavn [SONG_NAME] | To Play A Song Using Specific Service.
 /play [with reply to an audio file] | To Play A Song With TG Audio File.
 /queue | Check Queue Status.
 /delqueue | Deletes Queue List and Playlist.

@@ -168,7 +168,7 @@ async def queuer(_, message):
         usage = """
 **Usage:**
 __**/play Song_Name**__ (uses youtube service)
-__**/play youtube/saavn/deezer Song_Name**__
+__**/play youtube/saavn Song_Name**__
 __**/play Reply_On_Audio**__"""
 
         if len(message.command) < 2 and (
@@ -190,7 +190,7 @@ __**/play Reply_On_Audio**__"""
             text = message.text.split("\n")[0]
             text = text.split(None, 2)[1:]
             service = text[0].lower()
-            services = ["youtube", "deezer", "saavn"]
+            services = ["youtube", "saavn"]
             if service in services:
                 song_name = text[1]
             else:
@@ -330,7 +330,7 @@ Example:
     db["playlist"] = True
     db["queue"] = asyncio.Queue()
     for line in raw_playlist.split("\n"):
-        services = ["youtube", "deezer", "saavn"]
+        services = ["youtube", "saavn"]
         if line.split()[0].lower() in services:
             service = line.split()[0].lower()
             song_name = " ".join(line.split()[1:])

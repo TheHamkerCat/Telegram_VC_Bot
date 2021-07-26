@@ -23,7 +23,7 @@ if not HEROKU:
     ARQ_API_KEY = "Get this from @ARQRobot"
     CHAT_ID = -100546355432
     DEFAULT_SERVICE = (
-        "youtube"  # Must be one of "youtube"/"deezer"/"saavn"
+        "saavn"  # Must be one of "youtube"/"saavn"
     )
 
 # don't make changes below this line
