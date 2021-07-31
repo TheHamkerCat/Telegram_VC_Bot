@@ -4,13 +4,13 @@ import asyncio
 import os
 import traceback
 
+import pytgcalls
 from pyrogram import filters, idle
 from pyrogram.errors.exceptions.bad_request_400 import \
     ChatAdminRequired
 from pyrogram.raw.functions.phone import CreateGroupCall
 from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
-from pytgcalls import GroupCall
 
 # Initialize db
 import db
@@ -23,6 +23,9 @@ from functions import (CHAT_ID, app, get_default_service, play_song,
 from misc import HELP_TEXT, REPO_TEXT
 
 running = False  # Tells if the queue is running or not
+CLIENT_TYPE = pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM
+PLAYOUT_FILE = "input.raw"
+PLAY_LOCK = asyncio.Lock()
 
 
 @app.on_message(filters.command("help") & ~filters.private)
@@ -45,8 +48,10 @@ async def joinvc(_, message, manual=False):
         return await message.reply_text(
             "__**Bot Is Already In The VC**__"
         )
-    os.popen("cp etc/sample_input.raw input.raw")
-    vc = GroupCall(app, "input.raw")
+    os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
+    vc = pytgcalls.GroupCallFactory(
+        app, CLIENT_TYPE
+    ).get_file_group_call(PLAYOUT_FILE, "output.raw")
     db["call"] = vc
     try:
         await vc.start(CHAT_ID)
@@ -167,49 +172,52 @@ async def queuer(_, message):
     try:
         usage = """
 **Usage:**
-__**/play Song_Name**__ (uses youtube service)
-__**/play youtube/saavn Song_Name**__
-__**/play Reply_On_Audio**__"""
+__/play Song_Name__
+__/play youtube/saavn Song_Name__
+__/play Reply_On_Audio__"""
 
-        if len(message.command) < 2 and (
-            not message.reply_to_message
-            or not message.reply_to_message.audio
-        ):
-            return await message.reply_text(usage)
-        if "call" not in db:
-            return await message.reply_text("**Use /joinvc First!**")
-        if message.reply_to_message:
-            if message.reply_to_message.audio:
-                service = "telegram"
-                song_name = message.reply_to_message.audio.title
-            else:
+        async with PLAY_LOCK:
+            if (
+                len(message.command) < 2
+                and not message.reply_to_message
+            ):
+                return await message.reply_text(usage)
+            if "call" not in db:
                 return await message.reply_text(
-                    "**Reply to a telegram audio file**"
+                    "**Use /joinvc First!**"
                 )
-        else:
-            text = message.text.split("\n")[0]
-            text = text.split(None, 2)[1:]
-            service = text[0].lower()
-            services = ["youtube", "saavn"]
-            if service in services:
-                song_name = text[1]
+            if message.reply_to_message:
+                if message.reply_to_message.audio:
+                    service = "telegram"
+                    song_name = message.reply_to_message.audio.title
+                else:
+                    return await message.reply_text(
+                        "**Reply to a telegram audio file**"
+                    )
             else:
-                service = get_default_service()
-                song_name = " ".join(text)
-        requested_by = message.from_user.first_name
-        if "queue" not in db:
-            db["queue"] = asyncio.Queue()
-        if not db["queue"].empty() or db.get("running"):
-            await message.reply_text("__**Added To Queue.__**")
+                text = message.text.split("\n")[0]
+                text = text.split(None, 2)[1:]
+                service = text[0].lower()
+                services = ["youtube", "saavn"]
+                if service in services:
+                    song_name = text[1]
+                else:
+                    service = get_default_service()
+                    song_name = " ".join(text)
+            requested_by = message.from_user.first_name
+            if "queue" not in db:
+                db["queue"] = asyncio.Queue()
+            if not db["queue"].empty() or db.get("running"):
+                await message.reply_text("__**Added To Queue.__**")
 
-        await db["queue"].put(
-            {
-                "service": service or telegram,
-                "requested_by": requested_by,
-                "query": song_name,
-                "message": message,
-            }
-        )
+            await db["queue"].put(
+                {
+                    "service": service or telegram,
+                    "requested_by": requested_by,
+                    "query": song_name,
+                    "message": message,
+                }
+            )
         if not db.get("running"):
             db["running"] = True
             await start_queue()
@@ -354,6 +362,7 @@ Example:
 
 async def main():
     await app.start()
+    print("Bot started!")
     await idle()
     await session.close()
 
