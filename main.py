@@ -4,13 +4,14 @@ import asyncio
 import os
 import traceback
 
+import pytgcalls
+
 from pyrogram import filters, idle
 from pyrogram.errors.exceptions.bad_request_400 import \
     ChatAdminRequired
 from pyrogram.raw.functions.phone import CreateGroupCall
 from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
-from pytgcalls import GroupCall
 
 # Initialize db
 import db
@@ -23,7 +24,8 @@ from functions import (CHAT_ID, app, get_default_service, play_song,
 from misc import HELP_TEXT, REPO_TEXT
 
 running = False  # Tells if the queue is running or not
-
+CLIENT_TYPE = pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM
+PLAYOUT_FILE = "input.raw"
 
 @app.on_message(filters.command("help") & ~filters.private)
 async def help(_, message):
@@ -45,8 +47,11 @@ async def joinvc(_, message, manual=False):
         return await message.reply_text(
             "__**Bot Is Already In The VC**__"
         )
-    os.popen("cp etc/sample_input.raw input.raw")
-    vc = GroupCall(app, "input.raw")
+    os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
+    vc = pytgcalls.GroupCallFactory(
+            app,
+            CLIENT_TYPE
+            ).get_file_group_call(PLAYOUT_FILE, "output.raw")
     db["call"] = vc
     try:
         await vc.start(CHAT_ID)
@@ -67,6 +72,7 @@ async def joinvc(_, message, manual=False):
             return await message.reply_text(
                 "Make me admin with message delete and vc manage permission"
             )
+    #vc.set_is_mute(False)
     await message.reply_text(
         "__**Joined The Voice Chat.**__ \n\n**Note:** __If you can't hear anything,"
         + " Send /leavevc and then /joinvc again.__"
@@ -354,6 +360,7 @@ Example:
 
 async def main():
     await app.start()
+    print("Bot started!")
     await idle()
     await session.close()
 
