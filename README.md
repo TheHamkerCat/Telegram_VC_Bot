@@ -1,8 +1,8 @@
-# Telegram Voice-Chat Bot [ Pytgcalls ]
+# Telegram Voice-Chat Bot [PyTGCalls] [![Mentioned in Awesome Telegram Calls](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/tgcalls/awesome-tgcalls)
 
 Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In Your Group.
 
-<img src="https://hamker.me/wl9twld.png" width="690" height="400">
+<img src="https://hamker.me/wl9twld.png" width="500" height="300">
 
 
 ## Requirements
@@ -37,6 +37,8 @@ $ python3 main.py
 ```
 
 ## Heroku
+
+Read this -> https://t.me/TGVCSupport/17542
 
 #### Generate String session [IMPORTANT]
 
@@ -77,7 +79,7 @@ Command | Description
 :--- | :---
 /help | Show Help Message.
 /skip | Skip Any Playing Music.
-/play [SONG_NAME] | To Play A Song Using YouTube.<br>Service used can be changed in config (`DEFAULT_SERVICE`).
+/play [SONG_NAME] | To Play A Song Using Saavn.<br>Service used can be changed in config (`DEFAULT_SERVICE`).
 /play youtube/saavn [SONG_NAME] | To Play A Song Using Specific Service.
 /play [with reply to an audio file] | To Play A Song With TG Audio File.
 /queue | Check Queue Status.
@@ -96,5 +98,5 @@ Command | Description
 
 ## Credits
 
-1. @MarshalX [For TgCalls]
+1. [@MarshalX](https://github.com/MarshalX), For [TGCalls](https://github.com/MarshalX/tgcalls)
 2. Thanks to everyone who contributed to the project.
