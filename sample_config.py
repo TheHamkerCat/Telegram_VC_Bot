@@ -7,13 +7,13 @@ if HEROKU:
     from dotenv import load_dotenv
 
     load_dotenv()  # take environment variables from .env.
-    API_ID = int(environ["API_ID"])
-    API_HASH = environ["API_HASH"]
+    API_ID = int(environ["7353928"])
+    API_HASH = environ["c7a30161995acf9a0ba6037fe8a7788f"]
     SESSION_STRING = environ[
-        "SESSION_STRING"
+        "AQCPnZhs9EViCSWJKCFlwQMn7pCs6v30oP2q2VE37qU8782ehBWklEcx_JcWEKAEyTYk8TC9OMX9DMDR0rey55T1X1eKd01ri4LMOLHlL1jv-g6CmZ0N_Xz07E9AHsr_9jXHTAFUMUlHHodEIL7fgNDtEVqDdNbo7mM0mWUMDr7RBQZufCm7EuQW0Sq6o1lfXg7Hp_fQTcCCBLkYeO39W-AYQ9iuTsJTIihirrKlf_AJH408gVPc2gtGJKUBfzx0A29QWpn6bRt945VoISAWzUtPIJb1jRW4ScOERyKqqIakTES25FNFPQTjSJrSJRN5qfdBSleTdgO-MJzdaBQsznsNcVW_CAA"
     ]  # Check Readme for session
-    ARQ_API_KEY = environ["ARQ_API_KEY"]
-    CHAT_ID = int(environ["CHAT_ID"])
+    ARQ_API_KEY = environ["OVSRAZ-RXBFHP-WGPVSN-WUZXIO-ARQ"]
+    CHAT_ID = int(environ["-1001501310293"])
     DEFAULT_SERVICE = environ.get("DEFAULT_SERVICE") or "youtube"
 
 # NOTE Fill this if you are not deploying on heroku.
