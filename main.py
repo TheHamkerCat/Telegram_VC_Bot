@@ -19,14 +19,14 @@ db.init()
 
 from db import db
 from functions import (CHAT_ID, app, get_default_service, play_song,
-                       session, telegram)
+                       session, telegram, BITRATE)
 from misc import HELP_TEXT, REPO_TEXT
 
 running = False  # Tells if the queue is running or not
 CLIENT_TYPE = pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM
 PLAYOUT_FILE = "input.raw"
 PLAY_LOCK = asyncio.Lock()
-OUTGOING_AUDIO_BITRATE_KBIT = 512
+OUTGOING_AUDIO_BITRATE_KBIT = BITRATE
 
 
 @app.on_message(filters.command("help") & ~filters.private)
