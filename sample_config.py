@@ -15,7 +15,7 @@ if HEROKU:
     ARQ_API_KEY = environ["ARQ_API_KEY"]
     CHAT_ID = int(environ["CHAT_ID"])
     DEFAULT_SERVICE = environ.get("DEFAULT_SERVICE") or "youtube"
-    BITRATE = int(environ["BITRATE"]
+    BITRATE = int(environ["BITRATE"])
 
 # NOTE Fill this if you are not deploying on heroku.
 if not HEROKU:
@@ -24,7 +24,7 @@ if not HEROKU:
     ARQ_API_KEY = "Get this from @ARQRobot"
     CHAT_ID = -100546355432
     DEFAULT_SERVICE = "saavn"  # Must be one of "youtube"/"saavn"
-    BITRATE = "512" # Must be 512/320
+    BITRATE = 512 # Must be 512/320
 
 # don't make changes below this line
 ARQ_API = "https://thearq.tech"
