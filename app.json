@@ -34,6 +34,16 @@
     "ARQ_API_KEY": {
 	    "description": "Get this from @ARQRobot.",
 	    "required": true
+    },
+    "DEFAULT_SERVICE": {
+            "description": "Must be one of youtube/saavn.",
+            "value": "saavn",
+            "required": true
+    },
+    "BITRATE": {
+            "description": "Must be 512/320.",
+            "value": "512",
+            "required": true
     }},
     "formation": {
       "worker": {
