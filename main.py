@@ -26,6 +26,7 @@ running = False  # Tells if the queue is running or not
 CLIENT_TYPE = pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM
 PLAYOUT_FILE = "input.raw"
 PLAY_LOCK = asyncio.Lock()
+OUTGOING_AUDIO_BITRATE_KBIT = 512
 
 
 @app.on_message(filters.command("help") & ~filters.private)
@@ -50,7 +51,7 @@ async def joinvc(_, message, manual=False):
         )
     os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
     vc = pytgcalls.GroupCallFactory(
-        app, CLIENT_TYPE
+        app, CLIENT_TYPE, OUTGOING_AUDIO_BITRATE_KBIT
     ).get_file_group_call(PLAYOUT_FILE, "output.raw")
     db["call"] = vc
     try:
