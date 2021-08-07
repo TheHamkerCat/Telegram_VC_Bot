@@ -38,12 +38,12 @@
     "DEFAULT_SERVICE": {
             "description": "Must be one of youtube/saavn.",
             "value": "saavn",
-            "required": false
+            "required": true
     },
     "BITRATE": {
             "description": "Must be 512/320.",
             "value": "512",
-            "required": false
+            "required": true
     }},
     "formation": {
       "worker": {
