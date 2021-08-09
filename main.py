@@ -49,10 +49,11 @@ async def joinvc(_, message, manual=False):
         return await message.reply_text(
             "__**Bot Is Already In The VC**__"
         )
+    await message.delete()
     os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
     vc = pytgcalls.GroupCallFactory(
         app, CLIENT_TYPE, OUTGOING_AUDIO_BITRATE_KBIT
-    ).get_file_group_call(PLAYOUT_FILE, "output.raw")
+    ).get_file_group_call(PLAYOUT_FILE)
     db["call"] = vc
     try:
         await vc.start(CHAT_ID)
@@ -77,6 +78,7 @@ async def joinvc(_, message, manual=False):
         "__**Joined The Voice Chat.**__ \n\n**Note:** __If you can't hear anything,"
         + " Send /leavevc and then /joinvc again.__"
     )
+    await message.delete()
 
 
 @app.on_message(
@@ -85,11 +87,12 @@ async def joinvc(_, message, manual=False):
     & filters.chat(CHAT_ID)
 )
 async def leavevc(_, message):
+    await message.delete()
     if "call" in db:
         await db["call"].leave_current_group_call()
         await db["call"].stop()
         del db["call"]
-    await message.reply_text("__**Left The Voice Chat**__")
+    return await message.reply_text("__**Left The Voice Chat**__")
 
 
 @app.on_message(
@@ -154,6 +157,7 @@ async def resume_song(_, message):
     filters.command("skip") & ~filters.private & filters.chat(CHAT_ID)
 )
 async def skip_func(_, message):
+    await message.delete()
     if "queue" not in db:
         return await message.reply_text("**VC isn't started**")
     queue = db["queue"]
@@ -163,6 +167,7 @@ async def skip_func(_, message):
         )
     db["skipped"] = True
     await message.reply_text("__**Skipped!**__")
+
 
 
 @app.on_message(
@@ -183,10 +188,12 @@ __/play Reply_On_Audio__"""
                 and not message.reply_to_message
             ):
                 return await message.reply_text(usage)
+            await message.delete()
             if "call" not in db:
                 return await message.reply_text(
                     "**Use /joinvc First!**"
                 )
+            await message.delete()
             if message.reply_to_message:
                 if message.reply_to_message.audio:
                     service = "telegram"
@@ -195,6 +202,7 @@ __/play Reply_On_Audio__"""
                     return await message.reply_text(
                         "**Reply to a telegram audio file**"
                     )
+                await message.delete()
             else:
                 text = message.text.split("\n")[0]
                 text = text.split(None, 2)[1:]
@@ -210,6 +218,7 @@ __/play Reply_On_Audio__"""
                 db["queue"] = asyncio.Queue()
             if not db["queue"].empty() or db.get("running"):
                 await message.reply_text("__**Added To Queue.__**")
+            await message.delete()
 
             await db["queue"].put(
                 {
