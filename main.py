@@ -87,12 +87,12 @@ async def joinvc(_, message, manual=False):
     & filters.chat(CHAT_ID)
 )
 async def leavevc(_, message):
-    await message.delete()
     if "call" in db:
         await db["call"].leave_current_group_call()
         await db["call"].stop()
         del db["call"]
-    return await message.reply_text("__**Left The Voice Chat**__")
+    await message.reply_text("__**Left The Voice Chat**__")
+    await message.delete()
 
 
 @app.on_message(
@@ -157,16 +157,18 @@ async def resume_song(_, message):
     filters.command("skip") & ~filters.private & filters.chat(CHAT_ID)
 )
 async def skip_func(_, message):
-    await message.delete()
     if "queue" not in db:
         return await message.reply_text("**VC isn't started**")
+        return await message.delete()
     queue = db["queue"]
     if queue.empty() and ("playlist" not in db or not db["playlist"]):
-        return await message.reply_text(
+        await message.reply_text(
             "__**Queue Is Empty, Just Like Your Life.**__"
         )
+        await message.delete()
     db["skipped"] = True
     await message.reply_text("__**Skipped!**__")
+    await message.delete()
 
 
 
