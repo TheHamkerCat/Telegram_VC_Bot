@@ -17,7 +17,7 @@
     "telegram-vcbot",
     "telegram-musicbot"
   ],
-  "stack": "container",
+  "stack": "heroku-20",
   "env": {
     "API_ID": {
             "description": "API_ID of your Telegram Account my.telegram.org/apps",
@@ -34,7 +34,25 @@
     "ARQ_API_KEY": {
 	    "description": "Get this from @ARQRobot.",
 	    "required": true
-    }},
+    },
+    "DEFAULT_SERVICE": {
+            "description": "Must be one of youtube/saavn.",
+            "value": "saavn",
+            "required": true
+    },
+    "BITRATE": {
+            "description": "Must be 512/320.",
+            "value": "512",
+            "required": true
+    },
+    "buildpacks": [
+     {
+      "url": "heroku/python"
+     },
+     {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+     }
+    ]},
     "formation": {
       "worker": {
         "quantity": 1,

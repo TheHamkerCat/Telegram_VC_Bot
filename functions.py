@@ -340,7 +340,7 @@ async def telegram(message):
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
     await run_async(transcode, song)
-    await m.edit(f"__**Playing {reply.link}**__")
+    await m.edit(f"__**Playing {reply.link}**__", disable_web_page_preview=True)
     await pause_skip_watcher(m, reply.audio.duration)
     if os.path.exists(song):
         os.remove(song)
