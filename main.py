@@ -57,7 +57,6 @@ async def joinvc(_, message, manual=False):
         return await message.reply_text(
             "__**Bot Is Already In The VC**__"
         )
-    await message.delete()
     os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
     vc = pytgcalls.GroupCallFactory(
         app, CLIENT_TYPE, OUTGOING_AUDIO_BITRATE_KBIT
@@ -198,12 +197,10 @@ __/play Reply_On_Audio__"""
                 and not message.reply_to_message
             ):
                 return await message.reply_text(usage)
-            await message.delete()
             if "call" not in db:
                 return await message.reply_text(
                     "**Use /joinvc First!**"
                 )
-            await message.delete()
             if message.reply_to_message:
                 if message.reply_to_message.audio:
                     service = "telegram"
@@ -212,7 +209,6 @@ __/play Reply_On_Audio__"""
                     return await message.reply_text(
                         "**Reply to a telegram audio file**"
                     )
-                await message.delete()
             else:
                 text = message.text.split("\n")[0]
                 text = text.split(None, 2)[1:]
@@ -223,12 +219,14 @@ __/play Reply_On_Audio__"""
                 else:
                     service = get_default_service()
                     song_name = " ".join(text)
+                if "http" in song_name or ".com" in song_name:
+                    return await message.reply("Links aren't supported.")
+
             requested_by = message.from_user.first_name
             if "queue" not in db:
                 db["queue"] = asyncio.Queue()
             if not db["queue"].empty() or db.get("running"):
                 await message.reply_text("__**Added To Queue.__**")
-            await message.delete()
 
             await db["queue"].put(
                 {
