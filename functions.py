@@ -23,12 +23,6 @@ if is_config:
 else:
     from sample_config import *
 
-if HEROKU:
-    if is_config:
-        from config import SESSION_STRING
-    elif not is_config:
-        from sample_config import SESSION_STRING
-
 app = Client(
     SESSION_STRING if HEROKU else "tgvc",
     api_id=API_ID,
@@ -54,7 +48,7 @@ def get_default_service() -> str:
 
 async def pause_skip_watcher(message: Message, duration: int):
     try:
-        db["call"].set_is_mute(False)
+        await db["call"].set_is_mute(False)
         if "skipped" not in db:
             db["skipped"] = False
         if "paused" not in db:
