@@ -44,19 +44,20 @@
             "description": "Must be 512/320.",
             "value": "512",
             "required": true
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
     },
-    "buildpacks": [
-     {
+    {
       "url": "heroku/python"
-     },
-     {
-      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
-     }
-    ]},
-    "formation": {
-      "worker": {
-        "quantity": 1,
-        "size": "free"
-      }
-  }
+    }
+  ]
 }
