@@ -344,3 +344,24 @@ async def telegram(message):
     await pause_skip_watcher(m, reply.audio.duration)
     if os.path.exists(song):
         os.remove(song)
+        
+from functools import wraps
+
+LIST_OF_ADMINS = [12345678, 87654321] # List of user_id of authorized users
+
+def restricted(func):
+    @wraps(func)
+    def wrapped(update, context, *args, **kwargs):
+        user_id = update.effective_user.id
+        if user_id not in LIST_OF_ADMINS:
+            print("Unauthorized access denied for {}.".format(user_id))
+            return
+        return func(update, context, *args, **kwargs)
+    return wrapped
+
+@restricted
+def my_handler(update, context):
+    pass  # only accessible if `user_id` is in `LIST_OF_ADMINS`.
+
+#add the restriced to each function you want to restrict
+        
