@@ -27,4 +27,4 @@ if not HEROKU:
     BITRATE = 512 # Must be 512/320
 
 # don't make changes below this line
-ARQ_API = "https://thearq.tech"
+ARQ_API = "https://grambuilders.tech"
