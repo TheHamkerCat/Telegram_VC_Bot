@@ -38,7 +38,7 @@ $ python3 main.py
 
 ## Heroku
 
-Read this -> https://t.me/TGVCSupport/17542
+Read this -> https://t.me/hindi_chatting_friends_group
 
 #### Generate String session [IMPORTANT]
 
@@ -96,7 +96,3 @@ Command | Description
 
 1. If you want any help you can ask [here](https://t.me/tgvcsupport)
 
-## Credits
-
-1. [@MarshalX](https://github.com/MarshalX), For [TGCalls](https://github.com/MarshalX/tgcalls)
-2. Thanks to everyone who contributed to the project.
