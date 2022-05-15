@@ -1,6 +1,6 @@
 {
   "name": "Telegram Voice Chat Bot",
-  "description": "Telegram Voice-Chat Bot Written In Python Using Pytgcalls & Pyrogram.",
+  "description": "Telegram Voice-Chat Bot Written In Python Using Pyrogram.",
   "repository": "https://github.com/thehamkercat/Telegram_VC_Bot",
   "logo": "https://i.imgur.com/8S8NVy0.png",
   "keywords": [
@@ -11,24 +11,14 @@
     "youtube",
     "telegram-bot",
     "pyrogram",
-    "pytgcalls",
-    "tgcalls",
     "jiosaavn",
     "telegram-vcbot",
     "telegram-musicbot"
   ],
   "stack": "heroku-20",
   "env": {
-    "API_ID": {
-            "description": "API_ID of your Telegram Account my.telegram.org/apps",
-            "required": true
-    },
-    "API_HASH": {
-            "description": "API_HASH of your Telegram Account my.telegram.org/apps",
-            "required": true
-    },
-    "SESSION_STRING": {
-            "description": "Session string, Check the readme if you don't know how to get this.",
+    "BOT_TOKEN": {
+            "description": "Bot token, get from @BotFather",
             "required": true
     },
     "ARQ_API_KEY": {
@@ -40,11 +30,14 @@
             "value": "saavn",
             "required": true
     },
-    "BITRATE": {
-            "description": "Must be 512/320.",
-            "value": "512",
+    "STREAM_URL": {
+            "description": "You'll get this when you start a stream in TG.",
             "required": true
-    }
+    },
+    "STREAM_KEY": {
+            "description": "You'll get this when you start a stream in TG.",
+            "required": true
+    },
   },
   "formation": {
     "worker": {

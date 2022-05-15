@@ -1,15 +1,10 @@
 from __future__ import unicode_literals
 
 import asyncio
-import os
 import traceback
+from asyncio import Lock
 
-import pytgcalls
 from pyrogram import filters, idle
-from pyrogram.errors.exceptions.bad_request_400 import \
-    ChatAdminRequired
-from pyrogram.raw.functions.phone import CreateGroupCall
-from pyrogram.raw.types import InputPeerChannel
 from pyrogram.types import Message
 
 # Initialize db
@@ -19,14 +14,11 @@ db.init()
 
 from db import db
 from functions import (CHAT_ID, app, get_default_service, play_song,
-                       session, telegram, BITRATE)
+                       session,  telegram,
+            )
 from misc import HELP_TEXT, REPO_TEXT
 
 running = False  # Tells if the queue is running or not
-CLIENT_TYPE = pytgcalls.GroupCallFactory.MTPROTO_CLIENT_TYPE.PYROGRAM
-PLAYOUT_FILE = "input.raw"
-PLAY_LOCK = asyncio.Lock()
-OUTGOING_AUDIO_BITRATE_KBIT = BITRATE
 
 
 @app.on_message(
@@ -34,7 +26,7 @@ OUTGOING_AUDIO_BITRATE_KBIT = BITRATE
     & ~filters.private
     & filters.chat(CHAT_ID)
 )
-async def help(_, message):
+async def help_handler(_, message):
     await message.reply_text(HELP_TEXT, quote=False)
 
 
@@ -48,125 +40,9 @@ async def repo(_, message):
 
 
 @app.on_message(
-    filters.command("joinvc")
-    & ~filters.private
-    & filters.chat(CHAT_ID)
-)
-async def joinvc(_, message, manual=False):
-    if "call" in db:
-        return await message.reply_text(
-            "__**Bot Is Already In The VC**__"
-        )
-    os.popen(f"cp etc/sample_input.raw {PLAYOUT_FILE}")
-    vc = pytgcalls.GroupCallFactory(
-        app, CLIENT_TYPE, OUTGOING_AUDIO_BITRATE_KBIT
-    ).get_file_group_call(PLAYOUT_FILE)
-    db["call"] = vc
-    try:
-        await vc.start(CHAT_ID)
-    except Exception:
-        peer = await app.resolve_peer(CHAT_ID)
-        startVC = CreateGroupCall(
-            peer=InputPeerChannel(
-                channel_id=peer.channel_id,
-                access_hash=peer.access_hash,
-            ),
-            random_id=app.rnd_id() // 9000000000,
-        )
-        try:
-            await app.send(startVC)
-            await vc.start(CHAT_ID)
-        except ChatAdminRequired:
-            del db["call"]
-            return await message.reply_text(
-                "Make me admin with message delete and vc manage permission"
-            )
-    await message.reply_text(
-        "__**Joined The Voice Chat.**__ \n\n**Note:** __If you can't hear anything,"
-        + " Send /leavevc and then /joinvc again.__"
-    )
-    await message.delete()
-
-
-@app.on_message(
-    filters.command("leavevc")
-    & ~filters.private
-    & filters.chat(CHAT_ID)
-)
-async def leavevc(_, message):
-    if "call" in db:
-        await db["call"].leave_current_group_call()
-        await db["call"].stop()
-        del db["call"]
-    await message.reply_text("__**Left The Voice Chat**__")
-    await message.delete()
-
-
-@app.on_message(
-    filters.command("volume")
-    & ~filters.private
-    & filters.chat(CHAT_ID)
-)
-async def volume_bot(_, message):
-    usage = "**Usage:**\n/volume [1-200]"
-    if len(message.command) != 2:
-        return await message.reply_text(usage)
-    if "call" not in db:
-        return await message.reply_text("VC isn't started")
-    vc = db["call"]
-    volume = int(message.text.split(None, 1)[1])
-    if (volume < 1) or (volume > 200):
-        return await message.reply_text(usage)
-    try:
-        await vc.set_my_volume(volume=volume)
-    except ValueError:
-        return await message.reply_text(usage)
-    await message.reply_text(f"**Volume Set To {volume}**")
-
-
-@app.on_message(
-    filters.command("pause")
-    & ~filters.private
-    & filters.chat(CHAT_ID)
-)
-async def pause_song_func(_, message):
-    if "call" not in db:
-        return await message.reply_text("**VC isn't started**")
-    if "paused" in db:
-        if db.get("paused"):
-            return await message.reply_text("**Already paused**")
-    db["paused"] = True
-    db["call"].pause_playout()
-    await message.reply_text(
-        "**Paused The Music, Send `/resume` To Resume.**"
-    )
-
-
-@app.on_message(
-    filters.command("resume")
-    & ~filters.private
-    & filters.chat(CHAT_ID)
-)
-async def resume_song(_, message):
-    if "call" not in db:
-        return await message.reply_text("**VC isn't started**")
-    if "paused" in db:
-        if not db.get("paused"):
-            return await message.reply_text("**Already playing**")
-    db["paused"] = False
-    db["call"].resume_playout()
-    await message.reply_text(
-        "**Resumed, Send `/pause` To Pause The Music.**"
-    )
-
-
-@app.on_message(
     filters.command("skip") & ~filters.private & filters.chat(CHAT_ID)
 )
 async def skip_func(_, message):
-    if "queue" not in db:
-        await message.reply_text("**VC isn't started**")
-        return await message.delete()
     queue = db["queue"]
     if queue.empty() and ("playlist" not in db or not db["playlist"]):
         await message.reply_text(
@@ -177,6 +53,8 @@ async def skip_func(_, message):
     await message.reply_text("__**Skipped!**__")
     await message.delete()
 
+
+PLAY_LOCK = Lock()
 
 
 @app.on_message(
@@ -197,10 +75,6 @@ __/play Reply_On_Audio__"""
                 and not message.reply_to_message
             ):
                 return await message.reply_text(usage)
-            if "call" not in db:
-                return await message.reply_text(
-                    "**Use /joinvc First!**"
-                )
             if message.reply_to_message:
                 if message.reply_to_message.audio:
                     service = "telegram"
@@ -285,6 +159,7 @@ async def queue_list(_, message):
 
 
 async def start_queue(message=None):
+    print("Starting queue")
     while db:
         if "queue_breaker" in db and db.get("queue_breaker") != 0:
             db["queue_breaker"] -= 1

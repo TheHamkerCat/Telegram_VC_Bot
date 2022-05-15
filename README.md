@@ -1,27 +1,19 @@
-# Telegram Voice-Chat Bot [PyTGCalls] [![Mentioned in Awesome Telegram Calls](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/tgcalls/awesome-tgcalls)
+# Telegram Voice-Chat Bot [FFMPEG]
 
-Telegram Voice-Chat Bot To Play Music With Pytgcalls From Various Sources In Your Group.
+Telegram Voice-Chat Bot To Play Music From Various Sources In Your Group.
 
-<img src="https://hamker.me/wl9twld.png" width="500" height="300">
-
-
-## Requirements
-
-### Account requirements
-- A Telegram account to use as the music bot, **You cannot use regular bot accounts, as they cannot join voice chats. *It must be a user account.***
-- API_ID and API_HASH for that account.
-- The account must be an admin of the chat, with _Manage Voice Chats_ and _Delete Messages_ permissions.
+<img src="https://dl.hamker.in/files/8sug65vr.png" width="500" height="300">
 
 ### Environment requirements
-- Linux-based OS. **You cannot run this on Windows natively, Use WSL**
+- Linux-based OS. **You cannot run this on Windows natively, Use WSL or 
+  Docker**
 - Python 3.9 or later.
 - ffmpeg package, look below for instructions.
 
 
 ## Run (Assuming you have a debian-based distro)
 
-
-
+#### I recommend using Docker, but do this if you know what you're doing.
 ```sh
 $ git clone https://github.com/thehamkercat/Telegram_VC_Bot
 $ cd Telegram_VC_Bot
@@ -39,18 +31,6 @@ $ python3 main.py
 ## Heroku
 
 Read this -> https://t.me/TGVCSupport/17542
-
-#### Generate String session [IMPORTANT]
-
-Download this file [generate_string_session.py](https://raw.githubusercontent.com/thehamkercat/Telegram_VC_Bot/master/generate_string_session.py)
-
-
-```sh
-$ pip3 install pyrogram TgCrypto
-$ python3 generate_string_session.py
-```
-Fork this repository and change name of `sample_config.py` to `config.py`
-Then you will need get a session string, copy it, then press heroku deploy button.
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/thehamkercat/Telegram_VC_Bot/tree/master)
 
@@ -85,11 +65,6 @@ Command | Description
 /queue | Check Queue Status.
 /delqueue | Deletes Queue List and Playlist.
 /playlist [songs name separated by line] | Start Playing Playlist.
-/joinvc | Join Voice Chat.
-/leavevc | Leave Voice Chat.
-/volume [1-200] | Adjust Volume.
-/pause | Pause Music.
-/resume | Resume Music.
 
 
 ## Note
@@ -98,5 +73,4 @@ Command | Description
 
 ## Credits
 
-1. [@MarshalX](https://github.com/MarshalX), For [TGCalls](https://github.com/MarshalX/tgcalls)
-2. Thanks to everyone who contributed to the project.
+1. Thanks to everyone who contributed to the project.

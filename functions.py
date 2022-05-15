@@ -1,16 +1,13 @@
 import asyncio
-import functools
 import os
 import traceback
+from shlex import quote
+from subprocess import Popen, check_output
 
 import aiofiles
-import ffmpeg
-import youtube_dl
 from aiohttp import ClientSession
 from PIL import Image, ImageDraw, ImageFont
 from pyrogram import Client
-from pyrogram.raw.functions.channels import GetFullChannel
-from pyrogram.raw.functions.phone import EditGroupCallTitle
 from pyrogram.types import Message
 from Python_ARQ import ARQ
 
@@ -24,14 +21,16 @@ else:
     from sample_config import *
 
 app = Client(
-    SESSION_STRING if HEROKU else "tgvc",
-    api_id=API_ID,
-    api_hash=API_HASH,
+    "bot",
+    in_memory=True,
+    bot_token=BOT_TOKEN,
+    api_id=6,
+    api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e",
 )
 session = ClientSession()
 arq = ARQ(ARQ_API, ARQ_API_KEY, session)
-ydl_opts = {"format": "bestaudio", "quiet": True}
 
+ffmpeg_proc = None
 
 # Get default service from config
 def get_default_service() -> str:
@@ -48,7 +47,6 @@ def get_default_service() -> str:
 
 async def pause_skip_watcher(message: Message, duration: int):
     try:
-        await db["call"].set_is_mute(False)
         if "skipped" not in db:
             db["skipped"] = False
         if "paused" not in db:
@@ -62,6 +60,12 @@ async def pause_skip_watcher(message: Message, duration: int):
             for _ in range(duration * 10):
                 if db["skipped"]:
                     db["skipped"] = False
+                    try:
+                        ffmpeg_proc.kill()
+                    except Exception as e:
+                        print(e)
+                        pass
+
                     return await message.delete()
                 if db["paused"]:
                     while db["paused"]:
@@ -89,34 +93,24 @@ async def pause_skip_watcher(message: Message, duration: int):
         pass
 
 
-async def change_vc_title(title: str):
-    peer = await app.resolve_peer(CHAT_ID)
-    chat = await app.send(GetFullChannel(channel=peer))
-    data = EditGroupCallTitle(call=chat.full_chat.call, title=title)
-    await app.send(data)
+# Play song
+async def play_song_ffmpeg(url):
+    global ffmpeg_proc
 
+    if "http" in url:
+        url = str(quote(url))
 
-def transcode(filename: str):
-    ffmpeg.input(filename).output(
-        "input.raw",
-        format="s16le",
-        acodec="pcm_s16le",
-        ac=2,
-        ar="48k",
-        loglevel="error",
-    ).overwrite_output().run()
-    os.remove(filename)
+    if "youtube" in url:
+        url = check_output(
+            ["youtube-dl", "-f", "best", "--get-url", url]).decode()
 
-
-# Download song
-async def download_and_transcode_song(url):
-    song = "temp.mp3"
-    async with session.get(url) as resp:
-        if resp.status == 200:
-            f = await aiofiles.open(song, mode="wb")
-            await f.write(await resp.read())
-            await f.close()
-    await run_async(transcode, song)
+    ffmpeg_proc = Popen(
+        [
+            "ffmpeg", "-re", "-nostdin", "-i", url, "-vcodec", "libx264",
+            "-preset:v", "ultrafast", "-acodec", "aac", "-f", "flv",
+            f"{STREAM_URL}{STREAM_KEY}",
+        ],
+    )
 
 
 # Convert seconds to mm:ss
@@ -130,21 +124,20 @@ def convert_seconds(seconds: int):
 
 # Convert hh:mm:ss to seconds
 def time_to_seconds(time):
-    stringt = str(time)
     return sum(
         int(x) * 60 ** i
-        for i, x in enumerate(reversed(stringt.split(":")))
+        for i, x in enumerate(reversed(str(time).split(":")))
     )
 
 
 # Change image size
-def changeImageSize(maxWidth: int, maxHeight: int, image):
-    widthRatio = maxWidth / image.size[0]
-    heightRatio = maxHeight / image.size[1]
-    newWidth = int(widthRatio * image.size[0])
-    newHeight = int(heightRatio * image.size[1])
-    newImage = image.resize((newWidth, newHeight))
-    return newImage
+def change_image_size(max_width: int, max_height: int, image):
+    width_ratio = max_width / image.size[0]
+    height_ratio = max_height / image.size[1]
+    new_width = int(width_ratio * image.size[0])
+    new_height = int(height_ratio * image.size[1])
+    new_image = image.resize((new_width, new_height))
+    return new_image
 
 
 async def send(*args, **kwargs):
@@ -152,8 +145,6 @@ async def send(*args, **kwargs):
 
 
 # Generate cover for youtube
-
-
 async def generate_cover(
     requested_by, title, artist, duration, thumbnail
 ):
@@ -167,8 +158,8 @@ async def generate_cover(
     temp = "temp.png"
     image1 = Image.open(background)
     image2 = Image.open("etc/foreground.png")
-    image3 = changeImageSize(1280, 720, image1)
-    image4 = changeImageSize(1280, 720, image2)
+    image3 = change_image_size(1280, 720, image1)
+    image4 = change_image_size(1280, 720, image2)
     image5 = image3.convert("RGBA")
     image6 = image4.convert("RGBA")
     Image.alpha_composite(image5, image6).save(temp)
@@ -199,13 +190,6 @@ async def generate_cover(
     img.save(final)
     os.remove(temp)
     os.remove(background)
-    try:
-        await change_vc_title(title)
-    except Exception:
-        await send(
-            text="[ERROR]: FAILED TO EDIT VC TITLE, MAKE ME ADMIN."
-        )
-        pass
     return final
 
 
@@ -214,7 +198,7 @@ async def run_async(func, *args, **kwargs):
     return await loop.run_in_executor(None, func, *args, **kwargs)
 
 
-async def download_transcode_gencover(
+async def play_and_gencover(
     requested_by, title, artist, duration, thumbnail, url
 ):
     return await asyncio.gather(
@@ -225,7 +209,7 @@ async def download_transcode_gencover(
             duration,
             thumbnail,
         ),
-        download_and_transcode_song(url),
+        play_song_ffmpeg(url),
     )
 
 
@@ -283,21 +267,14 @@ async def play_song(requested_by, query, message, service):
             convert_seconds(duration),
             thumbnail,
         )
-        await m.edit("__**Downloading**__")
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)
-            audio_file = ydl.prepare_filename(info_dict)
-            ydl.process_info(info_dict)
-        await m.edit("__**Transcoding.**__")
-        song = "audio.webm"
-        os.rename(audio_file, song)
-        await run_async(transcode, song)
+        await m.edit("__**Playing in a few seconds...**__")
 
+        await play_song_ffmpeg(url)
     else:
         await m.edit(
-            "__**Generating thumbnail, Downloading And Transcoding.**__"
+            "__**Generating thumbnail, Preparing to play.**__"
         )
-        cover, _ = await download_transcode_gencover(
+        cover, _ = await play_and_gencover(
             requested_by,
             title,
             artist,
@@ -339,8 +316,9 @@ async def telegram(message):
     m = await message.reply_text("__**Downloading.**__")
     song = await message.reply_to_message.download()
     await m.edit("__**Transcoding.**__")
-    await run_async(transcode, song)
-    await m.edit(f"__**Playing {reply.link}**__", disable_web_page_preview=True)
+    await play_song_ffmpeg(song)
+    await m.edit(f"__**Playing {reply.link} in a moment**__",
+                 disable_web_page_preview=True)
     await pause_skip_watcher(m, reply.audio.duration)
     if os.path.exists(song):
         os.remove(song)
